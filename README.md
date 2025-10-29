@@ -6,6 +6,11 @@ Eine voll ausgestattete Online-Quiz-Anwendung mit Multiplayer-Unterstützung, er
 
 ## Features
 
+### UI/UX
+- **Dynamische Browser-Titel**: Zeigt Quiz-Namen im Browser-Tab
+- **Custom Favicon**: Purple-blue Gradient-Icon passend zum App-Design
+- **Responsives Design**: Optimiert für Desktop und Mobile
+
 ### Admin-Modus
 - **Quiz-Verwaltung**: Quiz erstellen, bearbeiten und löschen
 - **Fragen-Verwaltung**: Fragen mit optionalem Titel, Beschreibung und Bild hinzufügen, bearbeiten und löschen
@@ -38,7 +43,7 @@ Eine voll ausgestattete Online-Quiz-Anwendung mit Multiplayer-Unterstützung, er
 - **QR-Codes**: qrcode library
 - **Avatare**: DiceBear Avataaars API
 - **UI-Sprache**: Deutsch (German)
-- **Deployment**: Vercel-ready
+- **Deployment**: Docker & Docker Compose
 
 ## Getting Started
 
@@ -82,16 +87,22 @@ npm run dev
 ## Project Structure
 
 ```
+/
+  Dockerfile                   # Multi-stage production build
+  docker-compose.yml          # Container orchestration
+  .dockerignore               # Docker build exclusions
 /app
+  icon.svg                     # Custom purple-blue gradient favicon
+  layout.tsx                   # Root layout with default metadata
   /admin                       # Admin mode pages
-    page.tsx                   # Quiz listing
+    page.tsx                   # Quiz listing (dynamic rendering)
     /create/page.tsx           # Create new quiz
     /[quizId]/edit/            # Edit quiz & questions
-      page.tsx                 # Server component wrapper
+      page.tsx                 # Server component with dynamic metadata
       QuestionManager.tsx      # Client component for managing questions
       DeleteButton.tsx         # Client component for delete confirmation
   /game                        # Game mode pages
-    page.tsx                   # Quiz selection
+    page.tsx                   # Quiz selection (dynamic rendering)
     /join                      # Player join flow
       page.tsx                 # Enter session code
       /[sessionCode]/page.tsx  # Enter player name
@@ -99,9 +110,11 @@ npm run dev
     /[quizId]
       page.tsx                 # Mode selection (solo/multiplayer)
       /solo                    # Solo mode
-        page.tsx               # Server component wrapper
+        page.tsx               # Server component with dynamic metadata
         QuizPlayer.tsx         # Client component for playing
-      /host/page.tsx           # Host multiplayer game
+      /host                    # Host multiplayer game
+        page.tsx               # Client component
+        layout.tsx             # Layout for dynamic metadata
   /host                        # Host/management landing page
     page.tsx                   # Main landing page
   /api
@@ -240,9 +253,32 @@ npx prisma studio
 
 ## Deployment with Docker
 
-This application is ready to deploy using Docker:
+This application is ready to deploy using Docker. You can either use pre-built images from GitHub Container Registry or build locally.
 
-### Option 1: Using Docker Compose (Recommended)
+### Option 1: Using Pre-built Images (Fastest)
+
+Pre-built Docker images are automatically published to GitHub Container Registry on every commit to main.
+
+1. Pull the latest image:
+```bash
+docker pull ghcr.io/splagemann/quiz-app:latest
+```
+
+2. Run with Docker Compose:
+```bash
+# The docker-compose.yml is already configured to use pre-built images
+docker compose up -d
+```
+
+3. The application will be available at `http://localhost:3210`
+
+**Available Image Tags:**
+- `latest` - Latest stable build from main branch
+- `main` - Latest commit on main branch
+- `v1.0.0` - Specific version tags
+- `sha-abc1234` - Specific commit builds
+
+### Option 2: Using Docker Compose with Local Build
 
 1. Clone the repository:
 ```bash
@@ -250,20 +286,25 @@ git clone git@github.com:splagemann/quiz-app.git
 cd quiz-app
 ```
 
-2. Create a `.env` file or set environment variables in `docker-compose.yml`:
-```env
-DATABASE_URL=file:/app/data/quiz.db
-NEXT_PUBLIC_APP_URL=http://your-domain.com:3210
+2. Edit `docker-compose.yml` to use local build:
+```yaml
+# Comment out the 'image' line
+# image: ghcr.io/splagemann/quiz-app:latest
+
+# Uncomment the 'build' section
+build:
+  context: .
+  dockerfile: Dockerfile
 ```
 
 3. Build and start the application:
 ```bash
-docker-compose up -d
+docker compose up -d --build
 ```
 
 4. The application will be available at `http://localhost:3210`
 
-### Option 2: Using Docker directly
+### Option 3: Using Docker CLI directly
 
 1. Build the Docker image:
 ```bash

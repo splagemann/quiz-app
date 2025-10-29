@@ -17,7 +17,10 @@ type Quiz = {
   title: string;
   questions: Array<{
     id: number;
+    title?: string | null;
     questionText: string;
+    description?: string | null;
+    imageUrl?: string | null;
     answers: Array<{
       id: number;
       answerText: string;

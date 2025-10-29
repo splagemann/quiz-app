@@ -47,7 +47,16 @@ Die Anwendung unterstützt zwei Spielmodi:
 ## Dateistruktur
 
 ```
+/
+  Dockerfile                      # Multi-stage Docker build
+  docker-compose.yml             # Docker Compose configuration (uses pre-built images)
+  .dockerignore                  # Docker build exclusions
+/.github
+  /workflows
+    docker-publish.yml           # GitHub Actions CI/CD workflow
 /app
+  icon.svg                       # Custom favicon (purple-blue gradient)
+  layout.tsx                     # Root layout mit default metadata
   /admin                           # Admin-Bereich
     page.tsx                       # Quiz-Übersicht
     /create/page.tsx              # Neues Quiz erstellen
@@ -66,7 +75,9 @@ Die Anwendung unterstützt zwei Spielmodi:
       /solo/
         page.tsx                  # Einzelspieler (Server Component wrapper)
         QuizPlayer.tsx            # Quiz spielen (Client Component)
-      /host/page.tsx              # Spielleiter-Interface (Client Component)
+      /host/
+        page.tsx                  # Spielleiter-Interface (Client Component)
+        layout.tsx                # Layout für dynamic metadata
   /host                           # Host/Management Startseite
     page.tsx                      # Startseite mit Auswahl
   /api/questions                  # REST API für Fragen
@@ -132,13 +143,72 @@ rm -rf .next
 
 ### Entwicklungsserver starten
 ```bash
+# Development
 npm run dev
+
+# Docker (Production)
+docker compose up -d --build
+docker compose logs -f quiz-app
+
+# Docker stoppen
+docker compose down
 ```
 
 ### Datenbank ansehen
 ```bash
 npx prisma studio
 ```
+
+## Production Deployment
+
+### CI/CD Pipeline (GitHub Actions)
+Automatisierte Docker-Image-Erstellung und -Veröffentlichung:
+- **Workflow-Datei**: `.github/workflows/docker-publish.yml`
+- **Trigger**:
+  - Push zu `main` Branch
+  - Tags matching `v*` (z.B. v1.0.0)
+  - Manueller Workflow-Trigger
+- **Image Registry**: GitHub Container Registry (`ghcr.io`)
+- **Multi-Platform Builds**: linux/amd64, linux/arm64
+- **Build Caching**: GitHub Actions Cache für schnellere Builds
+- **Automatische Tags**:
+  - `latest` - Neuester Build vom main Branch
+  - `main` - Letzter Commit auf main
+  - `v1.0.0`, `1.0.0`, `1.0`, `1` - Semantic Versioning
+  - `sha-abc1234` - Commit-spezifische Builds
+
+### Docker
+Die Anwendung kann mit Docker deployed werden:
+- **Multi-stage Dockerfile** für optimierte Production-Builds
+- **Docker Compose** für einfaches Deployment mit persistenten Volumes
+- **Pre-built Images** von GitHub Container Registry verfügbar
+- **Automatische Migrationen** beim Container-Start
+- **Health Checks** für Container-Überwachung
+- SQLite-Datenbank wird in Docker-Volume persistiert
+- Uploaded Images werden in separatem Volume gespeichert
+
+**Image Pull**:
+```bash
+docker pull ghcr.io/splagemann/quiz-app:latest
+```
+
+### Dynamic Rendering
+- Admin- und Game-Seiten verwenden `export const dynamic = 'force-dynamic'`
+- Verhindert Pre-Rendering zur Build-Zeit (benötigt keine Datenbank beim Build)
+- Notwendig für Docker-Builds und Vercel-ähnliche Deployments
+
+### Browser Title Management
+- Root Layout: "Quiz App" als Default-Titel
+- Dynamische Titel für Quiz-Seiten via `generateMetadata`:
+  - `/game/[quizId]`: "[Quiz-Titel] - Quiz App"
+  - `/game/[quizId]/solo`: "[Quiz-Titel] - Einzelspieler - Quiz App"
+  - `/game/[quizId]/host`: "[Quiz-Titel] - Mehrspieler Host - Quiz App" (via layout.tsx)
+  - `/admin/[quizId]/edit`: "[Quiz-Titel] bearbeiten - Quiz App"
+
+### Custom Favicon
+- SVG-Icon mit purple-blue Gradient (`app/icon.svg`)
+- Passt zum Farbschema der Anwendung
+- Weißes Fragezeichen auf Gradient-Hintergrund
 
 ## Neue Features
 
@@ -257,12 +327,16 @@ Response: { isCorrect: boolean, score: number }
 2. **Lesbarkeit**: Immer dunkle Textfarben verwenden (`text-gray-700` minimum)
 3. **Server vs Client**: Interaktive Elemente erfordern `"use client"` Direktive
 4. **Cache**: Bei Datenbank-Problemen immer `.next` löschen
-5. **Absolute Pfade**: DATABASE_URL verwendet absoluten Pfad
+5. **Absolute Pfade**: DATABASE_URL verwendet absoluten Pfad (Dev) / relativen Pfad (Docker)
 6. **Formular-Validierung**: Alert-Nachrichten auf Deutsch
 7. **Bestätigungen**: Alle confirm()-Dialoge auf Deutsch
 8. **Multiplayer State**: In-Memory State (gameState.ts) wird beim Server-Neustart zurückgesetzt
 9. **SSE Connections**: Keep-Alive Pings alle 30 Sekunden, automatische Bereinigung bei Disconnect
 10. **Session Codes**: Immer Großbuchstaben, 6-stellig, Kollisionsprüfung bei Generierung
+11. **Dynamic Rendering**: Seiten mit DB-Queries benötigen `export const dynamic = 'force-dynamic'`
+12. **Docker Builds**: Benötigen dummy DATABASE_URL für Prisma Generation während Build
+13. **TypeScript Types**: Quiz-Types in Client Components müssen alle optionalen Felder enthalten (title, description, imageUrl)
+14. **Page Metadata**: Server Components können `generateMetadata` für dynamische Titles verwenden
 
 ## Cascading Deletes
 
