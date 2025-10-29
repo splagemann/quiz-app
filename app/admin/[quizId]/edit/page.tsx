@@ -1,7 +1,24 @@
 import { notFound, redirect } from "next/navigation";
+import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import QuestionManager from "./QuestionManager";
 import DeleteButton from "./DeleteButton";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ quizId: string }>;
+}): Promise<Metadata> {
+  const { quizId } = await params;
+  const quiz = await prisma.quiz.findUnique({
+    where: { id: parseInt(quizId) },
+    select: { title: true },
+  });
+
+  return {
+    title: quiz ? `${quiz.title} bearbeiten - Quiz App` : "Quiz App",
+  };
+}
 
 async function updateQuiz(quizId: number, formData: FormData) {
   "use server";

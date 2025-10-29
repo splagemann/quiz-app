@@ -238,13 +238,88 @@ npx prisma generate
 npx prisma studio
 ```
 
-## Deploy on Vercel
+## Deployment with Docker
 
-This application is ready to deploy on Vercel:
+This application is ready to deploy using Docker:
 
-1. Push your code to GitHub
-2. Import the project in Vercel
-3. Vercel will automatically detect Next.js and configure the build
-4. Deploy!
+### Option 1: Using Docker Compose (Recommended)
 
-Note: For production, consider using a more robust database like PostgreSQL instead of SQLite.
+1. Clone the repository:
+```bash
+git clone git@github.com:splagemann/quiz-app.git
+cd quiz-app
+```
+
+2. Create a `.env` file or set environment variables in `docker-compose.yml`:
+```env
+DATABASE_URL=file:/app/data/quiz.db
+NEXT_PUBLIC_APP_URL=http://your-domain.com:3210
+```
+
+3. Build and start the application:
+```bash
+docker-compose up -d
+```
+
+4. The application will be available at `http://localhost:3210`
+
+### Option 2: Using Docker directly
+
+1. Build the Docker image:
+```bash
+docker build -t quiz-app .
+```
+
+2. Create a volume for persistent data:
+```bash
+docker volume create quiz-data
+docker volume create quiz-uploads
+```
+
+3. Run the container:
+```bash
+docker run -d \
+  --name quiz-app \
+  -p 3210:3000 \
+  -e DATABASE_URL=file:/app/data/quiz.db \
+  -e NEXT_PUBLIC_APP_URL=http://localhost:3210 \
+  -v quiz-data:/app/data \
+  -v quiz-uploads:/app/public/uploads \
+  --restart unless-stopped \
+  quiz-app
+```
+
+### Managing the Application
+
+**View logs:**
+```bash
+docker-compose logs -f
+# or
+docker logs -f quiz-app
+```
+
+**Stop the application:**
+```bash
+docker-compose down
+# or
+docker stop quiz-app
+```
+
+**Update the application:**
+```bash
+git pull
+docker-compose down
+docker-compose up -d --build
+```
+
+### Production Considerations
+
+- Update `NEXT_PUBLIC_APP_URL` to your actual domain
+- Use a reverse proxy (nginx/traefik) with SSL/TLS for HTTPS
+- Set up regular backups of the Docker volumes (database and uploads)
+- Mount the volumes to specific host directories for easier backup:
+  ```yaml
+  volumes:
+    - ./data:/app/data
+    - ./uploads:/app/public/uploads
+  ```

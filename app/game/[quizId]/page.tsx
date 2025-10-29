@@ -1,6 +1,23 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ quizId: string }>;
+}): Promise<Metadata> {
+  const { quizId } = await params;
+  const quiz = await prisma.quiz.findUnique({
+    where: { id: parseInt(quizId) },
+    select: { title: true },
+  });
+
+  return {
+    title: quiz ? `${quiz.title} - Quiz App` : "Quiz App",
+  };
+}
 
 export default async function QuizModePage({
   params,
