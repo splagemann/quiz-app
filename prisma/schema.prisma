@@ -12,33 +12,85 @@ datasource db {
 }
 
 model Quiz {
-  id          Int        @id @default(autoincrement())
-  title       String
-  description String?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  questions   Question[]
+  id           Int           @id @default(autoincrement())
+  title        String
+  description  String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  questions    Question[]
+  gameSessions GameSession[]
 }
 
 model Question {
-  id           Int      @id @default(autoincrement())
-  quizId       Int
-  questionText String
-  orderIndex   Int
-  createdAt    DateTime @default(now())
-  quiz         Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  answers      Answer[]
+  id            Int            @id @default(autoincrement())
+  quizId        Int
+  questionText  String
+  orderIndex    Int
+  createdAt     DateTime       @default(now())
+  quiz          Quiz           @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  answers       Answer[]
+  playerAnswers PlayerAnswer[]
 
   @@index([quizId])
 }
 
 model Answer {
-  id         Int      @id @default(autoincrement())
-  questionId Int
-  answerText String
-  isCorrect  Boolean  @default(false)
-  orderIndex Int
-  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  id            Int            @id @default(autoincrement())
+  questionId    Int
+  answerText    String
+  isCorrect     Boolean        @default(false)
+  orderIndex    Int
+  question      Question       @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  playerAnswers PlayerAnswer[]
 
+  @@index([questionId])
+}
+
+model GameSession {
+  id              String         @id @default(cuid())
+  quizId          Int
+  sessionCode     String         @unique
+  status          String         @default("waiting") // 'waiting', 'in_progress', 'finished'
+  currentQuestion Int?
+  createdAt       DateTime       @default(now())
+  startedAt       DateTime?
+  finishedAt      DateTime?
+  quiz            Quiz           @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  players         Player[]
+  answers         PlayerAnswer[]
+
+  @@index([sessionCode])
+  @@index([quizId])
+}
+
+model Player {
+  id          String         @id @default(cuid())
+  sessionId   String
+  playerName  String
+  score       Int            @default(0)
+  joinedAt    DateTime       @default(now())
+  isConnected Boolean        @default(true)
+  session     GameSession    @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  answers     PlayerAnswer[]
+
+  @@index([sessionId])
+}
+
+model PlayerAnswer {
+  id           String      @id @default(cuid())
+  sessionId    String
+  playerId     String
+  questionId   Int
+  answerId     Int
+  answeredAt   DateTime    @default(now())
+  isCorrect    Boolean
+  timeToAnswer Int?
+  session      GameSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  player       Player      @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  question     Question    @relation(fields: [questionId], references: [id])
+  answer       Answer      @relation(fields: [answerId], references: [id])
+
+  @@index([sessionId])
+  @@index([playerId])
   @@index([questionId])
 }

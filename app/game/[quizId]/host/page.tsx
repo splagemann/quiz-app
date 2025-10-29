@@ -1,0 +1,468 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import QRCode from "qrcode";
+import  type { GameEvent } from "@/lib/gameEvents";
+
+type Player = {
+  id: string;
+  playerName: string;
+  score: number;
+  isConnected: boolean;
+};
+
+type Quiz = {
+  id: number;
+  title: string;
+  questions: Array<{
+    id: number;
+    questionText: string;
+    answers: Array<{
+      id: number;
+      answerText: string;
+      isCorrect: boolean;
+    }>;
+  }>;
+};
+
+export default function MultiplayerHostPage() {
+  const params = useParams();
+  const router = useRouter();
+  const quizId = parseInt(params.quizId as string);
+
+  const [sessionCode, setSessionCode] = useState<string>("");
+  const [sessionId, setSessionId] = useState<string>("");
+  const [quiz, setQuiz] = useState<Quiz | null>(null);
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [gameStatus, setGameStatus] = useState<"initializing" | "waiting" | "in_progress" | "finished">("initializing");
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
+  const [answeredPlayers, setAnsweredPlayers] = useState<Set<string>>(new Set());
+  const [revealedAnswer, setRevealedAnswer] = useState<number | null>(null);
+  const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
+  const [error, setError] = useState<string>("");
+  const [finalScores, setFinalScores] = useState<Array<{ playerId: string; playerName: string; score: number }>>([]);
+
+  // Initialize game session
+  useEffect(() => {
+    async function initSession() {
+      try {
+        const response = await fetch("/api/game/session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ quizId }),
+        });
+
+        if (!response.ok) {
+          const data = await response.json();
+          setError(data.error || "Fehler beim Erstellen der Session");
+          return;
+        }
+
+        const data = await response.json();
+        setSessionCode(data.sessionCode);
+        setSessionId(data.sessionId);
+        setQuiz(data.quiz);
+        setGameStatus("waiting");
+
+        // Generate QR code
+        const joinUrl = `${window.location.origin}/game/join/${data.sessionCode}`;
+        const qrUrl = await QRCode.toDataURL(joinUrl, {
+          width: 300,
+          margin: 2,
+        });
+        setQrCodeUrl(qrUrl);
+      } catch (err) {
+        console.error("Error initializing session:", err);
+        setError("Netzwerkfehler beim Erstellen der Session");
+      }
+    }
+
+    initSession();
+  }, [quizId]);
+
+  // Connect to SSE for real-time updates
+  useEffect(() => {
+    if (!sessionId) return;
+
+    const eventSource = new EventSource(`/api/game/session/${sessionId}/events`);
+
+    eventSource.onmessage = (event) => {
+      const data: GameEvent = JSON.parse(event.data);
+
+      switch (data.type) {
+        case "player_joined":
+          setPlayers(prev => [...prev, data.player]);
+          break;
+        case "player_left":
+          setPlayers(prev => prev.filter(p => p.id !== data.playerId));
+          break;
+        case "player_answered":
+          setAnsweredPlayers(prev => new Set(prev).add(data.playerId));
+          break;
+        case "all_players_answered":
+          // Will be followed by reveal_answer
+          break;
+        case "reveal_answer":
+          setRevealedAnswer(data.correctAnswerId);
+          // Update scores
+          setPlayers(prev => prev.map(p => ({
+            ...p,
+            score: data.scores[p.id] ?? p.score
+          })));
+          break;
+        case "game_finished":
+          setGameStatus("finished");
+          setFinalScores(data.finalScores);
+          break;
+        case "session_ended":
+          eventSource.close();
+          break;
+      }
+    };
+
+    eventSource.onerror = () => {
+      console.error("SSE connection error");
+      eventSource.close();
+    };
+
+    return () => {
+      eventSource.close();
+    };
+  }, [sessionId]);
+
+  const startGame = async () => {
+    try {
+      const response = await fetch(`/api/game/session/${sessionId}/start`, {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        alert(data.error || "Fehler beim Starten des Spiels");
+        return;
+      }
+
+      setGameStatus("in_progress");
+      setCurrentQuestionIndex(0);
+      setAnsweredPlayers(new Set());
+      setRevealedAnswer(null);
+    } catch (err) {
+      console.error("Error starting game:", err);
+      alert("Netzwerkfehler beim Starten des Spiels");
+    }
+  };
+
+  const nextQuestion = async () => {
+    try {
+      const response = await fetch(`/api/game/session/${sessionId}/next`, {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        alert(data.error || "Fehler beim Wechseln zur nächsten Frage");
+        return;
+      }
+
+      const data = await response.json();
+
+      if (data.gameFinished) {
+        setGameStatus("finished");
+        setFinalScores(data.finalScores);
+      } else {
+        setCurrentQuestionIndex(data.currentQuestion);
+        setAnsweredPlayers(new Set());
+        setRevealedAnswer(null);
+      }
+    } catch (err) {
+      console.error("Error moving to next question:", err);
+      alert("Netzwerkfehler");
+    }
+  };
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center px-4">
+        <div className="bg-white rounded-lg shadow-2xl p-8 max-w-md text-center">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">Fehler</h1>
+          <p className="text-gray-700 mb-6">{error}</p>
+          <button
+            onClick={() => router.back()}
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
+          >
+            Zurück
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (gameStatus === "initializing" || !quiz) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
+        <div className="text-white text-2xl">Spiel wird vorbereitet...</div>
+      </div>
+    );
+  }
+
+  if (gameStatus === "finished") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-500 to-blue-600 py-8 px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white rounded-lg shadow-2xl p-8">
+            <h1 className="text-4xl font-bold text-gray-900 text-center mb-8">
+              🏆 Spiel beendet!
+            </h1>
+
+            <div className="space-y-4 mb-8">
+              {finalScores.map((player, index) => (
+                <div
+                  key={player.playerId}
+                  className={`p-6 rounded-lg flex items-center justify-between ${
+                    index === 0
+                      ? "bg-yellow-100 border-4 border-yellow-400"
+                      : index === 1
+                      ? "bg-gray-100 border-4 border-gray-400"
+                      : index === 2
+                      ? "bg-orange-100 border-4 border-orange-400"
+                      : "bg-gray-50 border-2 border-gray-300"
+                  }`}
+                >
+                  <div className="flex items-center">
+                    <div className="text-4xl font-bold mr-4 w-12">
+                      {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `${index + 1}.`}
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-gray-900">
+                        {player.playerName}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-3xl font-bold text-gray-900">
+                    {player.score} {player.score === 1 ? "Punkt" : "Punkte"}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex gap-4 justify-center">
+              <button
+                onClick={() => router.push("/game")}
+                className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition font-bold"
+              >
+                Neues Spiel
+              </button>
+              <button
+                onClick={() => router.push("/")}
+                className="bg-gray-600 text-white px-8 py-3 rounded-lg hover:bg-gray-700 transition font-bold"
+              >
+                Zur Startseite
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (gameStatus === "waiting") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-500 to-blue-600 py-8 px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white rounded-lg shadow-2xl p-8">
+            <h1 className="text-3xl font-bold text-gray-900 text-center mb-2">
+              {quiz.title}
+            </h1>
+            <p className="text-gray-700 text-center mb-8">
+              Warte auf Spieler...
+            </p>
+
+            <div className="grid md:grid-cols-2 gap-8 mb-8">
+              <div className="text-center">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">
+                  QR-Code scannen
+                </h2>
+                {qrCodeUrl && (
+                  <img
+                    src={qrCodeUrl}
+                    alt="QR Code"
+                    className="mx-auto mb-4 border-4 border-gray-300 rounded-lg"
+                  />
+                )}
+                <p className="text-gray-700">
+                  Spieler können mit ihrem Handy den QR-Code scannen
+                </p>
+              </div>
+
+              <div className="text-center flex flex-col justify-center">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">
+                  Oder Spiel-Code eingeben
+                </h2>
+                <div className="bg-gray-100 rounded-lg p-8 mb-4">
+                  <div className="text-6xl font-bold text-gray-900 tracking-wider">
+                    {sessionCode}
+                  </div>
+                </div>
+                <p className="text-gray-700">
+                  Gehe zu <span className="font-bold">{window.location.origin}/game/join</span>
+                </p>
+              </div>
+            </div>
+
+            <div className="mb-8">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">
+                Spieler ({players.length})
+              </h2>
+              {players.length === 0 ? (
+                <p className="text-gray-700 text-center py-8">
+                  Noch keine Spieler beigetreten
+                </p>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {players.map((player) => (
+                    <div
+                      key={player.id}
+                      className="bg-blue-100 border-2 border-blue-300 rounded-lg p-4 text-center"
+                    >
+                      <div className="text-2xl mb-2">👤</div>
+                      <div className="font-bold text-gray-900">
+                        {player.playerName}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="text-center">
+              <button
+                onClick={startGame}
+                disabled={players.length === 0}
+                className={`px-12 py-4 rounded-lg font-bold text-xl transition ${
+                  players.length === 0
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-green-600 text-white hover:bg-green-700 shadow-lg"
+                }`}
+              >
+                Spiel starten
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // In progress - showing question
+  const currentQuestion = quiz.questions[currentQuestionIndex];
+  const allAnswered = answeredPlayers.size === players.length && players.length > 0;
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-500 to-blue-600 py-8 px-4">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="bg-white rounded-lg shadow-lg p-4 mb-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-xl font-bold text-gray-900">{quiz.title}</h1>
+              <p className="text-sm text-gray-700">
+                Frage {currentQuestionIndex + 1} von {quiz.questions.length}
+              </p>
+            </div>
+            <div className="text-right">
+              <div className="text-sm text-gray-700">Spieler</div>
+              <div className="text-2xl font-bold text-blue-600">{players.length}</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Question */}
+        <div className="bg-white rounded-lg shadow-lg p-8 mb-6">
+          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+            {currentQuestion.questionText}
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {currentQuestion.answers.map((answer, index) => {
+              const isCorrect = answer.isCorrect;
+              const isRevealed = revealedAnswer !== null;
+
+              return (
+                <div
+                  key={answer.id}
+                  className={`p-6 rounded-lg border-4 font-bold text-xl ${
+                    isRevealed && isCorrect
+                      ? "bg-green-100 border-green-500 text-green-900"
+                      : isRevealed
+                      ? "bg-gray-100 border-gray-300 text-gray-700"
+                      : "bg-blue-50 border-blue-300 text-gray-900"
+                  }`}
+                >
+                  {String.fromCharCode(65 + index)}. {answer.answerText}
+                  {isRevealed && isCorrect && (
+                    <span className="ml-2 text-green-600">✓</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Players Status */}
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-4">
+            Spieler-Status ({answeredPlayers.size}/{players.length} geantwortet)
+          </h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            {players.map((player) => {
+              const hasAnswered = answeredPlayers.has(player.id);
+              return (
+                <div
+                  key={player.id}
+                  className={`p-3 rounded-lg text-center ${
+                    hasAnswered
+                      ? "bg-green-100 border-2 border-green-500"
+                      : "bg-gray-100 border-2 border-gray-300"
+                  }`}
+                >
+                  <div className="text-sm font-bold text-gray-900 truncate">
+                    {player.playerName}
+                  </div>
+                  <div className="text-xs text-gray-700 mt-1">
+                    {player.score} {player.score === 1 ? "Punkt" : "Punkte"}
+                  </div>
+                  <div className="text-lg mt-1">
+                    {hasAnswered ? "✓" : "⏳"}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Controls */}
+        <div className="text-center">
+          {revealedAnswer !== null ? (
+            <button
+              onClick={nextQuestion}
+              className="bg-blue-600 text-white px-12 py-4 rounded-lg hover:bg-blue-700 transition font-bold text-xl shadow-lg"
+            >
+              {currentQuestionIndex < quiz.questions.length - 1
+                ? "Nächste Frage →"
+                : "Ergebnisse anzeigen"}
+            </button>
+          ) : allAnswered ? (
+            <div className="text-white text-xl">
+              Alle Spieler haben geantwortet! Antwort wird angezeigt...
+            </div>
+          ) : (
+            <div className="text-white text-xl">
+              Warte auf Antworten...
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
