@@ -64,7 +64,7 @@ export default async function GamePage() {
 
         <div className="mt-12 text-center">
           <Link
-            href="/"
+            href="/host"
             className="text-white hover:text-gray-200 underline"
           >
             Zurück zur Startseite

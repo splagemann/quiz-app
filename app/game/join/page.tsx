@@ -56,15 +56,6 @@ export default function JoinPage() {
             Weiter
           </button>
         </form>
-
-        <div className="mt-8 text-center">
-          <a
-            href="/game"
-            className="text-blue-600 hover:text-blue-800 underline"
-          >
-            ← Zurück zur Quiz-Auswahl
-          </a>
-        </div>
       </div>
     </div>
   );

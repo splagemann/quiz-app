@@ -12,7 +12,10 @@ type Answer = {
 
 type Question = {
   id: number;
+  title?: string | null;
   questionText: string;
+  description?: string | null;
+  imageUrl?: string | null;
   orderIndex: number;
   answers: Answer[];
 };
@@ -27,9 +30,49 @@ export default function QuestionManager({
   const router = useRouter();
   const [isAddingQuestion, setIsAddingQuestion] = useState(false);
   const [editingQuestionId, setEditingQuestionId] = useState<number | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [addQuestionImageUrl, setAddQuestionImageUrl] = useState<string>("");
+  const [editQuestionImageUrl, setEditQuestionImageUrl] = useState<string>("");
+
+  async function handleImageUpload(file: File, isEdit: boolean = false): Promise<string | null> {
+    if (!file) return null;
+
+    setUploadingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        alert(error.error || "Fehler beim Hochladen des Bildes");
+        return null;
+      }
+
+      const data = await response.json();
+      if (isEdit) {
+        setEditQuestionImageUrl(data.url);
+      } else {
+        setAddQuestionImageUrl(data.url);
+      }
+      return data.url;
+    } catch (err) {
+      console.error("Error uploading image:", err);
+      alert("Netzwerkfehler beim Hochladen");
+      return null;
+    } finally {
+      setUploadingImage(false);
+    }
+  }
 
   async function handleAddQuestion(formData: FormData) {
+    const title = formData.get("title") as string;
     const questionText = formData.get("questionText") as string;
+    const description = formData.get("description") as string;
     const answers = [
       { text: formData.get("answer0") as string, isCorrect: formData.get("correct") === "0" },
       { text: formData.get("answer1") as string, isCorrect: formData.get("correct") === "1" },
@@ -47,7 +90,10 @@ export default function QuestionManager({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         quizId,
+        title: title || null,
         questionText,
+        description: description || null,
+        imageUrl: addQuestionImageUrl || null,
         answers,
         orderIndex: initialQuestions.length,
       }),
@@ -55,12 +101,20 @@ export default function QuestionManager({
 
     if (response.ok) {
       setIsAddingQuestion(false);
+      setAddQuestionImageUrl("");
       router.refresh();
     }
   }
 
   async function handleUpdateQuestion(questionId: number, formData: FormData) {
+    const title = formData.get("title") as string;
     const questionText = formData.get("questionText") as string;
+    const description = formData.get("description") as string;
+
+    // Get the current question to preserve existing imageUrl if no new one is uploaded
+    const currentQuestion = initialQuestions.find(q => q.id === questionId);
+    const imageUrl = editQuestionImageUrl || currentQuestion?.imageUrl || null;
+
     const answers = [
       {
         id: parseInt(formData.get("answerId0") as string),
@@ -93,13 +147,17 @@ export default function QuestionManager({
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        title: title || null,
         questionText,
+        description: description || null,
+        imageUrl,
         answers,
       }),
     });
 
     if (response.ok) {
       setEditingQuestionId(null);
+      setEditQuestionImageUrl("");
       router.refresh();
     }
   }
@@ -139,6 +197,17 @@ export default function QuestionManager({
           <h3 className="font-semibold mb-4 text-gray-900">Neue Frage</h3>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-800 mb-2">
+              Titel (optional)
+            </label>
+            <input
+              type="text"
+              name="title"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
+              placeholder="z.B. Frage 1"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-800 mb-2">
               Fragetext *
             </label>
             <input
@@ -147,6 +216,44 @@ export default function QuestionManager({
               required
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
             />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-800 mb-2">
+              Beschreibung (optional)
+            </label>
+            <textarea
+              name="description"
+              rows={3}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
+              placeholder="Zusätzliche Informationen oder Kontext..."
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-800 mb-2">
+              Bild (optional)
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    await handleImageUpload(file, false);
+                  }
+                }}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900"
+                disabled={uploadingImage}
+              />
+              {uploadingImage && (
+                <span className="text-gray-600 py-2">Lädt hoch...</span>
+              )}
+            </div>
+            {addQuestionImageUrl && (
+              <p className="text-sm text-gray-600 mt-2">
+                Bild hochgeladen: {addQuestionImageUrl}
+              </p>
+            )}
           </div>
 
           <div className="mb-4">
@@ -207,6 +314,18 @@ export default function QuestionManager({
                 >
                   <div>
                     <label className="block text-sm font-medium text-gray-800 mb-2">
+                      Titel (optional)
+                    </label>
+                    <input
+                      type="text"
+                      name="title"
+                      defaultValue={question.title || ""}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
+                      placeholder="z.B. Frage 1"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-800 mb-2">
                       Fragetext *
                     </label>
                     <input
@@ -216,6 +335,45 @@ export default function QuestionManager({
                       required
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
                     />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-800 mb-2">
+                      Beschreibung (optional)
+                    </label>
+                    <textarea
+                      name="description"
+                      defaultValue={question.description || ""}
+                      rows={3}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
+                      placeholder="Zusätzliche Informationen oder Kontext..."
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-800 mb-2">
+                      Bild (optional)
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            await handleImageUpload(file, true);
+                          }
+                        }}
+                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                        disabled={uploadingImage}
+                      />
+                      {uploadingImage && (
+                        <span className="text-gray-600 py-2">Lädt hoch...</span>
+                      )}
+                    </div>
+                    {(editQuestionImageUrl || question.imageUrl) && (
+                      <p className="text-sm text-gray-600 mt-2">
+                        Aktuelles Bild: {editQuestionImageUrl || question.imageUrl}
+                      </p>
+                    )}
                   </div>
 
                   <div>
@@ -267,10 +425,29 @@ export default function QuestionManager({
               ) : (
                 <>
                   <div className="flex justify-between items-start mb-3">
-                    <h3 className="font-semibold text-lg text-gray-900">
-                      {index + 1}. {question.questionText}
-                    </h3>
-                    <div className="flex gap-2">
+                    <div className="flex-1">
+                      {question.title && (
+                        <div className="text-sm font-medium text-gray-600 mb-1">
+                          {question.title}
+                        </div>
+                      )}
+                      <h3 className="font-semibold text-lg text-gray-900">
+                        {index + 1}. {question.questionText}
+                      </h3>
+                      {question.description && (
+                        <p className="text-sm text-gray-700 mt-2">
+                          {question.description}
+                        </p>
+                      )}
+                      {question.imageUrl && (
+                        <img
+                          src={question.imageUrl}
+                          alt="Fragenbild"
+                          className="mt-3 max-w-md rounded-lg border border-gray-300"
+                        />
+                      )}
+                    </div>
+                    <div className="flex gap-2 ml-4">
                       <button
                         onClick={() => setEditingQuestionId(question.id)}
                         className="text-blue-600 hover:text-blue-800 text-sm font-medium"

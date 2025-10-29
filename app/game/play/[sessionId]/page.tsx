@@ -6,7 +6,10 @@ import type { GameEvent } from "@/lib/gameEvents";
 
 type Question = {
   id: number;
+  title?: string | null;
   questionText: string;
+  description?: string | null;
+  imageUrl?: string | null;
   answers: Array<{
     id: number;
     answerText: string;
@@ -215,7 +218,11 @@ export default function PlayerGamePage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center px-4">
         <div className="bg-white rounded-lg shadow-2xl p-8 max-w-md text-center">
-          <div className="text-6xl mb-4">⏳</div>
+          <img
+            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${playerId}`}
+            alt={myName}
+            className="w-24 h-24 rounded-full mx-auto mb-4"
+          />
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
             Willkommen, {myName}!
           </h1>
@@ -236,6 +243,11 @@ export default function PlayerGamePage() {
               Spiel beendet!
             </h1>
             <div className="text-center mb-8">
+              <img
+                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${playerId}`}
+                alt={myName}
+                className="w-24 h-24 rounded-full mx-auto mb-4"
+              />
               <div className="text-6xl mb-4">
                 {myRank === 1 ? "🏆" : myRank === 2 ? "🥈" : myRank === 3 ? "🥉" : "👏"}
               </div>
@@ -264,6 +276,11 @@ export default function PlayerGamePage() {
                     <div className="text-2xl font-bold mr-3 w-8 text-gray-900">
                       {index + 1}.
                     </div>
+                    <img
+                      src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${player.playerId}`}
+                      alt={player.playerName}
+                      className="w-12 h-12 rounded-full mr-3"
+                    />
                     <div className="font-bold text-gray-900">
                       {player.playerName}
                       {player.playerId === playerId && " (Du)"}
@@ -278,7 +295,7 @@ export default function PlayerGamePage() {
 
             <div className="text-center">
               <button
-                onClick={() => router.push("/game")}
+                onClick={() => router.push("/")}
                 className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition font-bold"
               >
                 Neues Spiel
@@ -305,7 +322,14 @@ export default function PlayerGamePage() {
         {/* Header */}
         <div className="bg-white rounded-lg shadow-lg p-4 mb-6">
           <div className="flex justify-between items-center">
-            <div className="font-bold text-gray-900">{myName}</div>
+            <div className="flex items-center">
+              <img
+                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${playerId}`}
+                alt={myName}
+                className="w-12 h-12 rounded-full mr-3"
+              />
+              <div className="font-bold text-gray-900">{myName}</div>
+            </div>
             <div className="text-right">
               <div className="text-2xl font-bold text-green-600">{myScore}</div>
               <div className="text-xs text-gray-700">Punkte</div>
@@ -315,9 +339,28 @@ export default function PlayerGamePage() {
 
         {/* Question */}
         <div className="bg-white rounded-lg shadow-lg p-8 mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+          {currentQuestion.title && (
+            <div className="text-base font-medium text-gray-600 mb-2 text-center">
+              {currentQuestion.title}
+            </div>
+          )}
+          <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center">
             {currentQuestion.questionText}
           </h2>
+          {currentQuestion.description && (
+            <p className="text-sm text-gray-700 text-center mb-4">
+              {currentQuestion.description}
+            </p>
+          )}
+          {currentQuestion.imageUrl && (
+            <div className="flex justify-center mb-6">
+              <img
+                src={currentQuestion.imageUrl}
+                alt="Fragenbild"
+                className="max-w-full max-h-64 rounded-lg border-2 border-gray-300"
+              />
+            </div>
+          )}
 
           <div className="space-y-3">
             {currentQuestion.answers.map((answer, index) => {

@@ -67,6 +67,8 @@ Die Anwendung unterstützt zwei Spielmodi:
         page.tsx                  # Einzelspieler (Server Component wrapper)
         QuizPlayer.tsx            # Quiz spielen (Client Component)
       /host/page.tsx              # Spielleiter-Interface (Client Component)
+  /host                           # Host/Management Startseite
+    page.tsx                      # Startseite mit Auswahl
   /api/questions                  # REST API für Fragen
     route.ts                      # POST - Frage erstellen
     /[questionId]/route.ts        # PUT, DELETE - Frage bearbeiten/löschen
@@ -74,13 +76,15 @@ Die Anwendung unterstützt zwei Spielmodi:
     /session/
       route.ts                    # POST - Session erstellen
       /[sessionId]/
-        route.ts                  # GET - Session abrufen
+        route.ts                  # GET, DELETE - Session abrufen/löschen
         /events/route.ts          # GET - SSE Stream
         /start/route.ts           # POST - Spiel starten
         /next/route.ts            # POST - Nächste Frage
+        /reveal/route.ts          # POST - Antwort manuell aufdecken
     /players/
       route.ts                    # POST - Spieler beitreten
       /[playerId]/answer/route.ts # POST - Antwort absenden
+  /api/upload/route.ts            # POST - Bild hochladen
   page.tsx                        # Startseite
 /lib
   prisma.ts                       # Prisma Client Singleton
@@ -91,6 +95,9 @@ Die Anwendung unterstützt zwei Spielmodi:
   schema.prisma                   # Datenbank-Schema
   dev.db                          # SQLite Datei
   /migrations                     # Datenbank-Migrationen
+/public
+  /uploads                        # Hochgeladene Bilder
+    .gitkeep                      # Git-Ordner-Marker
 ```
 
 ## Häufige Probleme & Lösungen
@@ -133,6 +140,34 @@ npm run dev
 npx prisma studio
 ```
 
+## Neue Features
+
+### Fragen mit erweiterten Metadaten
+- **Titel**: Optionaler Titel für jede Frage (z.B. "Frage 1")
+- **Beschreibung**: Optionale längere Beschreibung/Kontext für die Frage
+- **Bild**: Optionales Bild für jede Frage
+
+### Bild-Upload
+- Bilder werden über `/api/upload` hochgeladen
+- Gespeichert im `/public/uploads` Verzeichnis
+- Validierung: Nur Bilder (JPEG, PNG, GIF, WebP), max 5MB
+- Unique filename generation mit Timestamp
+- **Wichtig**: URL-Eingabefelder wurden entfernt - nur Upload-Funktionalität
+
+### Manuelle Antwort-Aufdeckung
+- Host kann Antworten jederzeit manuell aufdecken via `/api/game/session/[sessionId]/reveal`
+- Spieler die noch nicht geantwortet haben, erhalten keine Punkte
+- Button erscheint beim Host wenn noch nicht alle geantwortet haben
+
+### Avatar-System
+- DiceBear Avataaars API für Spieler-Avatare
+- Avatare werden basierend auf Spieler-ID generiert
+- Konsistente Avatare für jeden Spieler während des Spiels
+
+### Environment Variables
+- `NEXT_PUBLIC_APP_URL`: Öffentliche URL für QR-Code und Join-Links
+- Wird in `.env` konfiguriert (siehe `.env.example`)
+
 ## API-Routen
 
 ### Fragen-API
@@ -142,7 +177,10 @@ Erstellt eine neue Frage mit Antworten
 ```typescript
 {
   quizId: number,
+  title?: string | null,
   questionText: string,
+  description?: string | null,
+  imageUrl?: string | null,
   answers: Array<{ text: string, isCorrect: boolean }>,
   orderIndex: number
 }
@@ -152,13 +190,30 @@ Erstellt eine neue Frage mit Antworten
 Aktualisiert eine Frage und ihre Antworten
 ```typescript
 {
+  title?: string | null,
   questionText: string,
+  description?: string | null,
+  imageUrl?: string | null,
   answers: Array<{ id: number, text: string, isCorrect: boolean }>
 }
 ```
 
 #### DELETE /api/questions/[questionId]
-Löscht eine Frage (Antworten werden durch Cascade gelöscht)
+Löscht eine Frage
+- **Wichtig**: Löscht zuerst alle PlayerAnswer-Einträge, dann die Frage
+- Antworten werden durch Cascade gelöscht
+
+### Bild-Upload-API
+
+#### POST /api/upload
+Lädt ein Bild hoch
+```typescript
+Request: FormData mit 'file' field
+Response: { url: string }  // z.B. "/uploads/1234567890-abc123.jpg"
+```
+Validierung:
+- Dateityp: image/jpeg, image/jpg, image/png, image/gif, image/webp
+- Maximale Größe: 5MB
 
 ### Multiplayer-API
 

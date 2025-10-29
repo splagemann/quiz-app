@@ -8,12 +8,15 @@ export async function PUT(
   try {
     const { questionId } = await params;
     const body = await request.json();
-    const { questionText, answers } = body;
+    const { title, questionText, description, imageUrl, answers } = body;
 
     const question = await prisma.question.update({
       where: { id: parseInt(questionId) },
       data: {
+        title,
         questionText,
+        description,
+        imageUrl,
         answers: {
           updateMany: answers.map((answer: { id: number; text: string; isCorrect: boolean }) => ({
             where: { id: answer.id },
@@ -46,6 +49,12 @@ export async function DELETE(
   try {
     const { questionId } = await params;
 
+    // First delete all player answers for this question
+    await prisma.playerAnswer.deleteMany({
+      where: { questionId: parseInt(questionId) },
+    });
+
+    // Then delete the question (answers will cascade)
     await prisma.question.delete({
       where: { id: parseInt(questionId) },
     });

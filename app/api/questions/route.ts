@@ -4,12 +4,15 @@ import { prisma } from "@/lib/prisma";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { quizId, questionText, answers, orderIndex } = body;
+    const { quizId, title, questionText, description, imageUrl, answers, orderIndex } = body;
 
     const question = await prisma.question.create({
       data: {
         quizId,
+        title,
         questionText,
+        description,
+        imageUrl,
         orderIndex,
         answers: {
           create: answers.map((answer: { text: string; isCorrect: boolean }, index: number) => ({

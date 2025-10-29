@@ -12,7 +12,10 @@ type Answer = {
 
 type Question = {
   id: number;
+  title?: string | null;
   questionText: string;
+  description?: string | null;
+  imageUrl?: string | null;
   orderIndex: number;
   answers: Answer[];
 };
@@ -93,7 +96,7 @@ export default function QuizPlayer({ quiz }: { quiz: Quiz }) {
               Anderes Quiz wählen
             </Link>
             <Link
-              href="/"
+              href="/host"
               className="block text-blue-600 hover:text-blue-800 underline mt-4"
             >
               Zurück zur Startseite
@@ -137,9 +140,28 @@ export default function QuizPlayer({ quiz }: { quiz: Quiz }) {
 
         {/* Question Card */}
         <div className="bg-white rounded-lg shadow-lg p-8 mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
+          {currentQuestion.title && (
+            <div className="text-base font-medium text-gray-600 mb-2">
+              {currentQuestion.title}
+            </div>
+          )}
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
             {currentQuestion.questionText}
           </h2>
+          {currentQuestion.description && (
+            <p className="text-sm text-gray-700 mb-4">
+              {currentQuestion.description}
+            </p>
+          )}
+          {currentQuestion.imageUrl && (
+            <div className="flex justify-center mb-6">
+              <img
+                src={currentQuestion.imageUrl}
+                alt="Fragenbild"
+                className="max-w-full max-h-80 rounded-lg border-2 border-gray-300"
+              />
+            </div>
+          )}
 
           <div className="space-y-3">
             {currentQuestion.answers.map((answer) => {

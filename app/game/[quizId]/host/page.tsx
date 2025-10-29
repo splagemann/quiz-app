@@ -40,6 +40,7 @@ export default function MultiplayerHostPage() {
   const [answeredPlayers, setAnsweredPlayers] = useState<Set<string>>(new Set());
   const [revealedAnswer, setRevealedAnswer] = useState<number | null>(null);
   const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
+  const [publicUrl, setPublicUrl] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [finalScores, setFinalScores] = useState<Array<{ playerId: string; playerName: string; score: number }>>([]);
 
@@ -66,7 +67,9 @@ export default function MultiplayerHostPage() {
         setGameStatus("waiting");
 
         // Generate QR code
-        const joinUrl = `${window.location.origin}/game/join/${data.sessionCode}`;
+        const appPublicUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+        setPublicUrl(appPublicUrl);
+        const joinUrl = `${appPublicUrl}/game/join/${data.sessionCode}`;
         const qrUrl = await QRCode.toDataURL(joinUrl, {
           width: 300,
           margin: 2,
@@ -181,6 +184,23 @@ export default function MultiplayerHostPage() {
     }
   };
 
+  const revealAnswer = async () => {
+    try {
+      const response = await fetch(`/api/game/session/${sessionId}/reveal`, {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        alert(data.error || "Fehler beim Aufdecken der Antwort");
+        return;
+      }
+    } catch (err) {
+      console.error("Error revealing answer:", err);
+      alert("Netzwerkfehler");
+    }
+  };
+
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center px-4">
@@ -233,6 +253,11 @@ export default function MultiplayerHostPage() {
                     <div className="text-4xl font-bold mr-4 w-12">
                       {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `${index + 1}.`}
                     </div>
+                    <img
+                      src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${player.playerId}`}
+                      alt={player.playerName}
+                      className="w-16 h-16 rounded-full mr-4"
+                    />
                     <div>
                       <div className="text-2xl font-bold text-gray-900">
                         {player.playerName}
@@ -254,7 +279,7 @@ export default function MultiplayerHostPage() {
                 Neues Spiel
               </button>
               <button
-                onClick={() => router.push("/")}
+                onClick={() => router.push("/host")}
                 className="bg-gray-600 text-white px-8 py-3 rounded-lg hover:bg-gray-700 transition font-bold"
               >
                 Zur Startseite
@@ -305,7 +330,7 @@ export default function MultiplayerHostPage() {
                   </div>
                 </div>
                 <p className="text-gray-700">
-                  Gehe zu <span className="font-bold">{window.location.origin}/game/join</span>
+                  Gehe zu <span className="font-bold">{publicUrl}</span>
                 </p>
               </div>
             </div>
@@ -325,7 +350,11 @@ export default function MultiplayerHostPage() {
                       key={player.id}
                       className="bg-blue-100 border-2 border-blue-300 rounded-lg p-4 text-center"
                     >
-                      <div className="text-2xl mb-2">👤</div>
+                      <img
+                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${player.id}`}
+                        alt={player.playerName}
+                        className="w-16 h-16 mx-auto mb-2 rounded-full"
+                      />
                       <div className="font-bold text-gray-900">
                         {player.playerName}
                       </div>
@@ -379,9 +408,28 @@ export default function MultiplayerHostPage() {
 
         {/* Question */}
         <div className="bg-white rounded-lg shadow-lg p-8 mb-6">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+          {currentQuestion.title && (
+            <div className="text-lg font-medium text-gray-600 mb-2 text-center">
+              {currentQuestion.title}
+            </div>
+          )}
+          <h2 className="text-3xl font-bold text-gray-900 mb-4 text-center">
             {currentQuestion.questionText}
           </h2>
+          {currentQuestion.description && (
+            <p className="text-gray-700 text-center mb-6">
+              {currentQuestion.description}
+            </p>
+          )}
+          {currentQuestion.imageUrl && (
+            <div className="flex justify-center mb-8">
+              <img
+                src={currentQuestion.imageUrl}
+                alt="Fragenbild"
+                className="max-w-2xl max-h-96 rounded-lg border-2 border-gray-300"
+              />
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {currentQuestion.answers.map((answer, index) => {
@@ -426,6 +474,11 @@ export default function MultiplayerHostPage() {
                       : "bg-gray-100 border-2 border-gray-300"
                   }`}
                 >
+                  <img
+                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${player.id}`}
+                    alt={player.playerName}
+                    className="w-12 h-12 mx-auto mb-1 rounded-full"
+                  />
                   <div className="text-sm font-bold text-gray-900 truncate">
                     {player.playerName}
                   </div>
@@ -457,9 +510,12 @@ export default function MultiplayerHostPage() {
               Alle Spieler haben geantwortet! Antwort wird angezeigt...
             </div>
           ) : (
-            <div className="text-white text-xl">
-              Warte auf Antworten...
-            </div>
+            <button
+              onClick={revealAnswer}
+              className="bg-orange-500 text-white px-10 py-4 rounded-lg hover:bg-orange-600 transition font-bold text-xl shadow-lg"
+            >
+              Antwort jetzt aufdecken →
+            </button>
           )}
         </div>
       </div>
