@@ -162,7 +162,7 @@ npx prisma studio
 ## Production Deployment
 
 ### CI/CD Pipeline (GitHub Actions)
-Automated Docker image creation and publishing:
+Automated Docker image creation, publishing, and release management:
 - **Workflow File**: `.github/workflows/docker-publish.yml`
 - **Triggers**:
   - Push to `main` branch
@@ -176,6 +176,11 @@ Automated Docker image creation and publishing:
   - `main` - Last commit on main
   - `v1.0.0`, `1.0.0`, `1.0`, `1` - Semantic Versioning
   - `sha-abc1234` - Commit-specific builds
+- **GitHub Releases**:
+  - Automatically created when a version tag is pushed
+  - Release notes extracted from CHANGELOG.md
+  - Includes Docker image information and pull commands
+  - Pre-release detection for versions with hyphens (e.g., v1.0.0-beta)
 
 ### Docker
 The application can be deployed with Docker:

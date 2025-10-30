@@ -305,6 +305,10 @@ Every release automatically triggers a GitHub Actions workflow that:
 - Publishes to GitHub Container Registry (ghcr.io)
 - Creates version-specific tags (e.g., `v1.0.0`, `1.0.0`, `1.0`, `1`)
 - Updates the `latest` tag
+- **Automatically creates a GitHub Release** with:
+  - Release notes extracted from CHANGELOG.md
+  - Docker image pull commands
+  - Supported architectures information
 
 **Monitor builds**: [GitHub Actions](https://github.com/splagemann/quiz-app/actions)
 

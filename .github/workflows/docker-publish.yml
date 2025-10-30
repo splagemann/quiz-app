@@ -44,7 +44,7 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
-            type=sha,prefix={{branch}}-
+            type=sha,prefix=sha-
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push Docker image
@@ -57,3 +57,61 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            DATABASE_URL=file:/app/data/quiz.db
+
+  create-release:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build-and-push
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Extract release notes from CHANGELOG
+        id: changelog
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          # Remove 'v' prefix if present
+          VERSION_NUM="${VERSION#v}"
+
+          # Extract the section for this version from CHANGELOG.md
+          awk "/## \[${VERSION_NUM}\]/,/## \[/" CHANGELOG.md | sed '$d' > release_notes.txt
+
+          # If release notes are empty, use a default message
+          if [ ! -s release_notes.txt ]; then
+            echo "Release $VERSION" > release_notes.txt
+            echo "" >> release_notes.txt
+            echo "See [CHANGELOG.md](CHANGELOG.md) for details." >> release_notes.txt
+          fi
+
+          # Add Docker image information
+          echo "" >> release_notes.txt
+          echo "## Docker Images" >> release_notes.txt
+          echo "" >> release_notes.txt
+          echo "Multi-platform Docker images are available at GitHub Container Registry:" >> release_notes.txt
+          echo "" >> release_notes.txt
+          echo '```bash' >> release_notes.txt
+          echo "docker pull ghcr.io/${{ github.repository }}:${VERSION}" >> release_notes.txt
+          echo "docker pull ghcr.io/${{ github.repository }}:${VERSION_NUM}" >> release_notes.txt
+          echo "docker pull ghcr.io/${{ github.repository }}:latest" >> release_notes.txt
+          echo '```' >> release_notes.txt
+          echo "" >> release_notes.txt
+          echo "**Supported Architectures:** linux/amd64, linux/arm64" >> release_notes.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: release_notes.txt
+          draft: false
+          prerelease: ${{ contains(steps.version.outputs.version, '-') }}
+          generate_release_notes: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
