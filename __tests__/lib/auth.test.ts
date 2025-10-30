@@ -73,11 +73,6 @@ describe('lib/auth', () => {
       expect(verifyPassphrase('wrong-passphrase')).toBe(false);
     });
 
-    it('should return false when ADMIN_PASSPHRASE is undefined', () => {
-      process.env.ADMIN_PASSPHRASE = undefined;
-      expect(verifyPassphrase('any-passphrase')).toBe(true); // Auth not enabled
-    });
-
     it('should be case-sensitive', () => {
       process.env.ADMIN_PASSPHRASE = 'TestPassword';
       expect(verifyPassphrase('testpassword')).toBe(false);

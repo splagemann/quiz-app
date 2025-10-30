@@ -22,14 +22,10 @@ export function verifyPassphrase(passphrase: string): boolean {
     return true; // No auth required if not configured
   }
 
-  const configuredPassphrase = process.env.ADMIN_PASSPHRASE;
-  if (!configuredPassphrase) {
-    return false;
-  }
-
   // Direct comparison is fine here since we're comparing the plaintext input
   // against the plaintext environment variable before hashing
-  return passphrase === configuredPassphrase;
+  // Note: At this point, ADMIN_PASSPHRASE is guaranteed to be truthy by isAuthEnabled()
+  return passphrase === process.env.ADMIN_PASSPHRASE;
 }
 
 /**
