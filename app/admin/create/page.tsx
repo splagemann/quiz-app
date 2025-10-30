@@ -1,4 +1,6 @@
 import { redirect } from "next/navigation";
+import { getTranslations } from 'next-intl/server';
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 
 async function createQuiz(formData: FormData) {
@@ -6,6 +8,7 @@ async function createQuiz(formData: FormData) {
 
   const title = formData.get("title") as string;
   const description = formData.get("description") as string;
+  const language = (formData.get("language") as string) || "en";
 
   if (!title) {
     return;
@@ -15,17 +18,23 @@ async function createQuiz(formData: FormData) {
     data: {
       title,
       description: description || null,
+      language,
     },
   });
 
   redirect(`/admin/${quiz.id}/edit`);
 }
 
-export default function CreateQuizPage() {
+export const dynamic = 'force-dynamic';
+
+export default async function CreateQuizPage() {
+  const t = await getTranslations('admin');
+  const tCommon = await getTranslations('common');
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-2xl mx-auto px-4">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Neues Quiz erstellen</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">{t('createNewQuiz')}</h1>
 
         <form action={createQuiz} className="bg-white rounded-lg shadow p-6">
           <div className="mb-6">
@@ -33,7 +42,7 @@ export default function CreateQuizPage() {
               htmlFor="title"
               className="block text-sm font-medium text-gray-800 mb-2"
             >
-              Quiz-Titel *
+              {t('quizTitleRequired')}
             </label>
             <input
               type="text"
@@ -41,7 +50,7 @@ export default function CreateQuizPage() {
               name="title"
               required
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
-              placeholder="z.B. JavaScript Grundlagen"
+              placeholder={t('quizTitlePlaceholder')}
             />
           </div>
 
@@ -50,15 +59,33 @@ export default function CreateQuizPage() {
               htmlFor="description"
               className="block text-sm font-medium text-gray-800 mb-2"
             >
-              Beschreibung
+              {t('quizDescription')}
             </label>
             <textarea
               id="description"
               name="description"
               rows={4}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
-              placeholder="Kurze Beschreibung des Quiz..."
+              placeholder={t('quizDescriptionPlaceholder')}
             />
+          </div>
+
+          <div className="mb-6">
+            <label
+              htmlFor="language"
+              className="block text-sm font-medium text-gray-800 mb-2"
+            >
+              {t('language')}
+            </label>
+            <select
+              id="language"
+              name="language"
+              defaultValue="en"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+            >
+              <option value="en">{t('languageEn')}</option>
+              <option value="de">{t('languageDe')}</option>
+            </select>
           </div>
 
           <div className="flex gap-4">
@@ -66,14 +93,14 @@ export default function CreateQuizPage() {
               type="submit"
               className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-medium"
             >
-              Quiz erstellen
+              {t('createQuiz')}
             </button>
-            <a
+            <Link
               href="/admin"
               className="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition font-medium text-center"
             >
-              Abbrechen
-            </a>
+              {tCommon('cancel')}
+            </Link>
           </div>
         </form>
       </div>

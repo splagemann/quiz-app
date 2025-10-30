@@ -3,6 +3,15 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import QuizPlayer from "./QuizPlayer";
 
+// Import translation files
+import enMessages from "@/locales/en.json";
+import deMessages from "@/locales/de.json";
+
+const messages = {
+  en: enMessages,
+  de: deMessages,
+};
+
 export async function generateMetadata({
   params,
 }: {
@@ -49,5 +58,9 @@ export default async function PlayQuizPage({
     notFound();
   }
 
-  return <QuizPlayer quiz={quiz} />;
+  const quizLanguage = (quiz.language || 'en') as 'en' | 'de';
+
+  return (
+    <QuizPlayer quiz={quiz} locale={quizLanguage} messages={messages[quizLanguage]} />
+  );
 }

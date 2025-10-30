@@ -1,9 +1,13 @@
 import Link from "next/link";
+import { getTranslations } from 'next-intl/server';
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = 'force-dynamic';
 
 export default async function GamePage() {
+  const t = await getTranslations('quiz');
+  const tAdmin = await getTranslations('admin');
+
   const quizzes = await prisma.quiz.findMany({
     include: {
       _count: {
@@ -19,22 +23,22 @@ export default async function GamePage() {
     <div className="min-h-screen bg-gradient-to-br from-purple-500 to-blue-600 py-12">
       <div className="max-w-4xl mx-auto px-4">
         <h1 className="text-4xl font-bold text-white text-center mb-4">
-          Quiz auswählen
+          {t('selectQuiz')}
         </h1>
         <p className="text-white text-center mb-12 text-lg">
-          Wähle ein Quiz und teste dein Wissen!
+          {t('selectQuizSubtitle')}
         </p>
 
         {quizzes.length === 0 ? (
           <div className="bg-white rounded-lg shadow-lg p-8 text-center">
             <p className="text-gray-800 text-lg mb-4">
-              Noch keine Quiz verfügbar.
+              {t('noQuizzesMessage')}
             </p>
             <Link
               href="/admin"
               className="text-blue-600 hover:text-blue-800 underline font-medium"
             >
-              Erstelle eines im Admin-Bereich
+              {t('createInAdmin')}
             </Link>
           </div>
         ) : (
@@ -53,10 +57,10 @@ export default async function GamePage() {
                 )}
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-700 font-medium">
-                    {quiz._count.questions} Fragen
+                    {quiz._count.questions} {tAdmin('questions')}
                   </span>
                   <span className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium">
-                    Spielen →
+                    {t('playButton')}
                   </span>
                 </div>
               </Link>
@@ -69,7 +73,7 @@ export default async function GamePage() {
             href="/host"
             className="text-white hover:text-gray-200 underline"
           >
-            Zurück zur Startseite
+            {t('backToHome')}
           </Link>
         </div>
       </div>

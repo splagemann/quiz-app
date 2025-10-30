@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from 'next-intl';
 
 type Answer = {
   id: number;
@@ -35,6 +36,10 @@ export default function QuestionManager({
   questions: Question[];
 }) {
   const router = useRouter();
+  const t = useTranslations('questionManager');
+  const tQuestion = useTranslations('question');
+  const tCommon = useTranslations('common');
+  const tValidation = useTranslations('validation');
   const [isAddingQuestion, setIsAddingQuestion] = useState(false);
   const [editingQuestionId, setEditingQuestionId] = useState<number | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -65,7 +70,7 @@ export default function QuestionManager({
 
       if (!response.ok) {
         const error = await response.json();
-        alert(error.error || "Fehler beim Hochladen des Bildes");
+        alert(error.error || tQuestion('imageUploadError'));
         return null;
       }
 
@@ -78,7 +83,7 @@ export default function QuestionManager({
       return data.url;
     } catch (err) {
       console.error("Error uploading image:", err);
-      alert("Netzwerkfehler beim Hochladen");
+      alert(t('networkErrorUploading'));
       return null;
     } finally {
       setUploadingImage(false);
@@ -99,7 +104,7 @@ export default function QuestionManager({
 
       if (!response.ok) {
         const error = await response.json();
-        alert(error.error || "Fehler beim Hochladen des Bildes");
+        alert(error.error || tQuestion('imageUploadError'));
         return null;
       }
 
@@ -107,7 +112,7 @@ export default function QuestionManager({
       return data.url;
     } catch (err) {
       console.error("Error uploading image:", err);
-      alert("Netzwerkfehler beim Hochladen");
+      alert(t('networkErrorUploading'));
       return null;
     }
   }
@@ -120,15 +125,15 @@ export default function QuestionManager({
     // Validate: at least one answer must have text or image
     const validAnswers = newAnswers.filter(a => a.text.trim() || a.imageUrl);
     if (!questionText) {
-      alert("Bitte gib einen Fragetext ein");
+      alert(tValidation('questionTextRequired'));
       return;
     }
     if (validAnswers.length < 2) {
-      alert("Bitte füge mindestens 2 Antworten hinzu (mit Text oder Bild)");
+      alert(t('minAnswersValidation'));
       return;
     }
     if (!newAnswers.some(a => a.isCorrect)) {
-      alert("Bitte markiere mindestens eine Antwort als richtig");
+      alert(tValidation('atLeastOneCorrect'));
       return;
     }
 
@@ -160,7 +165,7 @@ export default function QuestionManager({
       router.refresh();
     } else {
       const error = await response.json();
-      alert(error.error || "Fehler beim Erstellen der Frage");
+      alert(error.error || t('errorCreatingQuestion'));
     }
   }
 
@@ -176,15 +181,15 @@ export default function QuestionManager({
     // Validate: at least one answer must have text or image
     const validAnswers = editAnswers.filter(a => (a.answerText && a.answerText.trim()) || a.imageUrl);
     if (!questionText) {
-      alert("Bitte gib einen Fragetext ein");
+      alert(tValidation('questionTextRequired'));
       return;
     }
     if (validAnswers.length < 2) {
-      alert("Bitte behalte mindestens 2 Antworten (mit Text oder Bild)");
+      alert(t('minAnswersEditValidation'));
       return;
     }
     if (!editAnswers.some(a => a.isCorrect)) {
-      alert("Bitte markiere mindestens eine Antwort als richtig");
+      alert(tValidation('atLeastOneCorrect'));
       return;
     }
 
@@ -212,12 +217,12 @@ export default function QuestionManager({
       router.refresh();
     } else {
       const error = await response.json();
-      alert(error.error || "Fehler beim Aktualisieren der Frage");
+      alert(error.error || t('errorUpdatingQuestion'));
     }
   }
 
   async function handleDeleteQuestion(questionId: number) {
-    if (!confirm("Bist du sicher, dass du diese Frage löschen möchtest?")) {
+    if (!confirm(tQuestion('deleteConfirm'))) {
       return;
     }
 
@@ -233,12 +238,12 @@ export default function QuestionManager({
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold text-gray-900">Fragen ({initialQuestions.length})</h2>
+        <h2 className="text-xl font-semibold text-gray-900">{t('questionsCount', { count: initialQuestions.length })}</h2>
         <button
           onClick={() => setIsAddingQuestion(true)}
           className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
         >
-          Frage hinzufügen
+          {tQuestion('addQuestion')}
         </button>
       </div>
 
@@ -248,21 +253,21 @@ export default function QuestionManager({
           action={handleAddQuestion}
           className="mb-6 p-4 border-2 border-green-200 rounded-lg bg-green-50"
         >
-          <h3 className="font-semibold mb-4 text-gray-900">Neue Frage</h3>
+          <h3 className="font-semibold mb-4 text-gray-900">{t('newQuestion')}</h3>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-800 mb-2">
-              Titel (optional)
+              {t('titleOptional')}
             </label>
             <input
               type="text"
               name="title"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
-              placeholder="z.B. Frage 1"
+              placeholder={t('titlePlaceholder')}
             />
           </div>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-800 mb-2">
-              Fragetext *
+              {t('questionTextRequired')}
             </label>
             <input
               type="text"
@@ -273,18 +278,18 @@ export default function QuestionManager({
           </div>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-800 mb-2">
-              Beschreibung (optional)
+              {tQuestion('description')}
             </label>
             <textarea
               name="description"
               rows={3}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
-              placeholder="Zusätzliche Informationen oder Kontext..."
+              placeholder={t('descriptionPlaceholder')}
             />
           </div>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-800 mb-2">
-              Bild (optional)
+              {t('imageOptional')}
             </label>
             <div className="flex gap-2">
               <input
@@ -300,12 +305,12 @@ export default function QuestionManager({
                 disabled={uploadingImage}
               />
               {uploadingImage && (
-                <span className="text-gray-600 py-2">Lädt hoch...</span>
+                <span className="text-gray-600 py-2">{t('uploading')}</span>
               )}
             </div>
             {addQuestionImageUrl && (
               <p className="text-sm text-gray-600 mt-2">
-                Bild hochgeladen: {addQuestionImageUrl}
+                {t('imageUploaded', { url: addQuestionImageUrl })}
               </p>
             )}
           </div>
@@ -313,7 +318,7 @@ export default function QuestionManager({
           <div className="mb-4">
             <div className="flex justify-between items-center mb-2">
               <label className="block text-sm font-medium text-gray-800">
-                Antworten (2-4, wähle die richtige) *
+                {t('answersRequired')}
               </label>
               <div className="flex gap-2">
                 {newAnswers.length < 4 && (
@@ -322,7 +327,7 @@ export default function QuestionManager({
                     onClick={() => setNewAnswers([...newAnswers, { text: "", imageUrl: "", isCorrect: false }])}
                     className="text-sm bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition"
                   >
-                    + Antwort
+                    {t('addAnswerButton')}
                   </button>
                 )}
               </div>
@@ -349,7 +354,7 @@ export default function QuestionManager({
                       updated[i].text = e.target.value;
                       setNewAnswers(updated);
                     }}
-                    placeholder={`Antworttext ${i + 1}`}
+                    placeholder={t('answerPlaceholder', { number: i + 1 })}
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
                   />
                   {newAnswers.length > 2 && (
@@ -388,7 +393,7 @@ export default function QuestionManager({
                   />
                   {answer.imageUrl && (
                     <div className="mt-2">
-                      <img src={answer.imageUrl} alt="Antwortbild" className="max-w-xs rounded border border-gray-300" />
+                      <img src={answer.imageUrl} alt={t('answerImageAlt')} className="max-w-xs rounded border border-gray-300" />
                     </div>
                   )}
                 </div>
@@ -401,7 +406,7 @@ export default function QuestionManager({
               type="submit"
               className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
             >
-              Frage speichern
+              {t('saveQuestion')}
             </button>
             <button
               type="button"
@@ -415,7 +420,7 @@ export default function QuestionManager({
               }}
               className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
             >
-              Abbrechen
+              {tCommon('cancel')}
             </button>
           </div>
         </form>
@@ -424,7 +429,7 @@ export default function QuestionManager({
       {/* Questions List */}
       {initialQuestions.length === 0 ? (
         <p className="text-gray-700 text-center py-8">
-          Noch keine Fragen. Füge deine erste Frage hinzu!
+          {t('noQuestions')}
         </p>
       ) : (
         <div className="space-y-4">
@@ -437,19 +442,19 @@ export default function QuestionManager({
                 >
                   <div>
                     <label className="block text-sm font-medium text-gray-800 mb-2">
-                      Titel (optional)
+                      {t('titleOptional')}
                     </label>
                     <input
                       type="text"
                       name="title"
                       defaultValue={question.title || ""}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
-                      placeholder="z.B. Frage 1"
+                      placeholder={t('titlePlaceholder')}
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-800 mb-2">
-                      Fragetext *
+                      {t('questionTextRequired')}
                     </label>
                     <input
                       type="text"
@@ -461,19 +466,19 @@ export default function QuestionManager({
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-800 mb-2">
-                      Beschreibung (optional)
+                      {tQuestion('description')}
                     </label>
                     <textarea
                       name="description"
                       defaultValue={question.description || ""}
                       rows={3}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
-                      placeholder="Zusätzliche Informationen oder Kontext..."
+                      placeholder={t('descriptionPlaceholder')}
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-800 mb-2">
-                      Bild (optional)
+                      {t('imageOptional')}
                     </label>
                     <div className="flex gap-2">
                       <input
@@ -489,12 +494,12 @@ export default function QuestionManager({
                         disabled={uploadingImage}
                       />
                       {uploadingImage && (
-                        <span className="text-gray-600 py-2">Lädt hoch...</span>
+                        <span className="text-gray-600 py-2">{t('uploading')}</span>
                       )}
                     </div>
                     {(editQuestionImageUrl || question.imageUrl) && (
                       <p className="text-sm text-gray-600 mt-2">
-                        Aktuelles Bild: {editQuestionImageUrl || question.imageUrl}
+                        {t('currentImage', { url: editQuestionImageUrl || question.imageUrl })}
                       </p>
                     )}
                   </div>
@@ -502,7 +507,7 @@ export default function QuestionManager({
                   <div>
                     <div className="flex justify-between items-center mb-2">
                       <label className="block text-sm font-medium text-gray-800">
-                        Antworten (2-4, wähle die richtige) *
+                        {t('answersRequired')}
                       </label>
                       <div className="flex gap-2">
                         {editAnswers.length < 4 && (
@@ -517,7 +522,7 @@ export default function QuestionManager({
                             }])}
                             className="text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition"
                           >
-                            + Antwort
+                            {t('addAnswerButton')}
                           </button>
                         )}
                       </div>
@@ -544,7 +549,7 @@ export default function QuestionManager({
                               updated[i].answerText = e.target.value;
                               setEditAnswers(updated);
                             }}
-                            placeholder={`Antworttext ${i + 1}`}
+                            placeholder={t('answerPlaceholder', { number: i + 1 })}
                             className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
                           />
                           {editAnswers.length > 2 && (
@@ -583,7 +588,7 @@ export default function QuestionManager({
                           />
                           {answer.imageUrl && (
                             <div className="mt-2">
-                              <img src={answer.imageUrl} alt="Antwortbild" className="max-w-xs rounded border border-gray-300" />
+                              <img src={answer.imageUrl} alt={t('answerImageAlt')} className="max-w-xs rounded border border-gray-300" />
                             </div>
                           )}
                         </div>
@@ -596,7 +601,7 @@ export default function QuestionManager({
                       type="submit"
                       className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
                     >
-                      Speichern
+                      {tCommon('save')}
                     </button>
                     <button
                       type="button"
@@ -607,7 +612,7 @@ export default function QuestionManager({
                       }}
                       className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
                     >
-                      Abbrechen
+                      {tCommon('cancel')}
                     </button>
                   </div>
                 </form>
@@ -631,7 +636,7 @@ export default function QuestionManager({
                       {question.imageUrl && (
                         <img
                           src={question.imageUrl}
-                          alt="Fragenbild"
+                          alt={t('questionImageAlt')}
                           className="mt-3 max-w-md rounded-lg border border-gray-300"
                         />
                       )}
@@ -644,13 +649,13 @@ export default function QuestionManager({
                         }}
                         className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                       >
-                        Bearbeiten
+                        {tCommon('edit')}
                       </button>
                       <button
                         onClick={() => handleDeleteQuestion(question.id)}
                         className="text-red-600 hover:text-red-800 text-sm font-medium"
                       >
-                        Löschen
+                        {tCommon('delete')}
                       </button>
                     </div>
                   </div>
@@ -668,14 +673,14 @@ export default function QuestionManager({
                           <div className="flex-1">
                             {String.fromCharCode(65 + i)}. {answer.answerText}
                             {answer.isCorrect && (
-                              <span className="ml-2 text-green-700 font-semibold">✓ Richtig</span>
+                              <span className="ml-2 text-green-700 font-semibold">{t('correctMark')}</span>
                             )}
                           </div>
                         </div>
                         {answer.imageUrl && (
                           <img
                             src={answer.imageUrl}
-                            alt="Antwortbild"
+                            alt={t('answerImageAlt')}
                             className="mt-2 max-w-xs rounded border border-gray-300"
                           />
                         )}

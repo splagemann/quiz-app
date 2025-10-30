@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations } from 'next-intl/server';
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 
@@ -26,6 +27,9 @@ export default async function QuizModePage({
 }) {
   const { quizId } = await params;
   const quizIdNum = parseInt(quizId);
+
+  const t = await getTranslations('quiz');
+  const tAdmin = await getTranslations('admin');
 
   if (isNaN(quizIdNum)) {
     notFound();
@@ -55,7 +59,7 @@ export default async function QuizModePage({
             <p className="text-gray-700 mb-6 text-center">{quiz.description}</p>
           )}
           <p className="text-gray-700 text-center mb-8">
-            {quiz._count.questions} Fragen
+            {quiz._count.questions} {tAdmin('questions')}
           </p>
 
           <div className="space-y-4">
@@ -63,9 +67,9 @@ export default async function QuizModePage({
               href={`/game/${quiz.id}/solo`}
               className="block bg-blue-600 text-white text-center px-8 py-4 rounded-lg hover:bg-blue-700 transition font-bold text-lg shadow-lg"
             >
-              🎮 Einzelspieler
+              🎮 {t('playSolo')}
               <p className="text-sm font-normal mt-1 opacity-90">
-                Spiele alleine und teste dein Wissen
+                {t('playSoloDescription')}
               </p>
             </Link>
 
@@ -73,9 +77,9 @@ export default async function QuizModePage({
               href={`/game/${quiz.id}/host`}
               className="block bg-green-600 text-white text-center px-8 py-4 rounded-lg hover:bg-green-700 transition font-bold text-lg shadow-lg"
             >
-              👥 Mehrspieler (Spielleiter)
+              👥 {t('hostMultiplayer')}
               <p className="text-sm font-normal mt-1 opacity-90">
-                Starte ein Spiel für mehrere Spieler
+                {t('hostMultiplayerDescription')}
               </p>
             </Link>
           </div>
@@ -85,7 +89,7 @@ export default async function QuizModePage({
               href="/game"
               className="text-blue-600 hover:text-blue-800 underline"
             >
-              ← Zurück zur Quiz-Auswahl
+              {t('backToQuizSelection')}
             </Link>
           </div>
         </div>

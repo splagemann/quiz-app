@@ -2,7 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { NextIntlClientProvider, useTranslations } from "next-intl";
 import type { GameEvent } from "@/lib/gameEvents";
+
+// Import translation files
+import enMessages from "@/locales/en.json";
+import deMessages from "@/locales/de.json";
+
+const messages = {
+  en: enMessages,
+  de: deMessages,
+};
 
 type Question = {
   id: number;
@@ -30,7 +40,10 @@ type FinalScore = {
   score: number;
 };
 
-export default function PlayerGamePage() {
+function PlayerGameContent() {
+  const tMultiplayer = useTranslations('multiplayer');
+  const tCommon = useTranslations('common');
+  const tQuiz = useTranslations('quiz');
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -52,7 +65,7 @@ export default function PlayerGamePage() {
   // Load initial session data
   useEffect(() => {
     if (!playerId) {
-      setError("Keine Spieler-ID gefunden");
+      setError(tCommon('error'));
       return;
     }
 
@@ -60,7 +73,7 @@ export default function PlayerGamePage() {
       try {
         const response = await fetch(`/api/game/session/${sessionId}`);
         if (!response.ok) {
-          setError("Session nicht gefunden");
+          setError(tCommon('error'));
           return;
         }
 
@@ -68,7 +81,7 @@ export default function PlayerGamePage() {
         const player = session.players.find((p: any) => p.id === playerId);
 
         if (!player) {
-          setError("Spieler nicht in dieser Session gefunden");
+          setError(tCommon('error'));
           return;
         }
 
@@ -94,12 +107,12 @@ export default function PlayerGamePage() {
         }
       } catch (err) {
         console.error("Error loading session:", err);
-        setError("Fehler beim Laden der Session");
+        setError(tCommon('error'));
       }
     }
 
     loadSession();
-  }, [sessionId, playerId]);
+  }, [sessionId, playerId, tCommon]);
 
   // Connect to SSE for real-time updates
   useEffect(() => {
@@ -156,7 +169,7 @@ export default function PlayerGamePage() {
     return () => {
       eventSource.close();
     };
-  }, [sessionId, playerId, myScore, router]);
+  }, [sessionId, playerId, myScore, router, tMultiplayer, tCommon, tQuiz]);
 
   const submitAnswer = async (answerId: number) => {
     if (!playerId || !currentQuestion || selectedAnswer !== null) return;
@@ -175,7 +188,7 @@ export default function PlayerGamePage() {
 
       if (!response.ok) {
         const data = await response.json();
-        alert(data.error || "Fehler beim Absenden der Antwort");
+        alert(data.error || tCommon('error'));
         setSelectedAnswer(null);
         return;
       }
@@ -185,7 +198,7 @@ export default function PlayerGamePage() {
       setGameStatus("answered");
     } catch (err) {
       console.error("Error submitting answer:", err);
-      alert("Netzwerkfehler");
+      alert(tCommon('error'));
       setSelectedAnswer(null);
     }
   };
@@ -194,13 +207,13 @@ export default function PlayerGamePage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center px-4">
         <div className="bg-white rounded-lg shadow-2xl p-8 max-w-md text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">Fehler</h1>
+          <h1 className="text-2xl font-bold text-red-600 mb-4">{tCommon('error')}</h1>
           <p className="text-gray-700 mb-6">{error}</p>
           <button
             onClick={() => router.push("/game")}
             className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
           >
-            Zur Quiz-Auswahl
+            {tQuiz('backToQuizSelection')}
           </button>
         </div>
       </div>
@@ -210,7 +223,7 @@ export default function PlayerGamePage() {
   if (gameStatus === "loading") {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center">
-        <div className="text-white text-2xl">Lädt...</div>
+        <div className="text-white text-2xl">{tCommon('loading')}</div>
       </div>
     );
   }
@@ -225,10 +238,10 @@ export default function PlayerGamePage() {
             className="w-24 h-24 rounded-full mx-auto mb-4"
           />
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            Willkommen, {myName}!
+            {tMultiplayer('welcome', { name: myName })}
           </h1>
           <p className="text-gray-700 text-lg">
-            Warte darauf, dass der Spielleiter das Spiel startet...
+            {tMultiplayer('waitingForHost')}
           </p>
         </div>
       </div>
@@ -241,7 +254,7 @@ export default function PlayerGamePage() {
         <div className="max-w-2xl mx-auto">
           <div className="bg-white rounded-lg shadow-2xl p-8">
             <h1 className="text-3xl font-bold text-gray-900 text-center mb-2">
-              Spiel beendet!
+              {tMultiplayer('gameFinished')}
             </h1>
             <div className="text-center mb-8">
               <img
@@ -253,16 +266,16 @@ export default function PlayerGamePage() {
                 {myRank === 1 ? "🏆" : myRank === 2 ? "🥈" : myRank === 3 ? "🥉" : "👏"}
               </div>
               <div className="text-2xl font-bold text-gray-900 mb-2">
-                Platz {myRank}
+                {tMultiplayer('place')} {myRank}
               </div>
               <div className="text-xl text-gray-700">
-                {myScore} {myScore === 1 ? "Punkt" : "Punkte"}
+                {myScore} {myScore === 1 ? tMultiplayer('point') : tMultiplayer('points')}
               </div>
             </div>
 
             <div className="space-y-3 mb-8">
               <h2 className="text-xl font-bold text-gray-900 text-center mb-4">
-                Bestenliste
+                {tMultiplayer('leaderboard')}
               </h2>
               {finalScores.map((player, index) => (
                 <div
@@ -284,7 +297,7 @@ export default function PlayerGamePage() {
                     />
                     <div className="font-bold text-gray-900">
                       {player.playerName}
-                      {player.playerId === playerId && " (Du)"}
+                      {player.playerId === playerId && ` (${tMultiplayer('you')})`}
                     </div>
                   </div>
                   <div className="text-xl font-bold text-gray-900">
@@ -299,7 +312,7 @@ export default function PlayerGamePage() {
                 onClick={() => router.push("/")}
                 className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition font-bold"
               >
-                Neues Spiel
+                {tMultiplayer('newGame')}
               </button>
             </div>
           </div>
@@ -312,7 +325,7 @@ export default function PlayerGamePage() {
   if (!currentQuestion) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center">
-        <div className="text-white text-2xl">Lädt Frage...</div>
+        <div className="text-white text-2xl">{tCommon('loading')}</div>
       </div>
     );
   }
@@ -332,7 +345,7 @@ export default function PlayerGamePage() {
           </div>
           <div className="text-right">
             <div className="text-xl font-bold text-green-600">{myScore}</div>
-            <div className="text-xs text-gray-700">Punkte</div>
+            <div className="text-xs text-gray-700">{tMultiplayer('points')}</div>
           </div>
         </div>
       </div>
@@ -356,7 +369,7 @@ export default function PlayerGamePage() {
           <div className="flex justify-center mb-3 flex-1">
             <img
               src={currentQuestion.imageUrl}
-              alt="Fragenbild"
+              alt={tMultiplayer('questionImage')}
               className="max-h-64 object-contain rounded-lg border-2 border-gray-300"
             />
           </div>
@@ -414,7 +427,7 @@ export default function PlayerGamePage() {
                     <div className="flex-1 relative min-h-[120px]">
                       <img
                         src={answer.imageUrl}
-                        alt="Antwortbild"
+                        alt={tMultiplayer('answerImage')}
                         className="absolute inset-0 w-full h-full object-contain rounded"
                       />
                     </div>
@@ -440,10 +453,50 @@ export default function PlayerGamePage() {
         <div className="bg-white rounded-lg shadow-lg p-3 text-center flex-shrink-0">
           <div className="text-xl mb-1">⏳</div>
           <p className="text-gray-700 font-medium text-sm">
-            Warte auf die anderen Spieler...
+            {tMultiplayer('waitingForOthers')}
           </p>
         </div>
       )}
     </div>
+  );
+}
+
+export default function PlayerGamePage() {
+  const params = useParams();
+  const sessionId = params.sessionId as string;
+  const [locale, setLocale] = useState<string>('en');
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchQuizLanguage() {
+      try {
+        const response = await fetch(`/api/game/session/${sessionId}`);
+        if (response.ok) {
+          const session = await response.json();
+          const quizLanguage = session.quiz?.language || 'en';
+          setLocale(quizLanguage);
+        }
+      } catch (err) {
+        console.error("Error fetching quiz language:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchQuizLanguage();
+  }, [sessionId]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center">
+        <div className="text-white text-2xl">Loading...</div>
+      </div>
+    );
+  }
+
+  return (
+    <NextIntlClientProvider locale={locale} messages={messages[locale as keyof typeof messages]}>
+      <PlayerGameContent />
+    </NextIntlClientProvider>
   );
 }

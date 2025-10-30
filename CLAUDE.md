@@ -2,11 +2,71 @@
 
 ## Project Overview
 
-This is a quiz application built with Next.js 14+, TypeScript, SQLite (via Prisma), and Tailwind CSS. The entire user interface is localized in **German**.
+This is a quiz application built with Next.js 14+, TypeScript, SQLite (via Prisma), and Tailwind CSS. The user interface supports **internationalization (i18n)** with English (default) and German languages.
 
 The application supports two game modes:
 - **Single Player**: Players play through a quiz alone
 - **Multiplayer**: A host runs a game, multiple players can join via QR code or game code and play together
+
+### Internationalization (i18n)
+- **Library**: next-intl for Next.js App Router
+- **Default Language**: English (en)
+- **Supported Languages**: English (en), German (de)
+- **Global Language Setting**: Users can change the interface language in the admin section
+- **Per-Quiz Language**: Each quiz can specify its own language, independent of the global setting
+- **Translation Files**: `locales/en.json` and `locales/de.json`
+- **Language Persistence**: User's language preference is stored in cookies
+- **Language Selector**: Available in the admin section header
+
+#### Quiz Language Feature
+Each quiz has its own language setting that determines the language used during gameplay, independent of the global application language. This allows quizzes in different languages to coexist in the same application.
+
+**How it works:**
+1. **Setting Quiz Language**: When creating or editing a quiz, the language can be set in the quiz form (defaults to English)
+2. **Language Storage**: Quiz language is stored in the `Quiz.language` field in the database
+3. **Language Application**: During gameplay (single player, multiplayer host, and multiplayer player), the quiz's language is used for all UI elements
+4. **Implementation Pattern**:
+   - Server components fetch the quiz and its language from the database
+   - Translation messages are loaded based on the quiz language
+   - `NextIntlClientProvider` wraps the game component with quiz-specific locale and messages
+   - Multiple `useTranslations()` hooks are used for different translation namespaces
+
+**Example Implementation:**
+```typescript
+// Server component (page.tsx)
+const quiz = await prisma.quiz.findUnique({ where: { id: quizId } });
+const quizLanguage = (quiz.language || 'en') as 'en' | 'de';
+
+return (
+  <GameComponent
+    quiz={quiz}
+    locale={quizLanguage}
+    messages={messages[quizLanguage]}
+  />
+);
+
+// Client component (GameComponent.tsx)
+function GameContent() {
+  const tSolo = useTranslations('solo');
+  const tMultiplayer = useTranslations('multiplayer');
+  return <div>{tSolo('points')}</div>;
+}
+
+export default function GameComponent({ quiz, locale, messages }) {
+  return (
+    <NextIntlClientProvider locale={locale} messages={messages}>
+      <GameContent quiz={quiz} />
+    </NextIntlClientProvider>
+  );
+}
+```
+
+**Files involved:**
+- `app/game/[quizId]/solo/page.tsx` - Single player server wrapper
+- `app/game/[quizId]/solo/QuizPlayer.tsx` - Single player client component
+- `app/game/[quizId]/host/page.tsx` - Multiplayer host (uses callback pattern)
+- `app/game/play/[sessionId]/page.tsx` - Multiplayer player (fetches from session API)
+- `lib/i18nQuiz.ts` - Type definitions for quiz i18n
 
 ## Important Architecture Decisions
 
@@ -41,8 +101,11 @@ The application supports two game modes:
   - Labels: `text-gray-800`
   - Normal text: `text-gray-700`
   - **NEVER** use `text-gray-500` or lighter on white background
-- **Language**: All UI text, buttons, labels, alerts, and confirmations are in German
-- **Date Format**: German format using `toLocaleDateString('de-DE')`
+- **Internationalization**: UI text uses next-intl translations (default: English)
+  - Use `useTranslations()` hook in client components
+  - Use `getTranslations()` in server components
+  - All strings should be defined in `locales/en.json` and `locales/de.json`
+- **Date Format**: Locale-aware using `toLocaleDateString(locale)`
 
 ## File Structure
 
@@ -58,12 +121,14 @@ The application supports two game modes:
   icon.svg                       # Custom favicon (purple-blue gradient)
   layout.tsx                     # Root layout with default metadata
   /admin                           # Admin area
-    page.tsx                       # Quiz overview
-    /create/page.tsx              # Create new quiz
+    page.tsx                       # Quiz overview (with LanguageSelector)
+    /create/page.tsx              # Create new quiz (with language field)
     /[quizId]/edit/
-      page.tsx                    # Edit quiz (Server Component)
+      page.tsx                    # Edit quiz (Server Component, with language field)
       QuestionManager.tsx         # Manage questions (Client Component)
       DeleteButton.tsx            # Delete button (Client Component)
+  /components
+    LanguageSelector.tsx          # Language selector component (Client)
   /game                           # Game mode
     page.tsx                      # Select quiz
     /join                         # Player join flow
@@ -96,12 +161,18 @@ The application supports two game modes:
       route.ts                    # POST - Player join
       /[playerId]/answer/route.ts # POST - Submit answer
   /api/upload/route.ts            # POST - Upload image
+  /api/locale/route.ts            # POST, GET - Set/get user locale
   page.tsx                        # Homepage
 /lib
   prisma.ts                       # Prisma Client Singleton
   sessionCode.ts                  # Session code generator
   gameEvents.ts                   # Event types for SSE
   gameState.ts                    # In-memory game state manager
+  i18n.ts                         # next-intl configuration (server)
+  i18nClient.ts                   # Client-side i18n utilities
+/locales
+  en.json                         # English translations
+  de.json                         # German translations
 /prisma
   schema.prisma                   # Database schema
   dev.db                          # SQLite file
@@ -328,19 +399,19 @@ Response: { isCorrect: boolean, score: number }
 
 ## Important Notes for Future Changes
 
-1. **Language**: All new UI text must be in German
+1. **Internationalization**: All new UI text must be added to both `locales/en.json` and `locales/de.json`
 2. **Readability**: Always use dark text colors (`text-gray-700` minimum)
 3. **Server vs Client**: Interactive elements require `"use client"` directive
 4. **Cache**: For database issues, always delete `.next`
 5. **Paths**: DATABASE_URL uses absolute path (Dev) / relative path (Docker)
-6. **Form Validation**: Alert messages in German
-7. **Confirmations**: All confirm() dialogs in German
+6. **Form Validation**: Alert messages should use translation keys
+7. **Confirmations**: All confirm() dialogs should use translation keys
 8. **Multiplayer State**: In-memory state (gameState.ts) is reset on server restart
 9. **SSE Connections**: Keep-alive pings every 30 seconds, automatic cleanup on disconnect
 10. **Session Codes**: Always uppercase, 6 characters, collision check on generation
 11. **Dynamic Rendering**: Pages with DB queries need `export const dynamic = 'force-dynamic'`
 12. **Docker Builds**: Require dummy DATABASE_URL for Prisma generation during build
-13. **TypeScript Types**: Quiz types in Client Components must include all optional fields (title, description, imageUrl)
+13. **TypeScript Types**: Quiz types in Client Components must include all optional fields (title, description, imageUrl, language)
 14. **Page Metadata**: Server Components can use `generateMetadata` for dynamic titles
 
 ## Cascading Deletes
@@ -352,6 +423,34 @@ The schema uses `onDelete: Cascade`:
 - When a player is deleted → all their answers are deleted
 
 ## Testing Strategy
+
+### Quiz Language Tests
+1. **Create quizzes in different languages**:
+   - Create a quiz with English language setting
+   - Create a quiz with German language setting
+   - Verify language selection is saved correctly in edit form
+
+2. **Single Player Language Tests**:
+   - Play English quiz → verify all UI text is in English
+   - Play German quiz → verify all UI text is in German
+   - Verify language switches correctly between quizzes
+   - Check completion screen, buttons, and progress indicators
+
+3. **Multiplayer Host Language Tests**:
+   - Host English quiz → verify all UI text is in English
+   - Host German quiz → verify all UI text is in German
+   - Check QR code instructions, player list, and game controls
+
+4. **Multiplayer Player Language Tests**:
+   - Join English quiz session → verify all UI text is in English
+   - Join German quiz session → verify all UI text is in German
+   - Check waiting screen, question display, and results screen
+
+5. **Global vs Quiz Language**:
+   - Change global app language to German
+   - Play English quiz → verify quiz uses English (not German)
+   - Verify admin interface uses global language
+   - Verify quiz gameplay uses quiz-specific language
 
 ### Single Player Tests
 1. Create quiz with German umlauts (ä, ö, ü)

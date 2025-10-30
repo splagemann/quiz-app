@@ -15,6 +15,7 @@ model Quiz {
   id           Int           @id @default(autoincrement())
   title        String
   description  String?
+  language     String        @default("en") // 'en' or 'de'
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   questions    Question[]
