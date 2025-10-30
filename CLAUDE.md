@@ -1,50 +1,50 @@
 # Claude Code Context
 
-## Projekt-Übersicht
+## Project Overview
 
-Dies ist eine Quiz-Anwendung, die mit Next.js 14+, TypeScript, SQLite (via Prisma) und Tailwind CSS erstellt wurde. Die gesamte Benutzeroberfläche ist auf **Deutsch** lokalisiert.
+This is a quiz application built with Next.js 14+, TypeScript, SQLite (via Prisma), and Tailwind CSS. The entire user interface is localized in **German**.
 
-Die Anwendung unterstützt zwei Spielmodi:
-- **Einzelspieler**: Spieler spielen alleine durch ein Quiz
-- **Mehrspieler**: Ein Spielleiter hostet ein Spiel, mehrere Spieler können über QR-Code oder Spiel-Code beitreten und gemeinsam spielen
+The application supports two game modes:
+- **Single Player**: Players play through a quiz alone
+- **Multiplayer**: A host runs a game, multiple players can join via QR code or game code and play together
 
-## Wichtige Architektur-Entscheidungen
+## Important Architecture Decisions
 
-### Datenbank
-- **SQLite** mit relativer Pfad-Konfiguration: `file:./prisma/dev.db` (siehe `.env.example`)
-- Prisma Client wird nach `/app/generated/prisma/client` generiert
-- Import erfolgt als: `import { PrismaClient } from "@/app/generated/prisma/client"`
-- **Wichtig**: Bei Datenbank-Problemen immer `.next` Cache löschen: `rm -rf .next`
+### Database
+- **SQLite** with relative path configuration: `file:./prisma/dev.db` (see `.env.example`)
+- Prisma Client is generated to `/app/generated/prisma/client`
+- Import path: `import { PrismaClient } from "@/app/generated/prisma/client"`
+- **Important**: For database issues, always clear `.next` cache: `rm -rf .next`
 
-### Multiplayer-Architektur
-- **Server-Sent Events (SSE)**: Einseitige Echtzeit-Kommunikation vom Server zu Clients
-- **In-Memory State Management**: Aktive Spielsitzungen und Spieler-Status werden im Memory gehalten (`lib/gameState.ts`)
-- **Persistenz**: Spielsitzungen, Spieler und Antworten werden in SQLite gespeichert
-- **Session Codes**: 6-stellige alphanumerische Codes für einfaches Beitreten
-- **QR-Code Generation**: Automatische QR-Code-Erzeugung mit der `qrcode` Library
+### Multiplayer Architecture
+- **Server-Sent Events (SSE)**: Unidirectional real-time communication from server to clients
+- **In-Memory State Management**: Active game sessions and player status are held in memory (`lib/gameState.ts`)
+- **Persistence**: Game sessions, players, and answers are stored in SQLite
+- **Session Codes**: 6-character alphanumeric codes for easy joining
+- **QR Code Generation**: Automatic QR code generation using the `qrcode` library
 
-### Komponenten-Architektur
-- **Server Components**: Alle Seiten-Dateien (page.tsx) standardmäßig
-- **Client Components**: Komponenten mit Interaktivität (Forms, onClick handlers)
-  - `QuestionManager.tsx` - Fragen verwalten
-  - `QuizPlayer.tsx` - Einzelspieler-Modus
-  - `DeleteButton.tsx` - Separierte Komponente für Lösch-Bestätigung
-  - Multiplayer-Seiten:
-    - `/game/[quizId]/host/page.tsx` - Spielleiter-Interface
-    - `/game/join/page.tsx` - Code-Eingabe
-    - `/game/join/[sessionCode]/page.tsx` - Namen-Eingabe
-    - `/game/play/[sessionId]/page.tsx` - Spieler-Interface
+### Component Architecture
+- **Server Components**: All page files (page.tsx) by default
+- **Client Components**: Components with interactivity (Forms, onClick handlers)
+  - `QuestionManager.tsx` - Manage questions
+  - `QuizPlayer.tsx` - Single player mode
+  - `DeleteButton.tsx` - Separate component for delete confirmation
+  - Multiplayer pages:
+    - `/game/[quizId]/host/page.tsx` - Host interface
+    - `/game/join/page.tsx` - Code entry
+    - `/game/join/[sessionCode]/page.tsx` - Name entry
+    - `/game/play/[sessionId]/page.tsx` - Player interface
 
-### Code-Stil & UI
-- **Textfarben**: Alle Texte verwenden dunkle Farben für gute Lesbarkeit
-  - Überschriften: `text-gray-900`
+### Code Style & UI
+- **Text Colors**: All text uses dark colors for good readability
+  - Headings: `text-gray-900`
   - Labels: `text-gray-800`
-  - Normaler Text: `text-gray-700`
-  - **NIEMALS** `text-gray-500` oder heller auf weißem Hintergrund
-- **Sprache**: Alle UI-Texte, Buttons, Labels, Alerts und Bestätigungen sind auf Deutsch
-- **Datums-Format**: Deutsch mit `toLocaleDateString('de-DE')`
+  - Normal text: `text-gray-700`
+  - **NEVER** use `text-gray-500` or lighter on white background
+- **Language**: All UI text, buttons, labels, alerts, and confirmations are in German
+- **Date Format**: German format using `toLocaleDateString('de-DE')`
 
-## Dateistruktur
+## File Structure
 
 ```
 /
@@ -56,92 +56,92 @@ Die Anwendung unterstützt zwei Spielmodi:
     docker-publish.yml           # GitHub Actions CI/CD workflow
 /app
   icon.svg                       # Custom favicon (purple-blue gradient)
-  layout.tsx                     # Root layout mit default metadata
-  /admin                           # Admin-Bereich
-    page.tsx                       # Quiz-Übersicht
-    /create/page.tsx              # Neues Quiz erstellen
+  layout.tsx                     # Root layout with default metadata
+  /admin                           # Admin area
+    page.tsx                       # Quiz overview
+    /create/page.tsx              # Create new quiz
     /[quizId]/edit/
-      page.tsx                    # Quiz bearbeiten (Server Component)
-      QuestionManager.tsx         # Fragen verwalten (Client Component)
-      DeleteButton.tsx            # Lösch-Button (Client Component)
-  /game                           # Spiel-Modus
-    page.tsx                      # Quiz auswählen
-    /join                         # Spieler-Beitritt
-      page.tsx                    # Code-Eingabe
-      /[sessionCode]/page.tsx     # Namen-Eingabe
-    /play/[sessionId]/page.tsx    # Spieler-Interface
+      page.tsx                    # Edit quiz (Server Component)
+      QuestionManager.tsx         # Manage questions (Client Component)
+      DeleteButton.tsx            # Delete button (Client Component)
+  /game                           # Game mode
+    page.tsx                      # Select quiz
+    /join                         # Player join flow
+      page.tsx                    # Enter code
+      /[sessionCode]/page.tsx     # Enter name
+    /play/[sessionId]/page.tsx    # Player interface
     /[quizId]/
-      page.tsx                    # Spielmodus-Auswahl (Einzel/Mehrspieler)
+      page.tsx                    # Game mode selection (Single/Multiplayer)
       /solo/
-        page.tsx                  # Einzelspieler (Server Component wrapper)
-        QuizPlayer.tsx            # Quiz spielen (Client Component)
+        page.tsx                  # Single player (Server Component wrapper)
+        QuizPlayer.tsx            # Play quiz (Client Component)
       /host/
-        page.tsx                  # Spielleiter-Interface (Client Component)
-        layout.tsx                # Layout für dynamic metadata
-  /host                           # Host/Management Startseite
-    page.tsx                      # Startseite mit Auswahl
-  /api/questions                  # REST API für Fragen
-    route.ts                      # POST - Frage erstellen
-    /[questionId]/route.ts        # PUT, DELETE - Frage bearbeiten/löschen
+        page.tsx                  # Host interface (Client Component)
+        layout.tsx                # Layout for dynamic metadata
+  /host                           # Host/Management homepage
+    page.tsx                      # Homepage with selection
+  /api/questions                  # REST API for questions
+    route.ts                      # POST - Create question
+    /[questionId]/route.ts        # PUT, DELETE - Edit/delete question
   /api/game                       # Multiplayer API
     /session/
-      route.ts                    # POST - Session erstellen
+      route.ts                    # POST - Create session
       /[sessionId]/
-        route.ts                  # GET, DELETE - Session abrufen/löschen
+        route.ts                  # GET, DELETE - Get/delete session
         /events/route.ts          # GET - SSE Stream
-        /start/route.ts           # POST - Spiel starten
-        /next/route.ts            # POST - Nächste Frage
-        /reveal/route.ts          # POST - Antwort manuell aufdecken
+        /start/route.ts           # POST - Start game
+        /next/route.ts            # POST - Next question
+        /reveal/route.ts          # POST - Manually reveal answer
     /players/
-      route.ts                    # POST - Spieler beitreten
-      /[playerId]/answer/route.ts # POST - Antwort absenden
-  /api/upload/route.ts            # POST - Bild hochladen
-  page.tsx                        # Startseite
+      route.ts                    # POST - Player join
+      /[playerId]/answer/route.ts # POST - Submit answer
+  /api/upload/route.ts            # POST - Upload image
+  page.tsx                        # Homepage
 /lib
   prisma.ts                       # Prisma Client Singleton
-  sessionCode.ts                  # Session-Code Generator
-  gameEvents.ts                   # Event-Typen für SSE
-  gameState.ts                    # In-Memory Spielzustand-Manager
+  sessionCode.ts                  # Session code generator
+  gameEvents.ts                   # Event types for SSE
+  gameState.ts                    # In-memory game state manager
 /prisma
-  schema.prisma                   # Datenbank-Schema
-  dev.db                          # SQLite Datei
-  /migrations                     # Datenbank-Migrationen
+  schema.prisma                   # Database schema
+  dev.db                          # SQLite file
+  /migrations                     # Database migrations
 /public
-  /uploads                        # Hochgeladene Bilder
-    .gitkeep                      # Git-Ordner-Marker
+  /uploads                        # Uploaded images
+    .gitkeep                      # Git folder marker
 ```
 
-## Häufige Probleme & Lösungen
+## Common Issues & Solutions
 
-### 1. Prisma Import-Fehler
+### 1. Prisma Import Error
 **Problem**: `Module not found: Can't resolve '@/app/generated/prisma'`
-**Lösung**: Import-Pfad korrigieren zu `@/app/generated/prisma/client`
+**Solution**: Correct import path to `@/app/generated/prisma/client`
 
-### 2. Datenbank-Verbindungsfehler
+### 2. Database Connection Error
 **Problem**: `Error code 14: Unable to open the database file`
-**Lösung**:
-1. Absoluten Pfad in `.env` verwenden
-2. Cache löschen: `rm -rf .next`
-3. Prisma neu generieren: `npx prisma generate`
+**Solution**:
+1. Use absolute path in `.env`
+2. Clear cache: `rm -rf .next`
+3. Regenerate Prisma: `npx prisma generate`
 
 ### 3. Event Handlers in Server Components
 **Problem**: `Event handlers cannot be passed to Client Component props`
-**Lösung**: Separates Client Component erstellen (siehe DeleteButton.tsx)
+**Solution**: Create separate Client Component (see DeleteButton.tsx)
 
-### 4. Lesbarkeit-Probleme
-**Problem**: Grauer Text auf weißem Hintergrund schwer lesbar
-**Lösung**: Immer `text-gray-700` oder dunkler verwenden, niemals `-gray-500` oder heller
+### 4. Readability Issues
+**Problem**: Gray text on white background hard to read
+**Solution**: Always use `text-gray-700` or darker, never `-gray-500` or lighter
 
-## Entwicklungs-Workflow
+## Development Workflow
 
-### Datenbank-Schema ändern
+### Modify Database Schema
 ```bash
-npx prisma migrate dev --name beschreibung_der_aenderung
+npx prisma migrate dev --name description_of_changes
 npx prisma generate
 rm -rf .next
 ```
 
-### Entwicklungsserver starten
+### Start Development Server
 ```bash
 # Development
 npm run dev
@@ -150,11 +150,11 @@ npm run dev
 docker compose up -d --build
 docker compose logs -f quiz-app
 
-# Docker stoppen
+# Stop Docker
 docker compose down
 ```
 
-### Datenbank ansehen
+### View Database
 ```bash
 npx prisma studio
 ```
@@ -162,30 +162,30 @@ npx prisma studio
 ## Production Deployment
 
 ### CI/CD Pipeline (GitHub Actions)
-Automatisierte Docker-Image-Erstellung und -Veröffentlichung:
-- **Workflow-Datei**: `.github/workflows/docker-publish.yml`
-- **Trigger**:
-  - Push zu `main` Branch
-  - Tags matching `v*` (z.B. v1.0.0)
-  - Manueller Workflow-Trigger
+Automated Docker image creation and publishing:
+- **Workflow File**: `.github/workflows/docker-publish.yml`
+- **Triggers**:
+  - Push to `main` branch
+  - Tags matching `v*` (e.g., v1.0.0)
+  - Manual workflow trigger
 - **Image Registry**: GitHub Container Registry (`ghcr.io`)
 - **Multi-Platform Builds**: linux/amd64, linux/arm64
-- **Build Caching**: GitHub Actions Cache für schnellere Builds
-- **Automatische Tags**:
-  - `latest` - Neuester Build vom main Branch
-  - `main` - Letzter Commit auf main
+- **Build Caching**: GitHub Actions Cache for faster builds
+- **Automatic Tags**:
+  - `latest` - Latest build from main branch
+  - `main` - Last commit on main
   - `v1.0.0`, `1.0.0`, `1.0`, `1` - Semantic Versioning
-  - `sha-abc1234` - Commit-spezifische Builds
+  - `sha-abc1234` - Commit-specific builds
 
 ### Docker
-Die Anwendung kann mit Docker deployed werden:
-- **Multi-stage Dockerfile** für optimierte Production-Builds
-- **Docker Compose** für einfaches Deployment mit persistenten Volumes
-- **Pre-built Images** von GitHub Container Registry verfügbar
-- **Automatische Migrationen** beim Container-Start
-- **Health Checks** für Container-Überwachung
-- SQLite-Datenbank wird in Docker-Volume persistiert
-- Uploaded Images werden in separatem Volume gespeichert
+The application can be deployed with Docker:
+- **Multi-stage Dockerfile** for optimized production builds
+- **Docker Compose** for easy deployment with persistent volumes
+- **Pre-built Images** available from GitHub Container Registry
+- **Automatic Migrations** on container start
+- **Health Checks** for container monitoring
+- SQLite database is persisted in Docker volume
+- Uploaded images are stored in separate volume
 
 **Image Pull**:
 ```bash
@@ -193,57 +193,57 @@ docker pull ghcr.io/splagemann/quiz-app:latest
 ```
 
 ### Dynamic Rendering
-- Admin- und Game-Seiten verwenden `export const dynamic = 'force-dynamic'`
-- Verhindert Pre-Rendering zur Build-Zeit (benötigt keine Datenbank beim Build)
-- Notwendig für Docker-Builds und Vercel-ähnliche Deployments
+- Admin and game pages use `export const dynamic = 'force-dynamic'`
+- Prevents pre-rendering at build time (doesn't require database during build)
+- Necessary for Docker builds and Vercel-like deployments
 
 ### Browser Title Management
-- Root Layout: "Quiz App" als Default-Titel
-- Dynamische Titel für Quiz-Seiten via `generateMetadata`:
-  - `/game/[quizId]`: "[Quiz-Titel] - Quiz App"
-  - `/game/[quizId]/solo`: "[Quiz-Titel] - Einzelspieler - Quiz App"
-  - `/game/[quizId]/host`: "[Quiz-Titel] - Mehrspieler Host - Quiz App" (via layout.tsx)
-  - `/admin/[quizId]/edit`: "[Quiz-Titel] bearbeiten - Quiz App"
+- Root Layout: "Quiz App" as default title
+- Dynamic titles for quiz pages via `generateMetadata`:
+  - `/game/[quizId]`: "[Quiz Title] - Quiz App"
+  - `/game/[quizId]/solo`: "[Quiz Title] - Single Player - Quiz App"
+  - `/game/[quizId]/host`: "[Quiz Title] - Multiplayer Host - Quiz App" (via layout.tsx)
+  - `/admin/[quizId]/edit`: "[Quiz Title] Edit - Quiz App"
 
 ### Custom Favicon
-- SVG-Icon mit purple-blue Gradient (`app/icon.svg`)
-- Passt zum Farbschema der Anwendung
-- Weißes Fragezeichen auf Gradient-Hintergrund
+- SVG icon with purple-blue gradient (`app/icon.svg`)
+- Matches application color scheme
+- White question mark on gradient background
 
-## Neue Features
+## Feature Highlights
 
-### Fragen mit erweiterten Metadaten
-- **Titel**: Optionaler Titel für jede Frage (z.B. "Frage 1")
-- **Beschreibung**: Optionale längere Beschreibung/Kontext für die Frage
-- **Bild**: Optionales Bild für jede Frage
+### Questions with Extended Metadata
+- **Title**: Optional title for each question (e.g., "Question 1")
+- **Description**: Optional longer description/context for the question
+- **Image**: Optional image for each question
 
-### Bild-Upload
-- Bilder werden über `/api/upload` hochgeladen
-- Gespeichert im `/public/uploads` Verzeichnis
-- Validierung: Nur Bilder (JPEG, PNG, GIF, WebP), max 5MB
-- Unique filename generation mit Timestamp
-- **Wichtig**: URL-Eingabefelder wurden entfernt - nur Upload-Funktionalität
+### Image Upload
+- Images are uploaded via `/api/upload`
+- Stored in `/public/uploads` directory
+- Validation: Images only (JPEG, PNG, GIF, WebP), max 5MB
+- Unique filename generation with timestamp
+- **Important**: URL input fields were removed - upload functionality only
 
-### Manuelle Antwort-Aufdeckung
-- Host kann Antworten jederzeit manuell aufdecken via `/api/game/session/[sessionId]/reveal`
-- Spieler die noch nicht geantwortet haben, erhalten keine Punkte
-- Button erscheint beim Host wenn noch nicht alle geantwortet haben
+### Manual Answer Reveal
+- Host can manually reveal answers at any time via `/api/game/session/[sessionId]/reveal`
+- Players who haven't answered yet receive no points
+- Button appears for host when not all players have answered
 
-### Avatar-System
-- DiceBear Avataaars API für Spieler-Avatare
-- Avatare werden basierend auf Spieler-ID generiert
-- Konsistente Avatare für jeden Spieler während des Spiels
+### Avatar System
+- DiceBear Avataaars API for player avatars
+- Avatars are generated based on player ID
+- Consistent avatars for each player during the game
 
 ### Environment Variables
-- `NEXT_PUBLIC_APP_URL`: Öffentliche URL für QR-Code und Join-Links
-- Wird in `.env` konfiguriert (siehe `.env.example`)
+- `NEXT_PUBLIC_APP_URL`: Public URL for QR code and join links
+- Configured in `.env` (see `.env.example`)
 
-## API-Routen
+## API Routes
 
-### Fragen-API
+### Questions API
 
 #### POST /api/questions
-Erstellt eine neue Frage mit Antworten
+Creates a new question with answers
 ```typescript
 {
   quizId: number,
@@ -257,7 +257,7 @@ Erstellt eine neue Frage mit Antworten
 ```
 
 #### PUT /api/questions/[questionId]
-Aktualisiert eine Frage und ihre Antworten
+Updates a question and its answers
 ```typescript
 {
   title?: string | null,
@@ -269,120 +269,120 @@ Aktualisiert eine Frage und ihre Antworten
 ```
 
 #### DELETE /api/questions/[questionId]
-Löscht eine Frage
-- **Wichtig**: Löscht zuerst alle PlayerAnswer-Einträge, dann die Frage
-- Antworten werden durch Cascade gelöscht
+Deletes a question
+- **Important**: Deletes all PlayerAnswer entries first, then the question
+- Answers are deleted via cascade
 
-### Bild-Upload-API
+### Image Upload API
 
 #### POST /api/upload
-Lädt ein Bild hoch
+Uploads an image
 ```typescript
-Request: FormData mit 'file' field
-Response: { url: string }  // z.B. "/uploads/1234567890-abc123.jpg"
+Request: FormData with 'file' field
+Response: { url: string }  // e.g., "/uploads/1234567890-abc123.jpg"
 ```
-Validierung:
-- Dateityp: image/jpeg, image/jpg, image/png, image/gif, image/webp
-- Maximale Größe: 5MB
+Validation:
+- File type: image/jpeg, image/jpg, image/png, image/gif, image/webp
+- Maximum size: 5MB
 
-### Multiplayer-API
+### Multiplayer API
 
 #### POST /api/game/session
-Erstellt eine neue Spielsitzung
+Creates a new game session
 ```typescript
 Request: { quizId: number }
 Response: { sessionId: string, sessionCode: string, quiz: Quiz }
 ```
 
 #### GET /api/game/session/[sessionId]
-Ruft Session-Daten ab (inkl. Quiz, Spieler, aktueller Status)
+Retrieves session data (incl. quiz, players, current status)
 
 #### GET /api/game/session/[sessionId]/events
-Server-Sent Events (SSE) Stream für Echtzeit-Updates
+Server-Sent Events (SSE) stream for real-time updates
 - Events: player_joined, player_left, game_started, player_answered, reveal_answer, next_question, game_finished, session_ended
 
 #### POST /api/game/session/[sessionId]/start
-Startet das Spiel (Status: waiting → in_progress)
+Starts the game (Status: waiting → in_progress)
 
 #### POST /api/game/session/[sessionId]/next
-Wechselt zur nächsten Frage oder beendet das Spiel
+Advances to next question or ends the game
 
 #### POST /api/game/players
-Spieler tritt Spielsitzung bei
+Player joins game session
 ```typescript
 Request: { sessionCode: string, playerName: string }
 Response: { playerId: string, sessionId: string, playerName: string }
 ```
 
 #### POST /api/game/players/[playerId]/answer
-Sendet Antwort eines Spielers
+Submits a player's answer
 ```typescript
 Request: { questionId: number, answerId: number }
 Response: { isCorrect: boolean, score: number }
 ```
 
-## Wichtige Hinweise für zukünftige Änderungen
+## Important Notes for Future Changes
 
-1. **Sprache**: Alle neuen UI-Texte müssen auf Deutsch sein
-2. **Lesbarkeit**: Immer dunkle Textfarben verwenden (`text-gray-700` minimum)
-3. **Server vs Client**: Interaktive Elemente erfordern `"use client"` Direktive
-4. **Cache**: Bei Datenbank-Problemen immer `.next` löschen
-5. **Absolute Pfade**: DATABASE_URL verwendet absoluten Pfad (Dev) / relativen Pfad (Docker)
-6. **Formular-Validierung**: Alert-Nachrichten auf Deutsch
-7. **Bestätigungen**: Alle confirm()-Dialoge auf Deutsch
-8. **Multiplayer State**: In-Memory State (gameState.ts) wird beim Server-Neustart zurückgesetzt
-9. **SSE Connections**: Keep-Alive Pings alle 30 Sekunden, automatische Bereinigung bei Disconnect
-10. **Session Codes**: Immer Großbuchstaben, 6-stellig, Kollisionsprüfung bei Generierung
-11. **Dynamic Rendering**: Seiten mit DB-Queries benötigen `export const dynamic = 'force-dynamic'`
-12. **Docker Builds**: Benötigen dummy DATABASE_URL für Prisma Generation während Build
-13. **TypeScript Types**: Quiz-Types in Client Components müssen alle optionalen Felder enthalten (title, description, imageUrl)
-14. **Page Metadata**: Server Components können `generateMetadata` für dynamische Titles verwenden
+1. **Language**: All new UI text must be in German
+2. **Readability**: Always use dark text colors (`text-gray-700` minimum)
+3. **Server vs Client**: Interactive elements require `"use client"` directive
+4. **Cache**: For database issues, always delete `.next`
+5. **Paths**: DATABASE_URL uses absolute path (Dev) / relative path (Docker)
+6. **Form Validation**: Alert messages in German
+7. **Confirmations**: All confirm() dialogs in German
+8. **Multiplayer State**: In-memory state (gameState.ts) is reset on server restart
+9. **SSE Connections**: Keep-alive pings every 30 seconds, automatic cleanup on disconnect
+10. **Session Codes**: Always uppercase, 6 characters, collision check on generation
+11. **Dynamic Rendering**: Pages with DB queries need `export const dynamic = 'force-dynamic'`
+12. **Docker Builds**: Require dummy DATABASE_URL for Prisma generation during build
+13. **TypeScript Types**: Quiz types in Client Components must include all optional fields (title, description, imageUrl)
+14. **Page Metadata**: Server Components can use `generateMetadata` for dynamic titles
 
 ## Cascading Deletes
 
-Das Schema verwendet `onDelete: Cascade`:
-- Wenn ein Quiz gelöscht wird → alle Fragen und Spielsitzungen werden gelöscht
-- Wenn eine Frage gelöscht wird → alle Antworten werden gelöscht
-- Wenn eine Spielsitzung gelöscht wird → alle Spieler und Antworten werden gelöscht
-- Wenn ein Spieler gelöscht wird → alle seine Antworten werden gelöscht
+The schema uses `onDelete: Cascade`:
+- When a quiz is deleted → all questions and game sessions are deleted
+- When a question is deleted → all answers are deleted
+- When a game session is deleted → all players and answers are deleted
+- When a player is deleted → all their answers are deleted
 
-## Testing-Strategie
+## Testing Strategy
 
-### Einzelspieler-Tests
-1. Quiz erstellen mit deutschen Umlauten (ä, ö, ü)
-2. Fragen hinzufügen/bearbeiten/löschen
-3. Quiz spielen und Score-Anzeige prüfen
-4. Alle Bestätigungs-Dialoge auf deutsche Texte prüfen
-5. Lesbarkeit auf verschiedenen Bildschirmgrößen prüfen
+### Single Player Tests
+1. Create quiz with German umlauts (ä, ö, ü)
+2. Add/edit/delete questions
+3. Play quiz and check score display
+4. Check all confirmation dialogs for German text
+5. Test readability on different screen sizes
 
-### Multiplayer-Tests
-1. **Spielleiter-Flow**:
-   - Session erstellen und QR-Code-Anzeige prüfen
-   - Session-Code-Anzeige prüfen
-   - Spieler-Beitritte beobachten
-   - Spiel starten mit mindestens 2 Spielern
-   - Fragen durchgehen und Antwort-Reveal prüfen
-   - Endstand mit Rangliste prüfen
+### Multiplayer Tests
+1. **Host Flow**:
+   - Create session and check QR code display
+   - Check session code display
+   - Observe player joins
+   - Start game with at least 2 players
+   - Go through questions and check answer reveal
+   - Check final leaderboard
 
-2. **Spieler-Flow**:
-   - QR-Code scannen oder manuellen Code eingeben
-   - Namen eingeben (Validierung: 2-20 Zeichen)
-   - Auf Spielstart warten
-   - Fragen beantworten
-   - Visual Feedback (richtig/falsch) prüfen
-   - Live-Score-Updates prüfen
-   - Endstand mit eigenem Rang prüfen
+2. **Player Flow**:
+   - Scan QR code or enter manual code
+   - Enter name (validation: 2-20 characters)
+   - Wait for game start
+   - Answer questions
+   - Check visual feedback (correct/incorrect)
+   - Check live score updates
+   - Check final ranking
 
-3. **Echtzeit-Kommunikation**:
-   - Spieler-Beitritt erscheint sofort beim Spielleiter
-   - Beantwortete Fragen werden sofort beim Spielleiter angezeigt
-   - Antwort-Reveal erscheint bei allen gleichzeitig
-   - Nächste Frage erscheint bei allen gleichzeitig
-   - Spiel-Ende erscheint bei allen gleichzeitig
+3. **Real-time Communication**:
+   - Player join appears immediately at host
+   - Answered questions shown immediately at host
+   - Answer reveal appears simultaneously for all
+   - Next question appears simultaneously for all
+   - Game end appears simultaneously for all
 
 4. **Edge Cases**:
-   - Spiel beitreten mit bereits vergebenem Namen
-   - Spiel beitreten während Spiel läuft (sollte abgelehnt werden)
-   - Ungültiger Session-Code (sollte Fehler zeigen)
-   - Alle Spieler antworten → automatisches Reveal
-   - Letzter Spieler disconnected während des Spiels
+   - Join game with already taken name
+   - Join game while game is running (should be rejected)
+   - Invalid session code (should show error)
+   - All players answer → automatic reveal
+   - Last player disconnects during game

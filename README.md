@@ -1,37 +1,39 @@
 # Quiz App
 
-Eine voll ausgestattete Online-Quiz-Anwendung mit Multiplayer-Unterstützung, erstellt mit Next.js, TypeScript und SQLite.
+A full-featured online quiz application with multiplayer support built with Next.js, TypeScript, and SQLite.
 
-*A full-featured online quiz application with multiplayer support built with Next.js, TypeScript, and SQLite.*
+**Note**: The user interface is localized in German.
 
 ## Features
 
 ### UI/UX
-- **Dynamische Browser-Titel**: Zeigt Quiz-Namen im Browser-Tab
-- **Custom Favicon**: Purple-blue Gradient-Icon passend zum App-Design
-- **Responsives Design**: Optimiert für Desktop und Mobile
+- **Dynamic Browser Titles**: Shows quiz names in the browser tab
+- **Custom Favicon**: Purple-blue gradient icon matching the app design
+- **Responsive Design**: Optimized for desktop and mobile
+- **Mobile-Optimized**: Color-coded answers and full-screen views
 
-### Admin-Modus
-- **Quiz-Verwaltung**: Quiz erstellen, bearbeiten und löschen
-- **Fragen-Verwaltung**: Fragen mit optionalem Titel, Beschreibung und Bild hinzufügen, bearbeiten und löschen
-- **Bild-Upload**: Bilder direkt hochladen (werden lokal gespeichert)
-- **Antwort-Verwaltung**: Jede Frage hat genau 4 mögliche Antworten, eine davon ist als richtig markiert
-- **Quiz-Übersicht**: Alle erstellten Quiz mit Fragenanzahl und Metadaten anzeigen
+### Admin Mode
+- **Quiz Management**: Create, edit, and delete quizzes
+- **Question Management**: Add, edit, and delete questions with optional title, description, and image
+- **Image Upload**: Upload images directly (stored locally)
+- **Answer Management**: Each question has 2-6 possible answers, with flexible configuration and image support
+- **Quiz Overview**: Display all created quizzes with question count and metadata
 
-### Einzelspieler-Modus
-- **Quiz-Auswahl**: Verfügbare Quiz durchsuchen und auswählen
-- **Interaktives Gameplay**: Fragen einzeln mit visueller Rückmeldung beantworten
-- **Punktesystem**: 1 Punkt für jede richtige Antwort
-- **Fortschrittsanzeige**: Live-Fortschrittsbalken während des Spiels
-- **Ergebnis-Bildschirm**: Endpunktzahl und Prozentsatz mit Optionen zum erneuten Versuchen oder Wählen eines anderen Quiz
+### Single Player Mode
+- **Quiz Selection**: Browse and select available quizzes
+- **Interactive Gameplay**: Answer questions one by one with visual feedback
+- **Scoring System**: 1 point for each correct answer
+- **Progress Indicator**: Live progress bar during gameplay
+- **Results Screen**: Final score and percentage with options to retry or choose another quiz
 
-### Multiplayer-Modus
-- **Spielleiter-Interface**: Spiel hosten, QR-Code generieren, Spieler-Liste in Echtzeit anzeigen
-- **Spieler-Beitritt**: Via QR-Code oder 6-stelligem Session-Code beitreten
-- **Echtzeit-Updates**: Server-Sent Events (SSE) für Live-Synchronisation zwischen Host und Spielern
-- **Flexible Steuerung**: Host kann Antworten jederzeit manuell aufdecken, auch wenn nicht alle geantwortet haben
-- **Live-Scoreboard**: Echtzeit-Rangliste während des Spiels
-- **Endstand**: Finale Rangliste mit Avataren und Punkten
+### Multiplayer Mode
+- **Host Interface**: Host games, generate QR codes, view real-time player list
+- **Player Join**: Join via QR code or 6-digit session code
+- **Real-time Updates**: Server-Sent Events (SSE) for live synchronization between host and players
+- **Flexible Control**: Host can manually reveal answers at any time, even if not all players have answered
+- **Live Scoreboard**: Real-time leaderboard during gameplay
+- **Final Rankings**: Final leaderboard with avatars and scores
+- **Avatar System**: Consistent avatars for each player using DiceBear API
 
 ## Tech Stack
 
@@ -187,47 +189,47 @@ npm run dev
 - isCorrect
 - timeToAnswer
 
-## Nutzung / Usage
+## Usage
 
-### Ein Quiz erstellen / Creating a Quiz
+### Creating a Quiz
 
-1. Navigiere zum Admin-Bereich von der Startseite
-2. Klicke auf "Neues Quiz erstellen"
-3. Gib Titel und optionale Beschreibung ein
-4. Klicke auf "Quiz erstellen"
-5. Füge Fragen mit optionalem Titel, Beschreibung und Bild hinzu
-6. Lade optional ein Bild für jede Frage hoch
-7. Gib 4 Antworten ein und markiere die richtige Antwort
+1. Navigate to the Admin area from the homepage
+2. Click "Create New Quiz" (Neues Quiz erstellen)
+3. Enter title and optional description
+4. Click "Create Quiz" (Quiz erstellen)
+5. Add questions with optional title, description, and image
+6. Optionally upload an image for each question
+7. Enter 2-6 answers and mark the correct answer
 
-### Einzelspieler-Modus / Solo Mode
+### Single Player Mode
 
-1. Navigiere zu "Quiz spielen" von der Startseite
-2. Wähle ein Quiz aus den verfügbaren Optionen
-3. Wähle "Solo spielen"
-4. Lies jede Frage und klicke auf deine Antwort
-5. Erhalte sofortiges Feedback (grün = richtig, rot = falsch)
-6. Fahre durch alle Fragen fort
-7. Sieh dir deine Endpunktzahl an
+1. Navigate to "Play Quiz" (Quiz spielen) from the homepage
+2. Select a quiz from available options
+3. Choose "Play Solo" (Solo spielen)
+4. Read each question and click your answer
+5. Get immediate feedback (green = correct, red = incorrect)
+6. Progress through all questions
+7. View your final score
 
-### Multiplayer-Modus / Multiplayer Mode
+### Multiplayer Mode
 
-**Als Spielleiter / As Host:**
-1. Navigiere zu "Quiz spielen" und wähle ein Quiz
-2. Wähle "Multiplayer hosten"
-3. Teile den QR-Code oder 6-stelligen Session-Code mit Spielern
-4. Warte bis alle Spieler beigetreten sind
-5. Starte das Spiel
-6. Decke Antworten manuell auf oder warte bis alle geantwortet haben
-7. Gehe zur nächsten Frage
-8. Sieh dir die finale Rangliste am Ende an
+**As Host:**
+1. Navigate to "Play Quiz" and select a quiz
+2. Choose "Host Multiplayer" (Multiplayer hosten)
+3. Share the QR code or 6-digit session code with players
+4. Wait for all players to join
+5. Start the game
+6. Manually reveal answers or wait until all have answered
+7. Proceed to next question
+8. View final leaderboard at the end
 
-**Als Spieler / As Player:**
-1. Scanne den QR-Code oder gehe zu "Quiz spielen" → "Spiel beitreten"
-2. Gib den 6-stelligen Session-Code ein (falls nicht via QR-Code beigetreten)
-3. Gib deinen Namen ein (2-20 Zeichen)
-4. Warte bis der Spielleiter das Spiel startet
-5. Beantworte die Fragen so schnell wie möglich
-6. Sieh dir deine Position in der Rangliste am Ende an
+**As Player:**
+1. Scan the QR code or go to "Play Quiz" → "Join Game" (Spiel beitreten)
+2. Enter the 6-digit session code (if not joined via QR code)
+3. Enter your name (2-20 characters)
+4. Wait for the host to start the game
+5. Answer questions as quickly as possible
+6. View your position in the leaderboard at the end
 
 ## Development
 
