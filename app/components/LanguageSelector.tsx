@@ -35,7 +35,7 @@ export function LanguageSelector() {
   };
 
   return (
-    <div className="flex items-center gap-1 bg-gray-50 border border-gray-200 rounded-md p-0.5">
+    <div className="flex items-center gap-1 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md p-0.5">
       {(Object.keys(flagMap) as Locale[]).map((locale) => (
         <button
           key={locale}
@@ -45,7 +45,7 @@ export function LanguageSelector() {
           className={`
             px-2 py-1 rounded text-lg transition-all
             ${currentLocale === locale
-              ? 'bg-white shadow-sm'
+              ? 'bg-white dark:bg-gray-700 shadow-sm'
               : 'opacity-50 hover:opacity-100'
             }
             disabled:opacity-30 disabled:cursor-not-allowed
