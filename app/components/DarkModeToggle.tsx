@@ -4,8 +4,10 @@ import { useEffect, useState } from 'react';
 
 export function DarkModeToggle() {
   const [isDark, setIsDark] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     // Check localStorage and system preference on mount
     const stored = localStorage.getItem('darkMode');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -14,6 +16,8 @@ export function DarkModeToggle() {
     setIsDark(shouldBeDark);
     if (shouldBeDark) {
       document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
     }
   }, []);
 
@@ -29,6 +33,13 @@ export function DarkModeToggle() {
       localStorage.setItem('darkMode', 'false');
     }
   };
+
+  // Prevent hydration mismatch by not rendering until mounted
+  if (!mounted) {
+    return (
+      <div className="p-2 w-9 h-9" />
+    );
+  }
 
   return (
     <button
