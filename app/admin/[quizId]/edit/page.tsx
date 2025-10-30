@@ -7,6 +7,7 @@ import QuestionManager from "./QuestionManager";
 import DeleteButton from "./DeleteButton";
 import { LanguageSelector } from "@/app/components/LanguageSelector";
 import { DarkModeToggle } from "@/app/components/DarkModeToggle";
+import { QuizLanguageSelector } from "@/app/components/QuizLanguageSelector";
 
 export async function generateMetadata({
   params,
@@ -126,7 +127,7 @@ export default async function EditQuizPage({
         {/* Quiz Details Form */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700/50 p-6 mb-8">
           <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">{t('quizDetails')}</h2>
-          <form action={updateQuizWithId}>
+          <form id="quiz-form" action={updateQuizWithId}>
             <div className="mb-4">
               <label
                 htmlFor="title"
@@ -167,29 +168,20 @@ export default async function EditQuizPage({
               >
                 {t('language')}
               </label>
-              <select
-                id="language"
-                name="language"
-                defaultValue={quiz.language}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-700"
-              >
-                <option value="en">{t('languageEn')}</option>
-                <option value="de">{t('languageDe')}</option>
-              </select>
+              <QuizLanguageSelector name="language" id="language" defaultValue={quiz.language} />
             </div>
 
           </form>
 
           <div className="flex gap-4 mt-4">
-            <form action={updateQuizWithId}>
-              <button
-                type="submit"
-                className="bg-blue-600 dark:bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition"
-              >
-                {t('updateQuiz')}
-              </button>
-            </form>
-            <form action={deleteQuizWithId}>
+            <button
+              type="submit"
+              form="quiz-form"
+              className="flex-1 bg-blue-600 dark:bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition font-medium"
+            >
+              {t('updateQuiz')}
+            </button>
+            <form action={deleteQuizWithId} className="flex-1">
               <DeleteButton />
             </form>
           </div>

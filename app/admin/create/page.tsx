@@ -4,6 +4,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { LanguageSelector } from "@/app/components/LanguageSelector";
 import { DarkModeToggle } from "@/app/components/DarkModeToggle";
+import { QuizLanguageSelector } from "@/app/components/QuizLanguageSelector";
 
 async function createQuiz(formData: FormData) {
   "use server";
@@ -103,15 +104,7 @@ export default async function CreateQuizPage() {
             >
               {t('language')}
             </label>
-            <select
-              id="language"
-              name="language"
-              defaultValue="en"
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-700"
-            >
-              <option value="en">{t('languageEn')}</option>
-              <option value="de">{t('languageDe')}</option>
-            </select>
+            <QuizLanguageSelector name="language" id="language" defaultValue="en" />
           </div>
 
           <div className="flex gap-4">
