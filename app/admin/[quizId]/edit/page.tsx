@@ -178,19 +178,21 @@ export default async function EditQuizPage({
               </select>
             </div>
 
-            <div className="flex gap-4">
+          </form>
+
+          <div className="flex gap-4 mt-4">
+            <form action={updateQuizWithId}>
               <button
                 type="submit"
                 className="bg-blue-600 dark:bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition"
               >
                 {t('updateQuiz')}
               </button>
-            </div>
-          </form>
-
-          <form action={deleteQuizWithId} className="mt-4">
-            <DeleteButton />
-          </form>
+            </form>
+            <form action={deleteQuizWithId}>
+              <DeleteButton />
+            </form>
+          </div>
         </div>
 
         {/* Question Manager */}
