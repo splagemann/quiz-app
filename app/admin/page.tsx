@@ -4,6 +4,7 @@ import { getLocale } from 'next-intl/server';
 import { prisma } from "@/lib/prisma";
 import { LanguageSelector } from "@/app/components/LanguageSelector";
 import { DarkModeToggle } from "@/app/components/DarkModeToggle";
+import packageJson from "@/package.json";
 
 export const dynamic = 'force-dynamic';
 
@@ -28,7 +29,15 @@ export default async function AdminPage() {
       <div className="max-w-4xl mx-auto px-4">
         <div className="mb-4">
           <div className="flex justify-between items-center mb-4">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{t('quizManagement')}</h1>
+            <div className="flex items-baseline gap-3">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{t('quizManagement')}</h1>
+              <Link
+                href="/admin/changelog"
+                className="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+              >
+                v{packageJson.version}
+              </Link>
+            </div>
             <div className="flex items-center gap-4">
               <DarkModeToggle />
               <LanguageSelector />

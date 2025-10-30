@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useTranslations } from 'next-intl';
 
 export default function JoinPage() {
   const router = useRouter();
   const t = useTranslations('join');
+  const tQuiz = useTranslations('quiz');
   const [sessionCode, setSessionCode] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -58,6 +60,15 @@ export default function JoinPage() {
             {t('continue')}
           </button>
         </form>
+
+        <div className="mt-6 text-center">
+          <Link
+            href="/game"
+            className="text-gray-700 hover:text-gray-900 underline"
+          >
+            {tQuiz('backToQuizSelection')}
+          </Link>
+        </div>
       </div>
     </div>
   );

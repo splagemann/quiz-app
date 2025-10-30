@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { useTranslations } from 'next-intl';
 
 export default function JoinGamePage() {
   const params = useParams();
   const router = useRouter();
   const t = useTranslations('join');
+  const tQuiz = useTranslations('quiz');
   const sessionCode = (params.sessionCode as string)?.toUpperCase() || "";
 
   const [playerName, setPlayerName] = useState("");
@@ -96,6 +98,15 @@ export default function JoinGamePage() {
             {isJoining ? t('joining') : t('joinGame')}
           </button>
         </form>
+
+        <div className="mt-6 text-center">
+          <Link
+            href="/game"
+            className="text-gray-700 hover:text-gray-900 underline"
+          >
+            {tQuiz('backToQuizSelection')}
+          </Link>
+        </div>
       </div>
     </div>
   );
