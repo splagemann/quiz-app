@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import QRCode from "qrcode";
 import  type { GameEvent } from "@/lib/gameEvents";
 
@@ -33,7 +33,9 @@ type Quiz = {
 export default function MultiplayerHostPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const quizId = parseInt(params.quizId as string);
+  const existingSessionId = searchParams.get("sessionId");
 
   const [sessionCode, setSessionCode] = useState<string>("");
   const [sessionId, setSessionId] = useState<string>("");
@@ -50,6 +52,50 @@ export default function MultiplayerHostPage() {
 
   // Initialize game session
   useEffect(() => {
+    async function loadExistingSession(sid: string) {
+      try {
+        const response = await fetch(`/api/game/session/${sid}`);
+        if (!response.ok) {
+          setError("Session nicht gefunden");
+          return;
+        }
+
+        const session = await response.json();
+        setSessionCode(session.sessionCode);
+        setSessionId(session.id);
+        setQuiz(session.quiz);
+        setPlayers(session.players);
+
+        if (session.status === "waiting") {
+          setGameStatus("waiting");
+        } else if (session.status === "in_progress") {
+          setGameStatus("in_progress");
+          setCurrentQuestionIndex(session.currentQuestion ?? 0);
+        } else if (session.status === "finished") {
+          setGameStatus("finished");
+          const sorted = [...session.players].sort((a: any, b: any) => b.score - a.score);
+          setFinalScores(sorted.map((p: any) => ({
+            playerId: p.id,
+            playerName: p.playerName,
+            score: p.score
+          })));
+        }
+
+        // Generate QR code
+        const appPublicUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+        setPublicUrl(appPublicUrl);
+        const joinUrl = `${appPublicUrl}/game/join/${session.sessionCode}`;
+        const qrUrl = await QRCode.toDataURL(joinUrl, {
+          width: 300,
+          margin: 2,
+        });
+        setQrCodeUrl(qrUrl);
+      } catch (err) {
+        console.error("Error loading session:", err);
+        setError("Fehler beim Laden der Session");
+      }
+    }
+
     async function initSession() {
       try {
         const response = await fetch("/api/game/session", {
@@ -70,6 +116,9 @@ export default function MultiplayerHostPage() {
         setQuiz(data.quiz);
         setGameStatus("waiting");
 
+        // Add session ID to URL
+        router.replace(`/game/${quizId}/host?sessionId=${data.sessionId}`);
+
         // Generate QR code
         const appPublicUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
         setPublicUrl(appPublicUrl);
@@ -85,8 +134,12 @@ export default function MultiplayerHostPage() {
       }
     }
 
-    initSession();
-  }, [quizId]);
+    if (existingSessionId) {
+      loadExistingSession(existingSessionId);
+    } else {
+      initSession();
+    }
+  }, [quizId, existingSessionId, router]);
 
   // Connect to SSE for real-time updates
   useEffect(() => {
@@ -205,9 +258,34 @@ export default function MultiplayerHostPage() {
     }
   };
 
+  // Keyboard shortcuts for game master
+  useEffect(() => {
+    if (gameStatus !== "in_progress") return;
+
+    const handleKeyPress = (event: KeyboardEvent) => {
+      // Space bar or right arrow to reveal answer or go to next question
+      if (event.code === "Space" || event.code === "ArrowRight") {
+        event.preventDefault();
+
+        if (revealedAnswer !== null) {
+          // Answer is revealed, go to next question
+          nextQuestion();
+        } else {
+          // Reveal answer at any time
+          revealAnswer();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => {
+      window.removeEventListener("keydown", handleKeyPress);
+    };
+  }, [gameStatus, revealedAnswer, answeredPlayers.size, sessionId, currentQuestionIndex]);
+
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center px-4">
+      <div className="h-screen bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center px-4">
         <div className="bg-white rounded-lg shadow-2xl p-8 max-w-md text-center">
           <h1 className="text-2xl font-bold text-red-600 mb-4">Fehler</h1>
           <p className="text-gray-700 mb-6">{error}</p>
@@ -224,7 +302,7 @@ export default function MultiplayerHostPage() {
 
   if (gameStatus === "initializing" || !quiz) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
+      <div className="h-screen bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
         <div className="text-white text-2xl">Spiel wird vorbereitet...</div>
       </div>
     );
@@ -232,50 +310,52 @@ export default function MultiplayerHostPage() {
 
   if (gameStatus === "finished") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-500 to-blue-600 py-8 px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-lg shadow-2xl p-8">
+      <div className="h-screen bg-gradient-to-br from-purple-500 to-blue-600 p-4 flex flex-col">
+        <div className="w-full h-full overflow-y-auto">
+          <div className="bg-white rounded-lg shadow-2xl p-8 h-full flex flex-col">
             <h1 className="text-4xl font-bold text-gray-900 text-center mb-8">
               🏆 Spiel beendet!
             </h1>
 
-            <div className="space-y-4 mb-8">
-              {finalScores.map((player, index) => (
-                <div
-                  key={player.playerId}
-                  className={`p-6 rounded-lg flex items-center justify-between ${
-                    index === 0
-                      ? "bg-yellow-100 border-4 border-yellow-400"
-                      : index === 1
-                      ? "bg-gray-100 border-4 border-gray-400"
-                      : index === 2
-                      ? "bg-orange-100 border-4 border-orange-400"
-                      : "bg-gray-50 border-2 border-gray-300"
-                  }`}
-                >
-                  <div className="flex items-center">
-                    <div className="text-4xl font-bold mr-4 w-12">
-                      {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `${index + 1}.`}
-                    </div>
-                    <img
-                      src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${player.playerId}`}
-                      alt={player.playerName}
-                      className="w-16 h-16 rounded-full mr-4"
-                    />
-                    <div>
-                      <div className="text-2xl font-bold text-gray-900">
-                        {player.playerName}
+            <div className="flex-1 overflow-y-auto mb-8">
+              <div className="space-y-4">
+                {finalScores.map((player, index) => (
+                  <div
+                    key={player.playerId}
+                    className={`p-6 rounded-lg flex items-center justify-between ${
+                      index === 0
+                        ? "bg-yellow-100 border-4 border-yellow-400"
+                        : index === 1
+                        ? "bg-gray-100 border-4 border-gray-400"
+                        : index === 2
+                        ? "bg-orange-100 border-4 border-orange-400"
+                        : "bg-gray-50 border-2 border-gray-300"
+                    }`}
+                  >
+                    <div className="flex items-center">
+                      <div className="text-4xl font-bold mr-4 w-12">
+                        {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `${index + 1}.`}
+                      </div>
+                      <img
+                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${player.playerId}`}
+                        alt={player.playerName}
+                        className="w-16 h-16 rounded-full mr-4"
+                      />
+                      <div>
+                        <div className="text-2xl font-bold text-gray-900">
+                          {player.playerName}
+                        </div>
                       </div>
                     </div>
+                    <div className="text-3xl font-bold text-gray-900">
+                      {player.score} {player.score === 1 ? "Punkt" : "Punkte"}
+                    </div>
                   </div>
-                  <div className="text-3xl font-bold text-gray-900">
-                    {player.score} {player.score === 1 ? "Punkt" : "Punkte"}
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
 
-            <div className="flex gap-4 justify-center">
+            <div className="flex gap-4 justify-center flex-shrink-0">
               <button
                 onClick={() => router.push("/game")}
                 className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition font-bold"
@@ -297,9 +377,9 @@ export default function MultiplayerHostPage() {
 
   if (gameStatus === "waiting") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-500 to-blue-600 py-8 px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-lg shadow-2xl p-8">
+      <div className="h-screen bg-gradient-to-br from-purple-500 to-blue-600 p-4 flex flex-col">
+        <div className="w-full h-full overflow-y-auto">
+          <div className="bg-white rounded-lg shadow-2xl p-8 h-full flex flex-col">
             <h1 className="text-3xl font-bold text-gray-900 text-center mb-2">
               {quiz.title}
             </h1>
@@ -339,31 +419,35 @@ export default function MultiplayerHostPage() {
               </div>
             </div>
 
-            <div className="mb-8">
+            <div className="flex-1 mb-8 flex flex-col">
               <h2 className="text-xl font-bold text-gray-900 mb-4">
                 Spieler ({players.length})
               </h2>
               {players.length === 0 ? (
-                <p className="text-gray-700 text-center py-8">
-                  Noch keine Spieler beigetreten
-                </p>
+                <div className="flex-1 flex items-center justify-center">
+                  <p className="text-gray-700 text-center text-2xl">
+                    Noch keine Spieler beigetreten
+                  </p>
+                </div>
               ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {players.map((player) => (
-                    <div
-                      key={player.id}
-                      className="bg-blue-100 border-2 border-blue-300 rounded-lg p-4 text-center"
-                    >
-                      <img
-                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${player.id}`}
-                        alt={player.playerName}
-                        className="w-16 h-16 mx-auto mb-2 rounded-full"
-                      />
-                      <div className="font-bold text-gray-900">
-                        {player.playerName}
+                <div className="flex-1 overflow-y-auto">
+                  <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+                    {players.map((player) => (
+                      <div
+                        key={player.id}
+                        className="bg-blue-100 border-2 border-blue-300 rounded-lg p-4 text-center"
+                      >
+                        <img
+                          src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${player.id}`}
+                          alt={player.playerName}
+                          className="w-16 h-16 mx-auto mb-2 rounded-full"
+                        />
+                        <div className="font-bold text-gray-900 text-sm">
+                          {player.playerName}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -395,17 +479,42 @@ export default function MultiplayerHostPage() {
     <div className="h-screen bg-gradient-to-br from-purple-500 to-blue-600 flex flex-col p-4">
       {/* Header */}
       <div className="bg-white rounded-lg shadow-lg p-3 mb-3 flex-shrink-0">
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center gap-4">
           <div>
             <h1 className="text-lg font-bold text-gray-900">{quiz.title}</h1>
             <p className="text-sm text-gray-700">
               Frage {currentQuestionIndex + 1} von {quiz.questions.length}
             </p>
           </div>
-          <div className="text-right">
-            <div className="text-sm text-gray-700">
-              {answeredPlayers.size}/{players.length} geantwortet
+          <div className="flex items-center gap-3">
+            <div className="text-right">
+              <div className="text-sm text-gray-700">
+                {answeredPlayers.size}/{players.length} geantwortet
+              </div>
             </div>
+            {revealedAnswer !== null ? (
+              <button
+                onClick={nextQuestion}
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition font-bold shadow-lg whitespace-nowrap"
+              >
+                {currentQuestionIndex < quiz.questions.length - 1
+                  ? "Nächste Frage →"
+                  : "Ergebnisse"}
+              </button>
+            ) : (
+              <button
+                onClick={revealAnswer}
+                className={`px-6 py-2 rounded-lg transition font-bold shadow-lg whitespace-nowrap ${
+                  allAnswered
+                    ? "bg-green-600 text-white hover:bg-green-700"
+                    : answeredPlayers.size > 0
+                    ? "bg-orange-500 text-white hover:bg-orange-600"
+                    : "bg-gray-500 text-white hover:bg-gray-600"
+                }`}
+              >
+                Antwort aufdecken
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -436,7 +545,7 @@ export default function MultiplayerHostPage() {
         )}
 
         <div className={`${currentQuestion.answers.some(a => a.imageUrl) ? 'flex-1' : ''} ${
-          currentQuestion.answers.length === 2 ? "grid grid-cols-2 gap-4" :
+          currentQuestion.answers.length === 2 ? "grid grid-cols-1 sm:grid-cols-2 gap-4" :
           currentQuestion.answers.length === 4 ? "grid grid-cols-2 gap-4" :
           "grid grid-cols-2 gap-4"
         }`}>
@@ -445,20 +554,32 @@ export default function MultiplayerHostPage() {
             const isRevealed = revealedAnswer !== null;
             const hasImages = currentQuestion.answers.some(a => a.imageUrl);
 
+            // Color scheme for text answers
+            const colors = [
+              { name: 'Rot', bg: 'bg-red-100', border: 'border-red-500', text: 'text-red-900' },
+              { name: 'Blau', bg: 'bg-blue-100', border: 'border-blue-500', text: 'text-blue-900' },
+              { name: 'Grün', bg: 'bg-green-100', border: 'border-green-500', text: 'text-green-900' },
+              { name: 'Lila', bg: 'bg-purple-100', border: 'border-purple-500', text: 'text-purple-900' }
+            ];
+            const color = colors[index % colors.length];
+
+            let containerClass = `p-4 rounded-lg border-4 font-bold text-2xl relative flex flex-col ${hasImages ? 'h-full' : ''} `;
+            if (isRevealed && isCorrect) {
+              containerClass += "bg-green-100 border-green-500 text-green-900";
+            } else if (isRevealed) {
+              containerClass += "bg-gray-100 border-gray-300 text-gray-700";
+            } else {
+              containerClass += `${color.bg} ${color.border} ${color.text}`;
+            }
+
             return (
               <div
                 key={answer.id}
-                className={`p-4 rounded-lg border-4 font-bold text-2xl relative flex flex-col ${hasImages ? 'h-full' : ''} ${
-                  isRevealed && isCorrect
-                    ? "bg-green-100 border-green-500 text-green-900"
-                    : isRevealed
-                    ? "bg-gray-100 border-gray-300 text-gray-700"
-                    : "bg-blue-50 border-blue-300 text-gray-900"
-                }`}
+                className={containerClass}
               >
                 {answer.answerText && (
                   <div className="mb-2">
-                    {String.fromCharCode(65 + index)}. {answer.answerText}
+                    {answer.answerText}
                   </div>
                 )}
                 {answer.imageUrl && (
@@ -466,7 +587,7 @@ export default function MultiplayerHostPage() {
                     <img
                       src={answer.imageUrl}
                       alt="Antwortbild"
-                      className="absolute inset-0 w-full h-full object-cover rounded"
+                      className="absolute inset-0 w-full h-full object-contain rounded"
                     />
                   </div>
                 )}
@@ -479,31 +600,6 @@ export default function MultiplayerHostPage() {
             );
           })}
         </div>
-      </div>
-
-      {/* Controls */}
-      <div className="text-center flex-shrink-0">
-        {revealedAnswer !== null ? (
-          <button
-            onClick={nextQuestion}
-            className="bg-blue-600 text-white px-12 py-3 rounded-lg hover:bg-blue-700 transition font-bold text-xl shadow-lg"
-          >
-            {currentQuestionIndex < quiz.questions.length - 1
-              ? "Nächste Frage →"
-              : "Ergebnisse anzeigen"}
-          </button>
-        ) : allAnswered ? (
-          <div className="text-white text-xl font-bold">
-            Alle Spieler haben geantwortet! Antwort wird angezeigt...
-          </div>
-        ) : (
-          <button
-            onClick={revealAnswer}
-            className="bg-orange-500 text-white px-10 py-3 rounded-lg hover:bg-orange-600 transition font-bold text-xl shadow-lg"
-          >
-            Antwort jetzt aufdecken →
-          </button>
-        )}
       </div>
     </div>
   );

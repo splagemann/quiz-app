@@ -338,7 +338,7 @@ export default function PlayerGamePage() {
       </div>
 
       {/* Question */}
-      <div className="bg-white rounded-lg shadow-lg p-4 mb-3 flex-1 flex flex-col overflow-hidden">
+      <div className="bg-white rounded-lg shadow-lg p-4 mb-3 flex-1 flex flex-col overflow-y-auto min-h-0">
         {currentQuestion.title && (
           <div className="text-base font-medium text-gray-600 mb-2 text-center">
             {currentQuestion.title}
@@ -363,7 +363,7 @@ export default function PlayerGamePage() {
         )}
 
         <div className={`${currentQuestion.answers.some(a => a.imageUrl) ? 'flex-1' : ''} ${
-          currentQuestion.answers.length === 2 ? "grid grid-cols-2 gap-2" :
+          currentQuestion.answers.length === 2 ? "grid grid-cols-1 sm:grid-cols-2 gap-2" :
           currentQuestion.answers.length === 4 ? "grid grid-cols-2 gap-2" :
           "flex flex-col gap-2"
         }`}>
@@ -372,6 +372,15 @@ export default function PlayerGamePage() {
               const isRevealed = revealedAnswerId !== null;
               const isCorrectAnswer = answer.isCorrect;
               const hasImages = currentQuestion.answers.some(a => a.imageUrl);
+
+              // Color scheme for text answers
+              const colors = [
+                { name: 'Rot', bg: 'bg-red-100', border: 'border-red-500', text: 'text-red-900', hover: 'hover:border-red-500 hover:bg-red-50' },
+                { name: 'Blau', bg: 'bg-blue-100', border: 'border-blue-500', text: 'text-blue-900', hover: 'hover:border-blue-500 hover:bg-blue-50' },
+                { name: 'Grün', bg: 'bg-green-100', border: 'border-green-500', text: 'text-green-900', hover: 'hover:border-green-500 hover:bg-green-50' },
+                { name: 'Lila', bg: 'bg-purple-100', border: 'border-purple-500', text: 'text-purple-900', hover: 'hover:border-purple-500 hover:bg-purple-50' }
+              ];
+              const color = colors[index % colors.length];
 
               let buttonClass = `w-full text-left p-3 rounded-lg border-4 transition font-bold text-base relative flex flex-col ${hasImages ? 'h-full' : ''} `;
 
@@ -384,9 +393,9 @@ export default function PlayerGamePage() {
                   buttonClass += "bg-gray-100 border-gray-300 text-gray-700";
                 }
               } else if (isSelected) {
-                buttonClass += "bg-blue-100 border-blue-500 text-blue-900";
+                buttonClass += `${color.bg} ${color.border} ${color.text}`;
               } else {
-                buttonClass += "bg-white border-gray-300 text-gray-900 hover:border-green-500 hover:bg-green-50";
+                buttonClass += `bg-white ${color.border} text-gray-900 ${color.hover}`;
               }
 
               return (
@@ -398,7 +407,7 @@ export default function PlayerGamePage() {
                 >
                   {answer.answerText && (
                     <span className="mb-1">
-                      {String.fromCharCode(65 + index)}. {answer.answerText}
+                      {answer.answerText}
                     </span>
                   )}
                   {answer.imageUrl && (
@@ -406,7 +415,7 @@ export default function PlayerGamePage() {
                       <img
                         src={answer.imageUrl}
                         alt="Antwortbild"
-                        className="absolute inset-0 w-full h-full object-cover rounded"
+                        className="absolute inset-0 w-full h-full object-contain rounded"
                       />
                     </div>
                   )}
