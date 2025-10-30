@@ -84,6 +84,9 @@ describe('POST /api/locale', () => {
   });
 
   it('should return 500 on error', async () => {
+    // Suppress console.error for this test since we're testing error handling
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
     const request = new NextRequest('http://localhost:3000/api/locale', {
       method: 'POST',
       body: 'invalid json',
@@ -94,6 +97,9 @@ describe('POST /api/locale', () => {
 
     expect(response.status).toBe(500);
     expect(data).toEqual({ error: 'Failed to set locale' });
+    expect(consoleErrorSpy).toHaveBeenCalled();
+
+    consoleErrorSpy.mockRestore();
   });
 });
 
