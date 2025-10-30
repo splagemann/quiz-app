@@ -46,7 +46,7 @@ echo ""
 # If dry run, revert package.json and exit
 if [ "$DRY_RUN" = true ]; then
   echo -e "${YELLOW}DRY RUN MODE - No changes will be committed${NC}"
-  git checkout package.json
+  git checkout package.json package-lock.json
   exit 0
 fi
 
@@ -57,16 +57,16 @@ if [ "$CURRENT_BRANCH" != "main" ]; then
   read -p "Do you want to continue? (y/N) " -n 1 -r
   echo
   if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    git checkout package.json
+    git checkout package.json package-lock.json
     exit 1
   fi
 fi
 
 # Check for uncommitted changes
-if [ -n "$(git status --porcelain | grep -v '^??' | grep -v 'package.json' | grep -v 'CHANGELOG.md')" ]; then
+if [ -n "$(git status --porcelain | grep -v '^??' | grep -v 'package.json' | grep -v 'package-lock.json' | grep -v 'CHANGELOG.md')" ]; then
   echo -e "${RED}Error: You have uncommitted changes${NC}"
   echo "Please commit or stash your changes before creating a release"
-  git checkout package.json
+  git checkout package.json package-lock.json
   exit 1
 fi
 
@@ -94,7 +94,7 @@ if ! grep -q "## \[${NEW_VERSION}\]" CHANGELOG.md; then
   if [[ $REPLY =~ ^[Yy]$ ]]; then
     ${EDITOR:-nano} CHANGELOG.md
   else
-    git checkout package.json
+    git checkout package.json package-lock.json
     exit 1
   fi
 fi
@@ -113,13 +113,13 @@ echo ""
 read -p "Continue? (y/N) " -n 1 -r
 echo
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-  git checkout package.json
+  git checkout package.json package-lock.json
   exit 1
 fi
 
 # Commit version bump
 echo -e "${YELLOW}Creating commit...${NC}"
-git add package.json CHANGELOG.md
+git add package.json package-lock.json CHANGELOG.md
 git commit -m "chore: bump version to v${NEW_VERSION}"
 
 # Create annotated tag
