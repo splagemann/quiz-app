@@ -386,15 +386,6 @@ function PlayerGameContent() {
               const isCorrectAnswer = answer.isCorrect;
               const hasImages = currentQuestion.answers.some(a => a.imageUrl);
 
-              // Color scheme for text answers
-              const colors = [
-                { name: 'Rot', bg: 'bg-red-100', border: 'border-red-500', text: 'text-red-900', hover: 'hover:border-red-500 hover:bg-red-50' },
-                { name: 'Blau', bg: 'bg-blue-100', border: 'border-blue-500', text: 'text-blue-900', hover: 'hover:border-blue-500 hover:bg-blue-50' },
-                { name: 'Grün', bg: 'bg-green-100', border: 'border-green-500', text: 'text-green-900', hover: 'hover:border-green-500 hover:bg-green-50' },
-                { name: 'Lila', bg: 'bg-purple-100', border: 'border-purple-500', text: 'text-purple-900', hover: 'hover:border-purple-500 hover:bg-purple-50' }
-              ];
-              const color = colors[index % colors.length];
-
               let buttonClass = `w-full text-left p-3 rounded-lg border-4 transition font-bold text-base relative flex flex-col ${hasImages ? 'h-full' : ''} `;
 
               if (isRevealed) {
@@ -406,9 +397,9 @@ function PlayerGameContent() {
                   buttonClass += "bg-gray-100 border-gray-300 text-gray-700";
                 }
               } else if (isSelected) {
-                buttonClass += `${color.bg} ${color.border} ${color.text}`;
+                buttonClass += "bg-blue-50 border-blue-500 text-blue-900";
               } else {
-                buttonClass += `bg-white ${color.border} text-gray-900 ${color.hover}`;
+                buttonClass += "bg-white border-gray-300 text-gray-900 hover:border-blue-500 hover:bg-blue-50";
               }
 
               return (
