@@ -37,7 +37,25 @@ export default async function CreateQuizPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 transition-colors">
       <div className="max-w-4xl mx-auto px-4">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{t('createNewQuiz')}</h1>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/admin"
+              className="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+              aria-label={t('backToManagement')}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+                className="w-5 h-5 text-gray-700 dark:text-gray-200"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+              </svg>
+            </Link>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{t('createNewQuiz')}</h1>
+          </div>
           <div className="flex items-center gap-4">
             <DarkModeToggle />
             <LanguageSelector />
