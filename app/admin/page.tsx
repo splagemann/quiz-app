@@ -33,7 +33,7 @@ export default async function AdminPage() {
             <LanguageSelector />
             <Link
               href="/admin/create"
-              className="bg-blue-600 dark:bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition"
+              className="flex items-center bg-blue-600 dark:bg-blue-500 text-white px-6 h-10 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition"
             >
               {t('createNewQuiz')}
             </Link>

@@ -5,6 +5,8 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import QuestionManager from "./QuestionManager";
 import DeleteButton from "./DeleteButton";
+import { LanguageSelector } from "@/app/components/LanguageSelector";
+import { DarkModeToggle } from "@/app/components/DarkModeToggle";
 
 export async function generateMetadata({
   params,
@@ -43,7 +45,7 @@ async function updateQuiz(quizId: number, formData: FormData) {
     },
   });
 
-  redirect(`/admin/${quizId}/edit`);
+  redirect(`/admin`);
 }
 
 async function deleteQuiz(quizId: number) {
@@ -95,7 +97,31 @@ export default async function EditQuizPage({
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 transition-colors">
       <div className="max-w-4xl mx-auto px-4">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">{t('editQuiz')}</h1>
+        <div className="flex justify-between items-center mb-8">
+          <div className="flex items-center gap-4">
+            <Link
+              href="/admin"
+              className="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+              aria-label={t('backToManagement')}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+                className="w-5 h-5 text-gray-700 dark:text-gray-200"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+              </svg>
+            </Link>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{t('editQuiz')}</h1>
+          </div>
+          <div className="flex items-center gap-4">
+            <DarkModeToggle />
+            <LanguageSelector />
+          </div>
+        </div>
 
         {/* Quiz Details Form */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700/50 p-6 mb-8">
@@ -159,16 +185,10 @@ export default async function EditQuizPage({
               >
                 {t('updateQuiz')}
               </button>
-              <Link
-                href="/admin"
-                className="bg-gray-800 dark:bg-gray-700 text-white px-6 py-2 rounded-lg hover:bg-gray-900 dark:hover:bg-gray-600 transition"
-              >
-                {t('backToManagement')}
-              </Link>
             </div>
           </form>
 
-          <form action={deleteQuizWithId} className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <form action={deleteQuizWithId} className="mt-4">
             <DeleteButton />
           </form>
         </div>

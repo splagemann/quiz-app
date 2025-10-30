@@ -236,12 +236,12 @@ export default function QuestionManager({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700/50 p-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold text-gray-900">{t('questionsCount', { count: initialQuestions.length })}</h2>
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{t('questionsCount', { count: initialQuestions.length })}</h2>
         <button
           onClick={() => setIsAddingQuestion(true)}
-          className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+          className="bg-green-600 dark:bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-700 dark:hover:bg-green-600 transition"
         >
           {tQuestion('addQuestion')}
         </button>
@@ -251,44 +251,44 @@ export default function QuestionManager({
       {isAddingQuestion && (
         <form
           action={handleAddQuestion}
-          className="mb-6 p-4 border-2 border-green-200 rounded-lg bg-green-50"
+          className="mb-6 p-4 border-2 border-green-200 dark:border-green-700 rounded-lg bg-green-50 dark:bg-green-900/20"
         >
-          <h3 className="font-semibold mb-4 text-gray-900">{t('newQuestion')}</h3>
+          <h3 className="font-semibold mb-4 text-gray-900 dark:text-gray-100">{t('newQuestion')}</h3>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-800 mb-2">
+            <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
               {t('titleOptional')}
             </label>
             <input
               type="text"
               name="title"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
               placeholder={t('titlePlaceholder')}
             />
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-800 mb-2">
+            <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
               {t('questionTextRequired')}
             </label>
             <input
               type="text"
               name="questionText"
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
             />
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-800 mb-2">
+            <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
               {tQuestion('description')}
             </label>
             <textarea
               name="description"
               rows={3}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
               placeholder={t('descriptionPlaceholder')}
             />
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-800 mb-2">
+            <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
               {t('imageOptional')}
             </label>
             <div className="flex gap-2">
@@ -301,15 +301,15 @@ export default function QuestionManager({
                     await handleImageUpload(file, false);
                   }
                 }}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900"
+                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-700"
                 disabled={uploadingImage}
               />
               {uploadingImage && (
-                <span className="text-gray-600 py-2">{t('uploading')}</span>
+                <span className="text-gray-600 dark:text-gray-400 py-2">{t('uploading')}</span>
               )}
             </div>
             {addQuestionImageUrl && (
-              <p className="text-sm text-gray-600 mt-2">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
                 {t('imageUploaded', { url: addQuestionImageUrl })}
               </p>
             )}
@@ -317,7 +317,7 @@ export default function QuestionManager({
 
           <div className="mb-4">
             <div className="flex justify-between items-center mb-2">
-              <label className="block text-sm font-medium text-gray-800">
+              <label className="block text-sm font-medium text-gray-800 dark:text-gray-200">
                 {t('answersRequired')}
               </label>
               <div className="flex gap-2">
@@ -325,7 +325,7 @@ export default function QuestionManager({
                   <button
                     type="button"
                     onClick={() => setNewAnswers([...newAnswers, { text: "", imageUrl: "", isCorrect: false }])}
-                    className="text-sm bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition"
+                    className="text-sm bg-green-500 dark:bg-green-600 text-white px-3 py-1 rounded hover:bg-green-600 dark:hover:bg-green-700 transition"
                   >
                     {t('addAnswerButton')}
                   </button>
@@ -333,7 +333,7 @@ export default function QuestionManager({
               </div>
             </div>
             {newAnswers.map((answer, i) => (
-              <div key={i} className="mb-3 p-3 border border-gray-300 rounded-lg bg-white">
+              <div key={i} className="mb-3 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700">
                 <div className="flex items-center gap-2 mb-2">
                   <input
                     type="radio"
@@ -355,7 +355,7 @@ export default function QuestionManager({
                       setNewAnswers(updated);
                     }}
                     placeholder={t('answerPlaceholder', { number: i + 1 })}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
+                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                   />
                   {newAnswers.length > 2 && (
                     <button
@@ -368,7 +368,7 @@ export default function QuestionManager({
                         }
                         setNewAnswers(updated);
                       }}
-                      className="text-red-600 hover:text-red-800 px-2"
+                      className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 px-2"
                     >
                       ✕
                     </button>
@@ -389,11 +389,11 @@ export default function QuestionManager({
                         }
                       }
                     }}
-                    className="text-sm px-2 py-1 border border-gray-300 rounded text-gray-900"
+                    className="text-sm px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-gray-100 dark:bg-gray-600"
                   />
                   {answer.imageUrl && (
                     <div className="mt-2">
-                      <img src={answer.imageUrl} alt={t('answerImageAlt')} className="max-w-xs rounded border border-gray-300" />
+                      <img src={answer.imageUrl} alt={t('answerImageAlt')} className="max-w-xs rounded border border-gray-300 dark:border-gray-600" />
                     </div>
                   )}
                 </div>
@@ -404,7 +404,7 @@ export default function QuestionManager({
           <div className="flex gap-2">
             <button
               type="submit"
-              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+              className="bg-green-600 dark:bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-700 dark:hover:bg-green-600 transition"
             >
               {t('saveQuestion')}
             </button>
@@ -418,7 +418,7 @@ export default function QuestionManager({
                 ]);
                 setAddQuestionImageUrl("");
               }}
-              className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
+              className="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition"
             >
               {tCommon('cancel')}
             </button>
@@ -428,32 +428,32 @@ export default function QuestionManager({
 
       {/* Questions List */}
       {initialQuestions.length === 0 ? (
-        <p className="text-gray-700 text-center py-8">
+        <p className="text-gray-700 dark:text-gray-300 text-center py-8">
           {t('noQuestions')}
         </p>
       ) : (
         <div className="space-y-4">
           {initialQuestions.map((question, index) => (
-            <div key={question.id} className="border rounded-lg p-4">
+            <div key={question.id} className="border border-gray-300 dark:border-gray-600 rounded-lg p-4 bg-white dark:bg-gray-700">
               {editingQuestionId === question.id ? (
                 <form
                   action={(formData) => handleUpdateQuestion(question.id, formData)}
                   className="space-y-4"
                 >
                   <div>
-                    <label className="block text-sm font-medium text-gray-800 mb-2">
+                    <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
                       {t('titleOptional')}
                     </label>
                     <input
                       type="text"
                       name="title"
                       defaultValue={question.title || ""}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                       placeholder={t('titlePlaceholder')}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-800 mb-2">
+                    <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
                       {t('questionTextRequired')}
                     </label>
                     <input
@@ -461,23 +461,23 @@ export default function QuestionManager({
                       name="questionText"
                       defaultValue={question.questionText}
                       required
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-800 mb-2">
+                    <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
                       {tQuestion('description')}
                     </label>
                     <textarea
                       name="description"
                       defaultValue={question.description || ""}
                       rows={3}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                       placeholder={t('descriptionPlaceholder')}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-800 mb-2">
+                    <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
                       {t('imageOptional')}
                     </label>
                     <div className="flex gap-2">
@@ -490,15 +490,15 @@ export default function QuestionManager({
                             await handleImageUpload(file, true);
                           }
                         }}
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                        className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-600"
                         disabled={uploadingImage}
                       />
                       {uploadingImage && (
-                        <span className="text-gray-600 py-2">{t('uploading')}</span>
+                        <span className="text-gray-600 dark:text-gray-400 py-2">{t('uploading')}</span>
                       )}
                     </div>
                     {(editQuestionImageUrl || question.imageUrl) && (
-                      <p className="text-sm text-gray-600 mt-2">
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
                         {t('currentImage', { url: editQuestionImageUrl || question.imageUrl })}
                       </p>
                     )}
@@ -506,7 +506,7 @@ export default function QuestionManager({
 
                   <div>
                     <div className="flex justify-between items-center mb-2">
-                      <label className="block text-sm font-medium text-gray-800">
+                      <label className="block text-sm font-medium text-gray-800 dark:text-gray-200">
                         {t('answersRequired')}
                       </label>
                       <div className="flex gap-2">
@@ -520,7 +520,7 @@ export default function QuestionManager({
                               isCorrect: false,
                               orderIndex: editAnswers.length
                             }])}
-                            className="text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition"
+                            className="text-sm bg-blue-500 dark:bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-600 dark:hover:bg-blue-700 transition"
                           >
                             {t('addAnswerButton')}
                           </button>
@@ -528,7 +528,7 @@ export default function QuestionManager({
                       </div>
                     </div>
                     {editAnswers.map((answer, i) => (
-                      <div key={answer.id} className="mb-3 p-3 border border-gray-300 rounded-lg bg-white">
+                      <div key={answer.id} className="mb-3 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-600">
                         <div className="flex items-center gap-2 mb-2">
                           <input
                             type="radio"
@@ -550,7 +550,7 @@ export default function QuestionManager({
                               setEditAnswers(updated);
                             }}
                             placeholder={t('answerPlaceholder', { number: i + 1 })}
-                            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
+                            className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-500 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                           />
                           {editAnswers.length > 2 && (
                             <button
@@ -563,7 +563,7 @@ export default function QuestionManager({
                                 }
                                 setEditAnswers(updated);
                               }}
-                              className="text-red-600 hover:text-red-800 px-2"
+                              className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 px-2"
                             >
                               ✕
                             </button>
@@ -584,11 +584,11 @@ export default function QuestionManager({
                                 }
                               }
                             }}
-                            className="text-sm px-2 py-1 border border-gray-300 rounded text-gray-900"
+                            className="text-sm px-2 py-1 border border-gray-300 dark:border-gray-500 rounded text-gray-900 dark:text-gray-100 dark:bg-gray-500"
                           />
                           {answer.imageUrl && (
                             <div className="mt-2">
-                              <img src={answer.imageUrl} alt={t('answerImageAlt')} className="max-w-xs rounded border border-gray-300" />
+                              <img src={answer.imageUrl} alt={t('answerImageAlt')} className="max-w-xs rounded border border-gray-300 dark:border-gray-500" />
                             </div>
                           )}
                         </div>
@@ -599,7 +599,7 @@ export default function QuestionManager({
                   <div className="flex gap-2">
                     <button
                       type="submit"
-                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+                      className="bg-blue-600 dark:bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition"
                     >
                       {tCommon('save')}
                     </button>
@@ -610,7 +610,7 @@ export default function QuestionManager({
                         setEditAnswers([]);
                         setEditQuestionImageUrl("");
                       }}
-                      className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
+                      className="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition"
                     >
                       {tCommon('cancel')}
                     </button>
@@ -621,15 +621,15 @@ export default function QuestionManager({
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex-1">
                       {question.title && (
-                        <div className="text-sm font-medium text-gray-600 mb-1">
+                        <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
                           {question.title}
                         </div>
                       )}
-                      <h3 className="font-semibold text-lg text-gray-900">
+                      <h3 className="font-semibold text-lg text-gray-900 dark:text-gray-100">
                         {index + 1}. {question.questionText}
                       </h3>
                       {question.description && (
-                        <p className="text-sm text-gray-700 mt-2">
+                        <p className="text-sm text-gray-700 dark:text-gray-300 mt-2">
                           {question.description}
                         </p>
                       )}
@@ -637,7 +637,7 @@ export default function QuestionManager({
                         <img
                           src={question.imageUrl}
                           alt={t('questionImageAlt')}
-                          className="mt-3 max-w-md rounded-lg border border-gray-300"
+                          className="mt-3 max-w-md rounded-lg border border-gray-300 dark:border-gray-600"
                         />
                       )}
                     </div>
@@ -647,13 +647,13 @@ export default function QuestionManager({
                           setEditingQuestionId(question.id);
                           setEditAnswers(question.answers);
                         }}
-                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm font-medium"
                       >
                         {tCommon('edit')}
                       </button>
                       <button
                         onClick={() => handleDeleteQuestion(question.id)}
-                        className="text-red-600 hover:text-red-800 text-sm font-medium"
+                        className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm font-medium"
                       >
                         {tCommon('delete')}
                       </button>
@@ -665,15 +665,15 @@ export default function QuestionManager({
                         key={answer.id}
                         className={`px-3 py-2 rounded ${
                           answer.isCorrect
-                            ? "bg-green-100 border border-green-300 text-green-900"
-                            : "bg-gray-100 border border-gray-300 text-gray-900"
+                            ? "bg-green-100 dark:bg-green-900/30 border border-green-300 dark:border-green-700 text-green-900 dark:text-green-100"
+                            : "bg-gray-100 dark:bg-gray-600 border border-gray-300 dark:border-gray-500 text-gray-900 dark:text-gray-100"
                         }`}
                       >
                         <div className="flex items-start gap-3">
                           <div className="flex-1">
                             {String.fromCharCode(65 + i)}. {answer.answerText}
                             {answer.isCorrect && (
-                              <span className="ml-2 text-green-700 font-semibold">{t('correctMark')}</span>
+                              <span className="ml-2 text-green-700 dark:text-green-400 font-semibold">{t('correctMark')}</span>
                             )}
                           </div>
                         </div>
@@ -681,7 +681,7 @@ export default function QuestionManager({
                           <img
                             src={answer.imageUrl}
                             alt={t('answerImageAlt')}
-                            className="mt-2 max-w-xs rounded border border-gray-300"
+                            className="mt-2 max-w-xs rounded border border-gray-300 dark:border-gray-500"
                           />
                         )}
                       </div>
