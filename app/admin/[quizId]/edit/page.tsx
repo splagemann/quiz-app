@@ -1,4 +1,6 @@
 import { notFound, redirect } from "next/navigation";
+import { getTranslations } from 'next-intl/server';
+import Link from "next/link";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import QuestionManager from "./QuestionManager";
@@ -10,13 +12,14 @@ export async function generateMetadata({
   params: Promise<{ quizId: string }>;
 }): Promise<Metadata> {
   const { quizId } = await params;
+  const t = await getTranslations('metadata');
   const quiz = await prisma.quiz.findUnique({
     where: { id: parseInt(quizId) },
     select: { title: true },
   });
 
   return {
-    title: quiz ? `${quiz.title} bearbeiten - Quiz App` : "Quiz App",
+    title: quiz ? `${quiz.title} ${t('editQuiz')} - Quiz App` : "Quiz App",
   };
 }
 
@@ -25,6 +28,7 @@ async function updateQuiz(quizId: number, formData: FormData) {
 
   const title = formData.get("title") as string;
   const description = formData.get("description") as string;
+  const language = (formData.get("language") as string) || "en";
 
   if (!title) {
     return;
@@ -35,6 +39,7 @@ async function updateQuiz(quizId: number, formData: FormData) {
     data: {
       title,
       description: description || null,
+      language,
     },
   });
 
@@ -58,6 +63,9 @@ export default async function EditQuizPage({
 }) {
   const { quizId } = await params;
   const quizIdNum = parseInt(quizId);
+
+  const t = await getTranslations('admin');
+  const tCommon = await getTranslations('common');
 
   if (isNaN(quizIdNum)) {
     notFound();
@@ -87,18 +95,18 @@ export default async function EditQuizPage({
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Quiz bearbeiten</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">{t('editQuiz')}</h1>
 
         {/* Quiz Details Form */}
         <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-gray-900">Quiz-Details</h2>
+          <h2 className="text-xl font-semibold mb-4 text-gray-900">{t('quizDetails')}</h2>
           <form action={updateQuizWithId}>
             <div className="mb-4">
               <label
                 htmlFor="title"
                 className="block text-sm font-medium text-gray-800 mb-2"
               >
-                Quiz-Titel *
+                {t('quizTitleRequired')}
               </label>
               <input
                 type="text"
@@ -115,7 +123,7 @@ export default async function EditQuizPage({
                 htmlFor="description"
                 className="block text-sm font-medium text-gray-800 mb-2"
               >
-                Beschreibung
+                {t('quizDescription')}
               </label>
               <textarea
                 id="description"
@@ -126,19 +134,37 @@ export default async function EditQuizPage({
               />
             </div>
 
+            <div className="mb-4">
+              <label
+                htmlFor="language"
+                className="block text-sm font-medium text-gray-800 mb-2"
+              >
+                {t('language')}
+              </label>
+              <select
+                id="language"
+                name="language"
+                defaultValue={quiz.language}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+              >
+                <option value="en">{t('languageEn')}</option>
+                <option value="de">{t('languageDe')}</option>
+              </select>
+            </div>
+
             <div className="flex gap-4">
               <button
                 type="submit"
                 className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
               >
-                Quiz aktualisieren
+                {t('updateQuiz')}
               </button>
-              <a
+              <Link
                 href="/admin"
                 className="bg-gray-800 text-white px-6 py-2 rounded-lg hover:bg-gray-900 transition"
               >
-                Zurück zur Verwaltung
-              </a>
+                {t('backToManagement')}
+              </Link>
             </div>
           </form>
 

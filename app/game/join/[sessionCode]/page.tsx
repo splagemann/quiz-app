@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useTranslations } from 'next-intl';
 
 export default function JoinGamePage() {
   const params = useParams();
   const router = useRouter();
+  const t = useTranslations('join');
   const sessionCode = (params.sessionCode as string)?.toUpperCase() || "";
 
   const [playerName, setPlayerName] = useState("");
@@ -29,7 +31,7 @@ export default function JoinGamePage() {
 
       if (!response.ok) {
         const data = await response.json();
-        setError(data.error || "Fehler beim Beitreten");
+        setError(data.error || t('errorJoining'));
         setIsJoining(false);
         return;
       }
@@ -39,7 +41,7 @@ export default function JoinGamePage() {
       router.push(`/game/play/${data.sessionId}?playerId=${data.playerId}`);
     } catch (err) {
       console.error("Error joining game:", err);
-      setError("Netzwerkfehler beim Beitreten");
+      setError(t('networkError'));
       setIsJoining(false);
     }
   };
@@ -48,10 +50,10 @@ export default function JoinGamePage() {
     <div className="min-h-screen bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center px-4">
       <div className="bg-white rounded-lg shadow-2xl p-8 max-w-md w-full">
         <h1 className="text-3xl font-bold text-gray-900 text-center mb-2">
-          Quiz beitreten
+          {t('title')}
         </h1>
         <p className="text-gray-700 text-center mb-8">
-          Spiel-Code: <span className="font-bold text-2xl">{sessionCode}</span>
+          {t('gameCode')}: <span className="font-bold text-2xl">{sessionCode}</span>
         </p>
 
         <form onSubmit={handleJoin} className="space-y-6">
@@ -60,7 +62,7 @@ export default function JoinGamePage() {
               htmlFor="playerName"
               className="block text-sm font-medium text-gray-800 mb-2"
             >
-              Dein Name
+              {t('yourName')}
             </label>
             <input
               type="text"
@@ -70,7 +72,7 @@ export default function JoinGamePage() {
               required
               minLength={2}
               maxLength={20}
-              placeholder="z.B. Max"
+              placeholder={t('playerNamePlaceholder')}
               className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 text-lg"
               disabled={isJoining}
             />
@@ -91,7 +93,7 @@ export default function JoinGamePage() {
                 : "bg-green-600 text-white hover:bg-green-700 shadow-lg"
             }`}
           >
-            {isJoining ? "Trete bei..." : "Spiel beitreten"}
+            {isJoining ? t('joining') : t('joinGame')}
           </button>
         </form>
       </div>

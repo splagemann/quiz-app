@@ -1,8 +1,12 @@
 "use client";
 
+import { useTranslations } from 'next-intl';
+
 export default function DeleteButton() {
+  const t = useTranslations('admin');
+
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!confirm("Bist du sicher, dass du dieses Quiz löschen möchtest? Dies kann nicht rückgängig gemacht werden.")) {
+    if (!confirm(t('deleteConfirm'))) {
       e.preventDefault();
     }
   };
@@ -13,7 +17,7 @@ export default function DeleteButton() {
       className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition"
       onClick={handleClick}
     >
-      Quiz löschen
+      {t('deleteQuiz')}
     </button>
   );
 }

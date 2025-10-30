@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { NextIntlClientProvider, useTranslations } from "next-intl";
 
 type Answer = {
   id: number;
@@ -28,7 +29,16 @@ type Quiz = {
   questions: Question[];
 };
 
-export default function QuizPlayer({ quiz }: { quiz: Quiz }) {
+type QuizPlayerProps = {
+  quiz: Quiz;
+  locale: string;
+  messages: any;
+};
+
+function QuizPlayerContent({ quiz }: { quiz: Quiz }) {
+  const tSolo = useTranslations('solo');
+  const tMultiplayer = useTranslations('multiplayer');
+  const tQuiz = useTranslations('quiz');
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswerId, setSelectedAnswerId] = useState<number | null>(null);
   const [score, setScore] = useState(0);
@@ -74,13 +84,13 @@ export default function QuizPlayer({ quiz }: { quiz: Quiz }) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center px-4">
         <div className="bg-white rounded-lg shadow-2xl p-8 max-w-md w-full text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Quiz abgeschlossen!</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">{tSolo('quizCompleted')}</h1>
           <div className="my-8">
             <div className="text-6xl font-bold text-blue-600 mb-2">
               {score}/{quiz.questions.length}
             </div>
             <div className="text-xl text-gray-800 font-medium">
-              {percentage}% Richtig
+              {percentage}% {tSolo('correctPercentage')}
             </div>
           </div>
           <div className="space-y-3">
@@ -88,19 +98,19 @@ export default function QuizPlayer({ quiz }: { quiz: Quiz }) {
               onClick={handleRestart}
               className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-medium"
             >
-              Nochmal versuchen
+              {tSolo('tryAgain')}
             </button>
             <Link
               href="/game"
               className="block w-full bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition font-medium"
             >
-              Anderes Quiz wählen
+              {tSolo('selectAnotherQuiz')}
             </Link>
             <Link
               href="/host"
               className="block text-blue-600 hover:text-blue-800 underline mt-4"
             >
-              Zurück zur Startseite
+              {tQuiz('backToHome')}
             </Link>
           </div>
         </div>
@@ -116,12 +126,12 @@ export default function QuizPlayer({ quiz }: { quiz: Quiz }) {
           <div>
             <h1 className="text-base font-bold text-gray-900">{quiz.title}</h1>
             <p className="text-xs text-gray-700">
-              Frage {currentQuestionIndex + 1} von {quiz.questions.length}
+              {tMultiplayer('questionOf', { current: currentQuestionIndex + 1, total: quiz.questions.length })}
             </p>
           </div>
           <div className="text-right">
             <div className="text-xl font-bold text-blue-600">{score}</div>
-            <div className="text-xs text-gray-700">Punkte</div>
+            <div className="text-xs text-gray-700">{tSolo('points')}</div>
           </div>
         </div>
         {/* Progress Bar */}
@@ -154,7 +164,7 @@ export default function QuizPlayer({ quiz }: { quiz: Quiz }) {
           <div className="flex justify-center mb-3 flex-1">
             <img
               src={currentQuestion.imageUrl}
-              alt="Fragenbild"
+              alt={tSolo('questionImage')}
               className="max-h-64 object-contain rounded-lg border-2 border-gray-300"
             />
           </div>
@@ -198,7 +208,7 @@ export default function QuizPlayer({ quiz }: { quiz: Quiz }) {
                     <div className="flex-1 relative min-h-[120px]">
                       <img
                         src={answer.imageUrl}
-                        alt="Antwortbild"
+                        alt={tSolo('answerImage')}
                         className="absolute inset-0 w-full h-full object-cover rounded"
                       />
                     </div>
@@ -226,10 +236,18 @@ export default function QuizPlayer({ quiz }: { quiz: Quiz }) {
             onClick={handleNext}
             className="bg-white text-blue-600 px-8 py-3 rounded-lg hover:bg-gray-100 transition font-bold text-base shadow-lg"
           >
-            {isLastQuestion ? "Ergebnis anzeigen" : "Nächste Frage →"}
+            {isLastQuestion ? tMultiplayer('results') : tMultiplayer('nextQuestionArrow')}
           </button>
         </div>
       )}
     </div>
+  );
+}
+
+export default function QuizPlayer({ quiz, locale, messages }: QuizPlayerProps) {
+  return (
+    <NextIntlClientProvider locale={locale} messages={messages} timeZone="UTC">
+      <QuizPlayerContent quiz={quiz} />
+    </NextIntlClientProvider>
   );
 }

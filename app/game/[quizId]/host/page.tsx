@@ -2,8 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { NextIntlClientProvider, useTranslations } from "next-intl";
 import QRCode from "qrcode";
 import  type { GameEvent } from "@/lib/gameEvents";
+
+// Import translation files
+import enMessages from "@/locales/en.json";
+import deMessages from "@/locales/de.json";
+
+const messages = {
+  en: enMessages,
+  de: deMessages,
+};
 
 type Player = {
   id: string;
@@ -15,6 +25,7 @@ type Player = {
 type Quiz = {
   id: number;
   title: string;
+  language?: string | null;
   questions: Array<{
     id: number;
     title?: string | null;
@@ -30,7 +41,9 @@ type Quiz = {
   }>;
 };
 
-export default function MultiplayerHostPage() {
+function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) => void }) {
+  const tMultiplayer = useTranslations('multiplayer');
+  const tCommon = useTranslations('common');
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -56,7 +69,7 @@ export default function MultiplayerHostPage() {
       try {
         const response = await fetch(`/api/game/session/${sid}`);
         if (!response.ok) {
-          setError("Session nicht gefunden");
+          setError(tCommon('error'));
           return;
         }
 
@@ -65,6 +78,11 @@ export default function MultiplayerHostPage() {
         setSessionId(session.id);
         setQuiz(session.quiz);
         setPlayers(session.players);
+
+        // Notify parent about quiz language
+        if (onQuizLoaded && session.quiz?.language) {
+          onQuizLoaded(session.quiz.language);
+        }
 
         if (session.status === "waiting") {
           setGameStatus("waiting");
@@ -92,7 +110,7 @@ export default function MultiplayerHostPage() {
         setQrCodeUrl(qrUrl);
       } catch (err) {
         console.error("Error loading session:", err);
-        setError("Fehler beim Laden der Session");
+        setError(tCommon('error'));
       }
     }
 
@@ -106,7 +124,7 @@ export default function MultiplayerHostPage() {
 
         if (!response.ok) {
           const data = await response.json();
-          setError(data.error || "Fehler beim Erstellen der Session");
+          setError(data.error || tCommon('error'));
           return;
         }
 
@@ -115,6 +133,11 @@ export default function MultiplayerHostPage() {
         setSessionId(data.sessionId);
         setQuiz(data.quiz);
         setGameStatus("waiting");
+
+        // Notify parent about quiz language
+        if (onQuizLoaded && data.quiz?.language) {
+          onQuizLoaded(data.quiz.language);
+        }
 
         // Add session ID to URL
         router.replace(`/game/${quizId}/host?sessionId=${data.sessionId}`);
@@ -130,7 +153,7 @@ export default function MultiplayerHostPage() {
         setQrCodeUrl(qrUrl);
       } catch (err) {
         console.error("Error initializing session:", err);
-        setError("Netzwerkfehler beim Erstellen der Session");
+        setError(tCommon('error'));
       }
     }
 
@@ -139,7 +162,7 @@ export default function MultiplayerHostPage() {
     } else {
       initSession();
     }
-  }, [quizId, existingSessionId, router]);
+  }, [quizId, existingSessionId, router, tCommon]);
 
   // Connect to SSE for real-time updates
   useEffect(() => {
@@ -199,7 +222,7 @@ export default function MultiplayerHostPage() {
 
       if (!response.ok) {
         const data = await response.json();
-        alert(data.error || "Fehler beim Starten des Spiels");
+        alert(data.error || tCommon('error'));
         return;
       }
 
@@ -209,7 +232,7 @@ export default function MultiplayerHostPage() {
       setRevealedAnswer(null);
     } catch (err) {
       console.error("Error starting game:", err);
-      alert("Netzwerkfehler beim Starten des Spiels");
+      alert(tCommon('error'));
     }
   };
 
@@ -221,7 +244,7 @@ export default function MultiplayerHostPage() {
 
       if (!response.ok) {
         const data = await response.json();
-        alert(data.error || "Fehler beim Wechseln zur nächsten Frage");
+        alert(data.error || tCommon('error'));
         return;
       }
 
@@ -237,7 +260,7 @@ export default function MultiplayerHostPage() {
       }
     } catch (err) {
       console.error("Error moving to next question:", err);
-      alert("Netzwerkfehler");
+      alert(tCommon('error'));
     }
   };
 
@@ -249,12 +272,12 @@ export default function MultiplayerHostPage() {
 
       if (!response.ok) {
         const data = await response.json();
-        alert(data.error || "Fehler beim Aufdecken der Antwort");
+        alert(data.error || tCommon('error'));
         return;
       }
     } catch (err) {
       console.error("Error revealing answer:", err);
-      alert("Netzwerkfehler");
+      alert(tCommon('error'));
     }
   };
 
@@ -287,13 +310,13 @@ export default function MultiplayerHostPage() {
     return (
       <div className="h-screen bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center px-4">
         <div className="bg-white rounded-lg shadow-2xl p-8 max-w-md text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">Fehler</h1>
+          <h1 className="text-2xl font-bold text-red-600 mb-4">{tCommon('error')}</h1>
           <p className="text-gray-700 mb-6">{error}</p>
           <button
             onClick={() => router.back()}
             className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
           >
-            Zurück
+            {tCommon('back')}
           </button>
         </div>
       </div>
@@ -303,7 +326,7 @@ export default function MultiplayerHostPage() {
   if (gameStatus === "initializing" || !quiz) {
     return (
       <div className="h-screen bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
-        <div className="text-white text-2xl">Spiel wird vorbereitet...</div>
+        <div className="text-white text-2xl">{tCommon('loading')}</div>
       </div>
     );
   }
@@ -314,7 +337,7 @@ export default function MultiplayerHostPage() {
         <div className="w-full h-full overflow-y-auto">
           <div className="bg-white rounded-lg shadow-2xl p-8 h-full flex flex-col">
             <h1 className="text-4xl font-bold text-gray-900 text-center mb-8">
-              🏆 Spiel beendet!
+              🏆 {tMultiplayer('gameFinished')}
             </h1>
 
             <div className="flex-1 overflow-y-auto mb-8">
@@ -348,7 +371,7 @@ export default function MultiplayerHostPage() {
                       </div>
                     </div>
                     <div className="text-3xl font-bold text-gray-900">
-                      {player.score} {player.score === 1 ? "Punkt" : "Punkte"}
+                      {player.score} {player.score === 1 ? tMultiplayer('point') : tMultiplayer('points')}
                     </div>
                   </div>
                 ))}
@@ -360,13 +383,13 @@ export default function MultiplayerHostPage() {
                 onClick={() => router.push("/game")}
                 className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition font-bold"
               >
-                Neues Spiel
+                {tMultiplayer('newGame')}
               </button>
               <button
                 onClick={() => router.push("/host")}
                 className="bg-gray-600 text-white px-8 py-3 rounded-lg hover:bg-gray-700 transition font-bold"
               >
-                Zur Startseite
+                {tCommon('back')}
               </button>
             </div>
           </div>
@@ -384,13 +407,13 @@ export default function MultiplayerHostPage() {
               {quiz.title}
             </h1>
             <p className="text-gray-700 text-center mb-8">
-              Warte auf Spieler...
+              {tMultiplayer('waitingForPlayers')}
             </p>
 
             <div className="grid md:grid-cols-2 gap-8 mb-8">
               <div className="text-center">
                 <h2 className="text-xl font-bold text-gray-900 mb-4">
-                  QR-Code scannen
+                  {tMultiplayer('scanQRCode')}
                 </h2>
                 {qrCodeUrl && (
                   <img
@@ -400,13 +423,13 @@ export default function MultiplayerHostPage() {
                   />
                 )}
                 <p className="text-gray-700">
-                  Spieler können mit ihrem Handy den QR-Code scannen
+                  {tMultiplayer('playersCanScanQR')}
                 </p>
               </div>
 
               <div className="text-center flex flex-col justify-center">
                 <h2 className="text-xl font-bold text-gray-900 mb-4">
-                  Oder Spiel-Code eingeben
+                  {tMultiplayer('orEnterGameCode')}
                 </h2>
                 <div className="bg-gray-100 rounded-lg p-8 mb-4">
                   <div className="text-6xl font-bold text-gray-900 tracking-wider">
@@ -414,19 +437,19 @@ export default function MultiplayerHostPage() {
                   </div>
                 </div>
                 <p className="text-gray-700">
-                  Gehe zu <span className="font-bold">{publicUrl}</span>
+                  {tMultiplayer('goToUrl')} <span className="font-bold">{publicUrl}</span>
                 </p>
               </div>
             </div>
 
             <div className="flex-1 mb-8 flex flex-col">
               <h2 className="text-xl font-bold text-gray-900 mb-4">
-                Spieler ({players.length})
+                {tMultiplayer('players')} ({players.length})
               </h2>
               {players.length === 0 ? (
                 <div className="flex-1 flex items-center justify-center">
                   <p className="text-gray-700 text-center text-2xl">
-                    Noch keine Spieler beigetreten
+                    {tMultiplayer('noPlayersYet')}
                   </p>
                 </div>
               ) : (
@@ -462,7 +485,7 @@ export default function MultiplayerHostPage() {
                     : "bg-green-600 text-white hover:bg-green-700 shadow-lg"
                 }`}
               >
-                Spiel starten
+                {tMultiplayer('startGame')}
               </button>
             </div>
           </div>
@@ -483,13 +506,13 @@ export default function MultiplayerHostPage() {
           <div>
             <h1 className="text-lg font-bold text-gray-900">{quiz.title}</h1>
             <p className="text-sm text-gray-700">
-              Frage {currentQuestionIndex + 1} von {quiz.questions.length}
+              {tMultiplayer('questionOf', { current: currentQuestionIndex + 1, total: quiz.questions.length })}
             </p>
           </div>
           <div className="flex items-center gap-3">
             <div className="text-right">
               <div className="text-sm text-gray-700">
-                {answeredPlayers.size}/{players.length} geantwortet
+                {tMultiplayer('playersAnswered', { answered: answeredPlayers.size, total: players.length })}
               </div>
             </div>
             {revealedAnswer !== null ? (
@@ -498,8 +521,8 @@ export default function MultiplayerHostPage() {
                 className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition font-bold shadow-lg whitespace-nowrap"
               >
                 {currentQuestionIndex < quiz.questions.length - 1
-                  ? "Nächste Frage →"
-                  : "Ergebnisse"}
+                  ? tMultiplayer('nextQuestionArrow')
+                  : tMultiplayer('results')}
               </button>
             ) : (
               <button
@@ -512,7 +535,7 @@ export default function MultiplayerHostPage() {
                     : "bg-gray-500 text-white hover:bg-gray-600"
                 }`}
               >
-                Antwort aufdecken
+                {tMultiplayer('revealAnswer')}
               </button>
             )}
           </div>
@@ -538,7 +561,7 @@ export default function MultiplayerHostPage() {
           <div className="flex justify-center mb-4 flex-1">
             <img
               src={currentQuestion.imageUrl}
-              alt="Fragenbild"
+              alt={tMultiplayer('questionImage')}
               className="max-h-96 object-contain rounded-lg border-2 border-gray-300"
             />
           </div>
@@ -586,7 +609,7 @@ export default function MultiplayerHostPage() {
                   <div className="flex-1 relative min-h-[200px]">
                     <img
                       src={answer.imageUrl}
-                      alt="Antwortbild"
+                      alt={tMultiplayer('answerImage')}
                       className="absolute inset-0 w-full h-full object-contain rounded"
                     />
                   </div>
@@ -602,5 +625,19 @@ export default function MultiplayerHostPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function HostGamePage() {
+  const [locale, setLocale] = useState<string>('en');
+
+  const handleQuizLoaded = (language: string) => {
+    setLocale(language || 'en');
+  };
+
+  return (
+    <NextIntlClientProvider locale={locale} messages={messages[locale as keyof typeof messages]}>
+      <HostGameContent onQuizLoaded={handleQuizLoaded} />
+    </NextIntlClientProvider>
   );
 }

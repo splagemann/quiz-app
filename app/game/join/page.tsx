@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from 'next-intl';
 
 export default function JoinPage() {
   const router = useRouter();
+  const t = useTranslations('join');
   const [sessionCode, setSessionCode] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -18,7 +20,7 @@ export default function JoinPage() {
     <div className="min-h-screen bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center px-4">
       <div className="bg-white rounded-lg shadow-2xl p-8 max-w-md w-full">
         <h1 className="text-3xl font-bold text-gray-900 text-center mb-8">
-          Spiel beitreten
+          {t('title')}
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -27,7 +29,7 @@ export default function JoinPage() {
               htmlFor="sessionCode"
               className="block text-sm font-medium text-gray-800 mb-2"
             >
-              Spiel-Code eingeben
+              {t('enterCode')}
             </label>
             <input
               type="text"
@@ -40,7 +42,7 @@ export default function JoinPage() {
               className="w-full px-4 py-4 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 text-2xl text-center font-bold tracking-wider uppercase"
             />
             <p className="text-gray-700 text-sm mt-2 text-center">
-              6-stelliger Code vom Spielleiter
+              {t('sixDigitCode')}
             </p>
           </div>
 
@@ -53,7 +55,7 @@ export default function JoinPage() {
                 : "bg-green-600 text-white hover:bg-green-700 shadow-lg"
             }`}
           >
-            Weiter
+            {t('continue')}
           </button>
         </form>
       </div>

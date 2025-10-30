@@ -15,6 +15,7 @@ model Quiz {
   id           Int           @id @default(autoincrement())
   title        String
   description  String?
+  language     String        @default("en") // Currently there are only language files for 'de' and 'en'
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   questions    Question[]
