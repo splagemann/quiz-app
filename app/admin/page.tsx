@@ -26,18 +26,20 @@ export default async function AdminPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 transition-colors">
       <div className="max-w-4xl mx-auto px-4">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{t('quizManagement')}</h1>
-          <div className="flex items-center gap-4">
-            <DarkModeToggle />
-            <LanguageSelector />
-            <Link
-              href="/admin/create"
-              className="flex items-center bg-blue-600 dark:bg-blue-500 text-white px-6 h-10 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition"
-            >
-              {t('createNewQuiz')}
-            </Link>
+        <div className="mb-4">
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{t('quizManagement')}</h1>
+            <div className="flex items-center gap-4">
+              <DarkModeToggle />
+              <LanguageSelector />
+            </div>
           </div>
+          <Link
+            href="/admin/create"
+            className="inline-flex items-center bg-blue-600 dark:bg-blue-500 text-white px-6 h-10 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition"
+          >
+            {t('createNewQuiz')}
+          </Link>
         </div>
 
         {quizzes.length === 0 ? (
