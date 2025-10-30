@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2025-10-30
+
+### Added
+- Automated GitHub release creation in CI/CD pipeline
+  - Release notes automatically extracted from CHANGELOG
+  - Docker image information included in releases
+  - Pre-release detection for beta versions
+
+### Changed
+- Updated package name from `claude-quiz` to `quiz-app`
+- Translated all technical documentation to English
+  - CLAUDE.md fully translated
+  - README.md translated with German UI labels for navigation
+- Improved release automation script with GitHub release information
+
+### Fixed
+- Docker build issues by adding DATABASE_URL build argument
+- Removed absolute paths from repository
+- Updated database path documentation to use relative paths
+- Fixed SHA tag prefix in Docker image tagging
+
+### Documentation
+- Added comprehensive release information to README
+- Enhanced CI/CD pipeline documentation
+- Added semantic versioning guidelines
+- Improved Docker deployment instructions
+
 ## [1.0.0] - 2025-10-30
 
 ### Added
@@ -75,5 +102,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Environment-based configuration
 - German date formatting
 
-[Unreleased]: https://github.com/splagemann/quiz-app/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/splagemann/quiz-app/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/splagemann/quiz-app/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/splagemann/quiz-app/releases/tag/v1.0.0
