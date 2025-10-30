@@ -251,6 +251,61 @@ npx prisma generate
 npx prisma studio
 ```
 
+## Releases
+
+This project uses [Semantic Versioning](https://semver.org/) (SemVer) for version management.
+
+### Release Information
+
+- **Current Version**: v1.0.0
+- **Release Notes**: See [CHANGELOG.md](./CHANGELOG.md) for detailed release notes
+- **GitHub Releases**: [View all releases](https://github.com/splagemann/quiz-app/releases)
+
+### Version Format
+
+Versions follow the `MAJOR.MINOR.PATCH` format:
+
+- **MAJOR** (1.0.0 → 2.0.0): Breaking changes or major new features
+- **MINOR** (1.0.0 → 1.1.0): New features, backwards-compatible
+- **PATCH** (1.0.0 → 1.0.1): Bug fixes, backwards-compatible
+
+### Creating a Release
+
+Use the automated release script for creating new releases:
+
+```bash
+# Patch release (bug fixes): 1.0.0 → 1.0.1
+./scripts/release.sh patch
+
+# Minor release (new features): 1.0.0 → 1.1.0
+./scripts/release.sh minor
+
+# Major release (breaking changes): 1.0.0 → 2.0.0
+./scripts/release.sh major
+
+# Preview changes without committing
+./scripts/release.sh patch --dry-run
+```
+
+The release script will:
+1. Update `package.json` version
+2. Verify `CHANGELOG.md` has been updated
+3. Run tests
+4. Create commit and annotated git tag
+5. Push to GitHub (triggers CI/CD)
+
+**Important**: Before creating a release, update `CHANGELOG.md` with your changes following the [Keep a Changelog](https://keepachangelog.com/) format.
+
+### CI/CD Pipeline
+
+Every release automatically triggers a GitHub Actions workflow that:
+- Builds multi-platform Docker images (linux/amd64, linux/arm64)
+- Publishes to GitHub Container Registry (ghcr.io)
+- Creates version-specific tags (e.g., `v1.0.0`, `1.0.0`, `1.0`, `1`)
+- Updates the `latest` tag
+
+**Monitor builds**: [GitHub Actions](https://github.com/splagemann/quiz-app/actions)
+
 ## Deployment with Docker
 
 This application is ready to deploy using Docker. You can either use pre-built images from GitHub Container Registry or build locally.
