@@ -5,6 +5,9 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import QuestionManager from "./QuestionManager";
 import DeleteButton from "./DeleteButton";
+import { LanguageSelector } from "@/app/components/LanguageSelector";
+import { DarkModeToggle } from "@/app/components/DarkModeToggle";
+import { QuizLanguageSelector } from "@/app/components/QuizLanguageSelector";
 
 export async function generateMetadata({
   params,
@@ -43,7 +46,7 @@ async function updateQuiz(quizId: number, formData: FormData) {
     },
   });
 
-  redirect(`/admin/${quizId}/edit`);
+  redirect(`/admin`);
 }
 
 async function deleteQuiz(quizId: number) {
@@ -93,18 +96,42 @@ export default async function EditQuizPage({
   const deleteQuizWithId = deleteQuiz.bind(null, quizIdNum);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 transition-colors">
       <div className="max-w-4xl mx-auto px-4">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">{t('editQuiz')}</h1>
+        <div className="flex justify-between items-center mb-8">
+          <div className="flex items-center gap-4">
+            <Link
+              href="/admin"
+              className="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+              aria-label={t('backToManagement')}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+                className="w-5 h-5 text-gray-700 dark:text-gray-200"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+              </svg>
+            </Link>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{t('editQuiz')}</h1>
+          </div>
+          <div className="flex items-center gap-4">
+            <DarkModeToggle />
+            <LanguageSelector />
+          </div>
+        </div>
 
         {/* Quiz Details Form */}
-        <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-gray-900">{t('quizDetails')}</h2>
-          <form action={updateQuizWithId}>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700/50 p-6 mb-8">
+          <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">{t('quizDetails')}</h2>
+          <form id="quiz-form" action={updateQuizWithId}>
             <div className="mb-4">
               <label
                 htmlFor="title"
-                className="block text-sm font-medium text-gray-800 mb-2"
+                className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2"
               >
                 {t('quizTitleRequired')}
               </label>
@@ -114,14 +141,14 @@ export default async function EditQuizPage({
                 name="title"
                 required
                 defaultValue={quiz.title}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
               />
             </div>
 
             <div className="mb-4">
               <label
                 htmlFor="description"
-                className="block text-sm font-medium text-gray-800 mb-2"
+                className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2"
               >
                 {t('quizDescription')}
               </label>
@@ -130,47 +157,34 @@ export default async function EditQuizPage({
                 name="description"
                 rows={4}
                 defaultValue={quiz.description || ""}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
               />
             </div>
 
             <div className="mb-4">
               <label
                 htmlFor="language"
-                className="block text-sm font-medium text-gray-800 mb-2"
+                className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2"
               >
                 {t('language')}
               </label>
-              <select
-                id="language"
-                name="language"
-                defaultValue={quiz.language}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
-              >
-                <option value="en">{t('languageEn')}</option>
-                <option value="de">{t('languageDe')}</option>
-              </select>
+              <QuizLanguageSelector name="language" id="language" defaultValue={quiz.language} />
             </div>
 
-            <div className="flex gap-4">
-              <button
-                type="submit"
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
-              >
-                {t('updateQuiz')}
-              </button>
-              <Link
-                href="/admin"
-                className="bg-gray-800 text-white px-6 py-2 rounded-lg hover:bg-gray-900 transition"
-              >
-                {t('backToManagement')}
-              </Link>
-            </div>
           </form>
 
-          <form action={deleteQuizWithId} className="mt-6 pt-6 border-t">
-            <DeleteButton />
-          </form>
+          <div className="flex gap-4 mt-4">
+            <button
+              type="submit"
+              form="quiz-form"
+              className="flex-1 bg-blue-600 dark:bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition font-medium"
+            >
+              {t('updateQuiz')}
+            </button>
+            <form action={deleteQuizWithId} className="flex-1">
+              <DeleteButton />
+            </form>
+          </div>
         </div>
 
         {/* Question Manager */}

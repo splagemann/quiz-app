@@ -2,6 +2,9 @@ import { redirect } from "next/navigation";
 import { getTranslations } from 'next-intl/server';
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { LanguageSelector } from "@/app/components/LanguageSelector";
+import { DarkModeToggle } from "@/app/components/DarkModeToggle";
+import { QuizLanguageSelector } from "@/app/components/QuizLanguageSelector";
 
 async function createQuiz(formData: FormData) {
   "use server";
@@ -32,15 +35,39 @@ export default async function CreateQuizPage() {
   const tCommon = await getTranslations('common');
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-2xl mx-auto px-4">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">{t('createNewQuiz')}</h1>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 transition-colors">
+      <div className="max-w-4xl mx-auto px-4">
+        <div className="flex justify-between items-center mb-8">
+          <div className="flex items-center gap-4">
+            <Link
+              href="/admin"
+              className="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+              aria-label={t('backToManagement')}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+                className="w-5 h-5 text-gray-700 dark:text-gray-200"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+              </svg>
+            </Link>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{t('createNewQuiz')}</h1>
+          </div>
+          <div className="flex items-center gap-4">
+            <DarkModeToggle />
+            <LanguageSelector />
+          </div>
+        </div>
 
-        <form action={createQuiz} className="bg-white rounded-lg shadow p-6">
+        <form action={createQuiz} className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700/50 p-6">
           <div className="mb-6">
             <label
               htmlFor="title"
-              className="block text-sm font-medium text-gray-800 mb-2"
+              className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2"
             >
               {t('quizTitleRequired')}
             </label>
@@ -49,7 +76,7 @@ export default async function CreateQuizPage() {
               id="title"
               name="title"
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
               placeholder={t('quizTitlePlaceholder')}
             />
           </div>
@@ -57,7 +84,7 @@ export default async function CreateQuizPage() {
           <div className="mb-6">
             <label
               htmlFor="description"
-              className="block text-sm font-medium text-gray-800 mb-2"
+              className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2"
             >
               {t('quizDescription')}
             </label>
@@ -65,7 +92,7 @@ export default async function CreateQuizPage() {
               id="description"
               name="description"
               rows={4}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
               placeholder={t('quizDescriptionPlaceholder')}
             />
           </div>
@@ -73,31 +100,23 @@ export default async function CreateQuizPage() {
           <div className="mb-6">
             <label
               htmlFor="language"
-              className="block text-sm font-medium text-gray-800 mb-2"
+              className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2"
             >
               {t('language')}
             </label>
-            <select
-              id="language"
-              name="language"
-              defaultValue="en"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
-            >
-              <option value="en">{t('languageEn')}</option>
-              <option value="de">{t('languageDe')}</option>
-            </select>
+            <QuizLanguageSelector name="language" id="language" defaultValue="en" />
           </div>
 
           <div className="flex gap-4">
             <button
               type="submit"
-              className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-medium"
+              className="flex-1 bg-blue-600 dark:bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition font-medium"
             >
               {t('createQuiz')}
             </button>
             <Link
               href="/admin"
-              className="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition font-medium text-center"
+              className="flex-1 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 px-6 py-3 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition font-medium text-center"
             >
               {tCommon('cancel')}
             </Link>
