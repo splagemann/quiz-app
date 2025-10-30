@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2025-10-30
+
+### Added
+- Admin authentication with bcrypt password hashing
+  - Secure password validation for admin access
+  - Environment-based admin credentials (ADMIN_PASSWORD)
+  - Login form with comprehensive test coverage
+- Dark mode toggle for admin interface
+  - System preference detection
+  - Persistent user preference in localStorage
+  - Smooth theme transitions
+- Per-quiz language support
+  - Individual language setting for each quiz
+  - Quiz-specific localization during gameplay
+  - Language selector in quiz creation/edit forms
+  - Independent from global application language
+
+### Changed
+- Replaced Next.js middleware with next.config.js rewrites for i18n routing
+- Simplified multiplayer answer button color scheme
+- Enhanced LanguageSelector component with improved UX
+- Improved test coverage for authentication and i18n features
+
+### Fixed
+- Removed unused i18nQuiz.ts causing CI parsing errors
+- Suppressed console errors in test environment
+
+### Security
+- Implemented bcrypt password hashing for admin authentication
+- Secure password comparison with timing-attack resistance
+
 ## [1.0.1] - 2025-10-30
 
 ### Added
@@ -102,6 +133,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Environment-based configuration
 - German date formatting
 
-[Unreleased]: https://github.com/splagemann/quiz-app/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/splagemann/quiz-app/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/splagemann/quiz-app/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/splagemann/quiz-app/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/splagemann/quiz-app/releases/tag/v1.0.0
