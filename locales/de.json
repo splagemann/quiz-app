@@ -49,7 +49,9 @@
     "languageEn": "Englisch (English)",
     "languageDe": "Deutsch",
     "backToHome": "Zurück zur Startseite",
-    "backToManagement": "Zurück zur Verwaltung"
+    "backToManagement": "Zurück zur Verwaltung",
+    "changelog": "Änderungsprotokoll",
+    "viewChangelog": "Änderungsprotokoll anzeigen"
   },
   "quiz": {
     "title": "Quiz",

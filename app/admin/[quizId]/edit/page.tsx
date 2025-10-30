@@ -1,6 +1,5 @@
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from 'next-intl/server';
-import Link from "next/link";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import QuestionManager from "./QuestionManager";
@@ -8,6 +7,7 @@ import DeleteButton from "./DeleteButton";
 import { LanguageSelector } from "@/app/components/LanguageSelector";
 import { DarkModeToggle } from "@/app/components/DarkModeToggle";
 import { QuizLanguageSelector } from "@/app/components/QuizLanguageSelector";
+import { BackButton } from "@/app/components/BackButton";
 
 export async function generateMetadata({
   params,
@@ -100,10 +100,8 @@ export default async function EditQuizPage({
       <div className="max-w-4xl mx-auto px-4">
         <div className="flex justify-between items-center mb-8">
           <div className="flex items-center gap-4">
-            <Link
-              href="/admin"
+            <BackButton
               className="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-              aria-label={t('backToManagement')}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -115,7 +113,7 @@ export default async function EditQuizPage({
               >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
               </svg>
-            </Link>
+            </BackButton>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{t('editQuiz')}</h1>
           </div>
           <div className="flex items-center gap-4">

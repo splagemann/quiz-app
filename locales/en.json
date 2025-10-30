@@ -49,7 +49,9 @@
     "languageEn": "English",
     "languageDe": "German (Deutsch)",
     "backToHome": "Back to Home",
-    "backToManagement": "Back to Management"
+    "backToManagement": "Back to Management",
+    "changelog": "Changelog",
+    "viewChangelog": "View Changelog"
   },
   "quiz": {
     "title": "Quiz",
