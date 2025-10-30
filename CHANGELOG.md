@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.1] - 2025-10-31
+
+### Added
+- Changelog page in admin section (`/admin/changelog`)
+  - Displays CHANGELOG.md with markdown parsing
+  - Dark mode support
+  - Browser back navigation
+- Version display in admin header
+  - Clickable version number linking to changelog
+  - Positioned next to "Quiz Management" heading
+- BackButton component for consistent browser back navigation
+- Navigation links on join game pages
+  - "Back to quiz selection" links on code entry and name entry pages
+
+### Changed
+- Updated admin create/edit pages to use BackButton for better navigation
+- Improved navigation consistency across admin pages
+- Removed redundant "View Changelog" link in favor of version number link
+
 ## [1.1.0] - 2025-10-30
 
 ### Added
@@ -133,7 +152,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Environment-based configuration
 - German date formatting
 
-[Unreleased]: https://github.com/splagemann/quiz-app/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/splagemann/quiz-app/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/splagemann/quiz-app/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/splagemann/quiz-app/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/splagemann/quiz-app/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/splagemann/quiz-app/releases/tag/v1.0.0
