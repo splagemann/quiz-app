@@ -259,7 +259,7 @@ This project uses [Semantic Versioning](https://semver.org/) (SemVer) for versio
 
 ### Release Information
 
-- **Current Version**: v1.0.0
+- **Current Version**: v1.1.0
 - **Release Notes**: See [CHANGELOG.md](./CHANGELOG.md) for detailed release notes
 - **GitHub Releases**: [View all releases](https://github.com/splagemann/quiz-app/releases)
 
@@ -272,6 +272,8 @@ Versions follow the `MAJOR.MINOR.PATCH` format:
 - **PATCH** (1.0.0 → 1.0.1): Bug fixes, backwards-compatible
 
 ### Creating a Release
+
+**Note**: The main branch is protected and requires pull requests. The release script handles this automatically.
 
 Use the automated release script for creating new releases:
 
@@ -290,13 +292,21 @@ Use the automated release script for creating new releases:
 ```
 
 The release script will:
-1. Update `package.json` version
-2. Verify `CHANGELOG.md` has been updated
-3. Run tests
-4. Create commit and annotated git tag
-5. Push to GitHub (triggers CI/CD)
+1. Ensure you're on the latest main branch
+2. Update `package.json` version
+3. Verify `CHANGELOG.md` has been updated
+4. Run tests
+5. Create a release branch and commit
+6. Create and merge a Pull Request to main (using admin privileges)
+7. Create and push an annotated git tag
+8. Trigger the CI/CD pipeline
 
 **Important**: Before creating a release, update `CHANGELOG.md` with your changes following the [Keep a Changelog](https://keepachangelog.com/) format.
+
+**Requirements**:
+- GitHub CLI (`gh`) must be installed and authenticated
+- Repository admin access (for merging protected branch)
+- All tests must pass
 
 ### CI/CD Pipeline
 
