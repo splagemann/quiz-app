@@ -84,6 +84,9 @@ describe('/api/questions', () => {
   });
 
   it('should return 500 error when creation fails', async () => {
+    // Suppress console.error for this test
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
     const questionData = {
       quizId: 1,
       title: 'Test Question',
@@ -103,5 +106,8 @@ describe('/api/questions', () => {
 
     expect(response.status).toBe(500);
     expect(data.error).toBe('Failed to create question');
+    expect(consoleErrorSpy).toHaveBeenCalled();
+
+    consoleErrorSpy.mockRestore();
   });
 });

@@ -20,6 +20,14 @@ const customJestConfig = {
     '!app/**/page.tsx',
     '!**/*.stories.{js,jsx,ts,tsx}',
     '!**/node_modules/**',
+    // Exclude frontend components (should be tested with component/e2e tests)
+    '!app/admin/**',
+    '!app/game/**',
+    '!app/host/**',
+    '!app/join/**',
+    '!app/quizzes/**',
+    // Exclude generated code
+    '!app/generated/**',
   ],
   testMatch: [
     '**/__tests__/**/*.[jt]s?(x)',
