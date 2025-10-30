@@ -66,7 +66,6 @@ export default function GameComponent({ quiz, locale, messages }) {
 - `app/game/[quizId]/solo/QuizPlayer.tsx` - Single player client component
 - `app/game/[quizId]/host/page.tsx` - Multiplayer host (uses callback pattern)
 - `app/game/play/[sessionId]/page.tsx` - Multiplayer player (fetches from session API)
-- `lib/i18nQuiz.ts` - Type definitions for quiz i18n
 
 ## Important Architecture Decisions
 
