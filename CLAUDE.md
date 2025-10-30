@@ -11,7 +11,7 @@ Die Anwendung unterstützt zwei Spielmodi:
 ## Wichtige Architektur-Entscheidungen
 
 ### Datenbank
-- **SQLite** mit absoluter Pfad-Konfiguration: `file:/Users/sebastian.plagemann/Development/personal/claude-quiz/prisma/dev.db`
+- **SQLite** mit absoluter Pfad-Konfiguration: `file:/Users/sebastian.plagemann/Development/personal/quiz-app/prisma/dev.db`
 - Prisma Client wird nach `/app/generated/prisma/client` generiert
 - Import erfolgt als: `import { PrismaClient } from "@/app/generated/prisma/client"`
 - **Wichtig**: Bei Datenbank-Problemen immer `.next` Cache löschen: `rm -rf .next`
