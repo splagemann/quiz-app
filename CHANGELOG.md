@@ -1,0 +1,79 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+## [1.0.0] - 2025-10-30
+
+### Added
+- Complete quiz application with German UI localization
+- Single-player mode with score tracking and immediate feedback
+- Multiplayer mode with real-time gameplay
+  - QR code generation for easy joining
+  - 6-digit session codes
+  - Host controls for game flow
+  - Live player list with avatars
+  - Real-time answer tracking
+  - Automatic and manual answer reveal
+  - Leaderboard with rankings
+- Question management system
+  - Create, edit, and delete quizzes
+  - Add questions with multiple choice answers
+  - Optional question titles and descriptions
+  - Optional question images
+  - Flexible answer configuration (2-6 answers)
+  - Image support in answers
+- Image upload functionality
+  - Support for JPEG, PNG, GIF, WebP
+  - Maximum file size: 5MB
+  - Automatic unique filename generation
+- Real-time features using Server-Sent Events (SSE)
+  - Player join/leave notifications
+  - Live answer tracking
+  - Synchronized question transitions
+  - Game state synchronization
+- Avatar system using DiceBear Avataaars API
+- Mobile-optimized UI
+  - Color-coded answers (green/red for correct/incorrect)
+  - Full-screen game views
+  - Responsive design for all screen sizes
+- Dynamic page titles based on quiz and context
+- Custom purple-blue gradient favicon
+
+### Infrastructure
+- SQLite database with Prisma ORM
+- Next.js 14+ with App Router
+- TypeScript for type safety
+- Tailwind CSS for styling
+- Docker multi-stage builds
+  - Multi-platform support (linux/amd64, linux/arm64)
+  - Persistent volumes for database and uploads
+  - Automatic database migrations on startup
+  - Health checks for container monitoring
+- GitHub Actions CI/CD pipeline
+  - Automated Docker image builds
+  - Publishing to GitHub Container Registry (ghcr.io)
+  - Semantic version tagging
+  - Build caching for faster builds
+- Comprehensive test coverage
+  - Jest testing framework
+  - React Testing Library
+  - API route tests
+  - Component tests
+  - commitlint for conventional commits
+  - Husky for git hooks
+
+### Technical Details
+- Dynamic rendering for database-dependent pages
+- Cascading deletes for data integrity
+- In-memory game state management
+- Session code collision prevention
+- Environment-based configuration
+- German date formatting
+
+[Unreleased]: https://github.com/splagemann/quiz-app/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/splagemann/quiz-app/releases/tag/v1.0.0
