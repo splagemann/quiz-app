@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 
 type Answer = {
   id: number;
-  answerText: string;
+  answerText: string | null;
+  imageUrl: string | null;
   isCorrect: boolean;
   orderIndex: number;
 };
@@ -18,6 +19,12 @@ type Question = {
   imageUrl?: string | null;
   orderIndex: number;
   answers: Answer[];
+};
+
+type NewAnswer = {
+  text: string;
+  imageUrl: string;
+  isCorrect: boolean;
 };
 
 export default function QuestionManager({
@@ -33,6 +40,15 @@ export default function QuestionManager({
   const [uploadingImage, setUploadingImage] = useState(false);
   const [addQuestionImageUrl, setAddQuestionImageUrl] = useState<string>("");
   const [editQuestionImageUrl, setEditQuestionImageUrl] = useState<string>("");
+
+  // State for new question answers (2-4 answers)
+  const [newAnswers, setNewAnswers] = useState<NewAnswer[]>([
+    { text: "", imageUrl: "", isCorrect: true },
+    { text: "", imageUrl: "", isCorrect: false },
+  ]);
+
+  // State for editing question answers
+  const [editAnswers, setEditAnswers] = useState<Answer[]>([]);
 
   async function handleImageUpload(file: File, isEdit: boolean = false): Promise<string | null> {
     if (!file) return null;
@@ -69,19 +85,50 @@ export default function QuestionManager({
     }
   }
 
+  async function handleAnswerImageUpload(file: File): Promise<string | null> {
+    if (!file) return null;
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        alert(error.error || "Fehler beim Hochladen des Bildes");
+        return null;
+      }
+
+      const data = await response.json();
+      return data.url;
+    } catch (err) {
+      console.error("Error uploading image:", err);
+      alert("Netzwerkfehler beim Hochladen");
+      return null;
+    }
+  }
+
   async function handleAddQuestion(formData: FormData) {
     const title = formData.get("title") as string;
     const questionText = formData.get("questionText") as string;
     const description = formData.get("description") as string;
-    const answers = [
-      { text: formData.get("answer0") as string, isCorrect: formData.get("correct") === "0" },
-      { text: formData.get("answer1") as string, isCorrect: formData.get("correct") === "1" },
-      { text: formData.get("answer2") as string, isCorrect: formData.get("correct") === "2" },
-      { text: formData.get("answer3") as string, isCorrect: formData.get("correct") === "3" },
-    ];
 
-    if (!questionText || answers.some((a) => !a.text)) {
-      alert("Bitte fülle alle Felder aus");
+    // Validate: at least one answer must have text or image
+    const validAnswers = newAnswers.filter(a => a.text.trim() || a.imageUrl);
+    if (!questionText) {
+      alert("Bitte gib einen Fragetext ein");
+      return;
+    }
+    if (validAnswers.length < 2) {
+      alert("Bitte füge mindestens 2 Antworten hinzu (mit Text oder Bild)");
+      return;
+    }
+    if (!newAnswers.some(a => a.isCorrect)) {
+      alert("Bitte markiere mindestens eine Antwort als richtig");
       return;
     }
 
@@ -94,7 +141,11 @@ export default function QuestionManager({
         questionText,
         description: description || null,
         imageUrl: addQuestionImageUrl || null,
-        answers,
+        answers: validAnswers.map(a => ({
+          text: a.text || null,
+          imageUrl: a.imageUrl || null,
+          isCorrect: a.isCorrect,
+        })),
         orderIndex: initialQuestions.length,
       }),
     });
@@ -102,7 +153,14 @@ export default function QuestionManager({
     if (response.ok) {
       setIsAddingQuestion(false);
       setAddQuestionImageUrl("");
+      setNewAnswers([
+        { text: "", imageUrl: "", isCorrect: true },
+        { text: "", imageUrl: "", isCorrect: false },
+      ]);
       router.refresh();
+    } else {
+      const error = await response.json();
+      alert(error.error || "Fehler beim Erstellen der Frage");
     }
   }
 
@@ -115,31 +173,18 @@ export default function QuestionManager({
     const currentQuestion = initialQuestions.find(q => q.id === questionId);
     const imageUrl = editQuestionImageUrl || currentQuestion?.imageUrl || null;
 
-    const answers = [
-      {
-        id: parseInt(formData.get("answerId0") as string),
-        text: formData.get("answer0") as string,
-        isCorrect: formData.get("correct") === "0",
-      },
-      {
-        id: parseInt(formData.get("answerId1") as string),
-        text: formData.get("answer1") as string,
-        isCorrect: formData.get("correct") === "1",
-      },
-      {
-        id: parseInt(formData.get("answerId2") as string),
-        text: formData.get("answer2") as string,
-        isCorrect: formData.get("correct") === "2",
-      },
-      {
-        id: parseInt(formData.get("answerId3") as string),
-        text: formData.get("answer3") as string,
-        isCorrect: formData.get("correct") === "3",
-      },
-    ];
-
-    if (!questionText || answers.some((a) => !a.text)) {
-      alert("Bitte fülle alle Felder aus");
+    // Validate: at least one answer must have text or image
+    const validAnswers = editAnswers.filter(a => (a.answerText && a.answerText.trim()) || a.imageUrl);
+    if (!questionText) {
+      alert("Bitte gib einen Fragetext ein");
+      return;
+    }
+    if (validAnswers.length < 2) {
+      alert("Bitte behalte mindestens 2 Antworten (mit Text oder Bild)");
+      return;
+    }
+    if (!editAnswers.some(a => a.isCorrect)) {
+      alert("Bitte markiere mindestens eine Antwort als richtig");
       return;
     }
 
@@ -151,14 +196,23 @@ export default function QuestionManager({
         questionText,
         description: description || null,
         imageUrl,
-        answers,
+        answers: validAnswers.map(a => ({
+          id: a.id,
+          text: a.answerText || null,
+          imageUrl: a.imageUrl || null,
+          isCorrect: a.isCorrect,
+        })),
       }),
     });
 
     if (response.ok) {
       setEditingQuestionId(null);
       setEditQuestionImageUrl("");
+      setEditAnswers([]);
       router.refresh();
+    } else {
+      const error = await response.json();
+      alert(error.error || "Fehler beim Aktualisieren der Frage");
     }
   }
 
@@ -257,25 +311,87 @@ export default function QuestionManager({
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-800 mb-2">
-              Antworten (wähle die richtige) *
-            </label>
-            {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="flex items-center gap-2 mb-2">
-                <input
-                  type="radio"
-                  name="correct"
-                  value={i}
-                  required
-                  className="w-4 h-4 text-green-600"
-                />
-                <input
-                  type="text"
-                  name={`answer${i}`}
-                  required
-                  placeholder={`Antwort ${i + 1}`}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
-                />
+            <div className="flex justify-between items-center mb-2">
+              <label className="block text-sm font-medium text-gray-800">
+                Antworten (2-4, wähle die richtige) *
+              </label>
+              <div className="flex gap-2">
+                {newAnswers.length < 4 && (
+                  <button
+                    type="button"
+                    onClick={() => setNewAnswers([...newAnswers, { text: "", imageUrl: "", isCorrect: false }])}
+                    className="text-sm bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition"
+                  >
+                    + Antwort
+                  </button>
+                )}
+              </div>
+            </div>
+            {newAnswers.map((answer, i) => (
+              <div key={i} className="mb-3 p-3 border border-gray-300 rounded-lg bg-white">
+                <div className="flex items-center gap-2 mb-2">
+                  <input
+                    type="radio"
+                    checked={answer.isCorrect}
+                    onChange={() => {
+                      setNewAnswers(newAnswers.map((a, idx) => ({
+                        ...a,
+                        isCorrect: idx === i
+                      })));
+                    }}
+                    className="w-4 h-4 text-green-600"
+                  />
+                  <input
+                    type="text"
+                    value={answer.text}
+                    onChange={(e) => {
+                      const updated = [...newAnswers];
+                      updated[i].text = e.target.value;
+                      setNewAnswers(updated);
+                    }}
+                    placeholder={`Antworttext ${i + 1}`}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
+                  />
+                  {newAnswers.length > 2 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const updated = newAnswers.filter((_, idx) => idx !== i);
+                        // If removing the correct answer, make the first one correct
+                        if (answer.isCorrect && updated.length > 0) {
+                          updated[0].isCorrect = true;
+                        }
+                        setNewAnswers(updated);
+                      }}
+                      className="text-red-600 hover:text-red-800 px-2"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+                <div className="ml-6">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const url = await handleAnswerImageUpload(file);
+                        if (url) {
+                          const updated = [...newAnswers];
+                          updated[i].imageUrl = url;
+                          setNewAnswers(updated);
+                        }
+                      }
+                    }}
+                    className="text-sm px-2 py-1 border border-gray-300 rounded text-gray-900"
+                  />
+                  {answer.imageUrl && (
+                    <div className="mt-2">
+                      <img src={answer.imageUrl} alt="Antwortbild" className="max-w-xs rounded border border-gray-300" />
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -289,7 +405,14 @@ export default function QuestionManager({
             </button>
             <button
               type="button"
-              onClick={() => setIsAddingQuestion(false)}
+              onClick={() => {
+                setIsAddingQuestion(false);
+                setNewAnswers([
+                  { text: "", imageUrl: "", isCorrect: true },
+                  { text: "", imageUrl: "", isCorrect: false },
+                ]);
+                setAddQuestionImageUrl("");
+              }}
               className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
             >
               Abbrechen
@@ -377,31 +500,93 @@ export default function QuestionManager({
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-800 mb-2">
-                      Antworten (wähle die richtige) *
-                    </label>
-                    {question.answers.map((answer, i) => (
-                      <div key={answer.id} className="flex items-center gap-2 mb-2">
-                        <input
-                          type="hidden"
-                          name={`answerId${i}`}
-                          value={answer.id}
-                        />
-                        <input
-                          type="radio"
-                          name="correct"
-                          value={i}
-                          defaultChecked={answer.isCorrect}
-                          required
-                          className="w-4 h-4 text-blue-600"
-                        />
-                        <input
-                          type="text"
-                          name={`answer${i}`}
-                          defaultValue={answer.answerText}
-                          required
-                          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
-                        />
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="block text-sm font-medium text-gray-800">
+                        Antworten (2-4, wähle die richtige) *
+                      </label>
+                      <div className="flex gap-2">
+                        {editAnswers.length < 4 && (
+                          <button
+                            type="button"
+                            onClick={() => setEditAnswers([...editAnswers, {
+                              id: -Date.now(), // Temporary negative ID for new answers
+                              answerText: "",
+                              imageUrl: null,
+                              isCorrect: false,
+                              orderIndex: editAnswers.length
+                            }])}
+                            className="text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition"
+                          >
+                            + Antwort
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    {editAnswers.map((answer, i) => (
+                      <div key={answer.id} className="mb-3 p-3 border border-gray-300 rounded-lg bg-white">
+                        <div className="flex items-center gap-2 mb-2">
+                          <input
+                            type="radio"
+                            checked={answer.isCorrect}
+                            onChange={() => {
+                              setEditAnswers(editAnswers.map((a, idx) => ({
+                                ...a,
+                                isCorrect: idx === i
+                              })));
+                            }}
+                            className="w-4 h-4 text-blue-600"
+                          />
+                          <input
+                            type="text"
+                            value={answer.answerText || ""}
+                            onChange={(e) => {
+                              const updated = [...editAnswers];
+                              updated[i].answerText = e.target.value;
+                              setEditAnswers(updated);
+                            }}
+                            placeholder={`Antworttext ${i + 1}`}
+                            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
+                          />
+                          {editAnswers.length > 2 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updated = editAnswers.filter((_, idx) => idx !== i);
+                                // If removing the correct answer, make the first one correct
+                                if (answer.isCorrect && updated.length > 0) {
+                                  updated[0].isCorrect = true;
+                                }
+                                setEditAnswers(updated);
+                              }}
+                              className="text-red-600 hover:text-red-800 px-2"
+                            >
+                              ✕
+                            </button>
+                          )}
+                        </div>
+                        <div className="ml-6">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                const url = await handleAnswerImageUpload(file);
+                                if (url) {
+                                  const updated = [...editAnswers];
+                                  updated[i].imageUrl = url;
+                                  setEditAnswers(updated);
+                                }
+                              }
+                            }}
+                            className="text-sm px-2 py-1 border border-gray-300 rounded text-gray-900"
+                          />
+                          {answer.imageUrl && (
+                            <div className="mt-2">
+                              <img src={answer.imageUrl} alt="Antwortbild" className="max-w-xs rounded border border-gray-300" />
+                            </div>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -415,7 +600,11 @@ export default function QuestionManager({
                     </button>
                     <button
                       type="button"
-                      onClick={() => setEditingQuestionId(null)}
+                      onClick={() => {
+                        setEditingQuestionId(null);
+                        setEditAnswers([]);
+                        setEditQuestionImageUrl("");
+                      }}
                       className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
                     >
                       Abbrechen
@@ -449,7 +638,10 @@ export default function QuestionManager({
                     </div>
                     <div className="flex gap-2 ml-4">
                       <button
-                        onClick={() => setEditingQuestionId(question.id)}
+                        onClick={() => {
+                          setEditingQuestionId(question.id);
+                          setEditAnswers(question.answers);
+                        }}
                         className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                       >
                         Bearbeiten
@@ -472,9 +664,20 @@ export default function QuestionManager({
                             : "bg-gray-100 border border-gray-300 text-gray-900"
                         }`}
                       >
-                        {String.fromCharCode(65 + i)}. {answer.answerText}
-                        {answer.isCorrect && (
-                          <span className="ml-2 text-green-700 font-semibold">✓ Richtig</span>
+                        <div className="flex items-start gap-3">
+                          <div className="flex-1">
+                            {String.fromCharCode(65 + i)}. {answer.answerText}
+                            {answer.isCorrect && (
+                              <span className="ml-2 text-green-700 font-semibold">✓ Richtig</span>
+                            )}
+                          </div>
+                        </div>
+                        {answer.imageUrl && (
+                          <img
+                            src={answer.imageUrl}
+                            alt="Antwortbild"
+                            className="mt-2 max-w-xs rounded border border-gray-300"
+                          />
                         )}
                       </div>
                     ))}

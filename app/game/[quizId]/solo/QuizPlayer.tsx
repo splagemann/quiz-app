@@ -5,7 +5,8 @@ import Link from "next/link";
 
 type Answer = {
   id: number;
-  answerText: string;
+  answerText: string | null;
+  imageUrl: string | null;
   isCorrect: boolean;
   orderIndex: number;
 };
@@ -108,68 +109,69 @@ export default function QuizPlayer({ quiz }: { quiz: Quiz }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-500 to-blue-600 py-8">
-      <div className="max-w-3xl mx-auto px-4">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-lg p-4 mb-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">{quiz.title}</h1>
-              <p className="text-sm text-gray-700">
-                Frage {currentQuestionIndex + 1} von {quiz.questions.length}
-              </p>
-            </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold text-blue-600">{score}</div>
-              <div className="text-sm text-gray-700">Punkte</div>
-            </div>
+    <div className="h-screen bg-gradient-to-br from-purple-500 to-blue-600 flex flex-col p-3">
+      {/* Header */}
+      <div className="bg-white rounded-lg shadow-lg p-3 mb-3 flex-shrink-0">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-base font-bold text-gray-900">{quiz.title}</h1>
+            <p className="text-xs text-gray-700">
+              Frage {currentQuestionIndex + 1} von {quiz.questions.length}
+            </p>
+          </div>
+          <div className="text-right">
+            <div className="text-xl font-bold text-blue-600">{score}</div>
+            <div className="text-xs text-gray-700">Punkte</div>
           </div>
         </div>
-
         {/* Progress Bar */}
-        <div className="bg-white rounded-lg shadow-lg p-4 mb-6">
-          <div className="w-full bg-gray-200 rounded-full h-3">
-            <div
-              className="bg-blue-600 h-3 rounded-full transition-all duration-300"
-              style={{
-                width: `${((currentQuestionIndex + 1) / quiz.questions.length) * 100}%`,
-              }}
+        <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+          <div
+            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+            style={{
+              width: `${((currentQuestionIndex + 1) / quiz.questions.length) * 100}%`,
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Question Card */}
+      <div className="bg-white rounded-lg shadow-lg p-4 mb-3 flex-1 flex flex-col overflow-hidden">
+        {currentQuestion.title && (
+          <div className="text-base font-medium text-gray-600 mb-2">
+            {currentQuestion.title}
+          </div>
+        )}
+        <h2 className="text-2xl font-bold text-gray-900 mb-3">
+          {currentQuestion.questionText}
+        </h2>
+        {currentQuestion.description && (
+          <p className="text-base text-gray-700 mb-3">
+            {currentQuestion.description}
+          </p>
+        )}
+        {currentQuestion.imageUrl && (
+          <div className="flex justify-center mb-3 flex-1">
+            <img
+              src={currentQuestion.imageUrl}
+              alt="Fragenbild"
+              className="max-h-64 object-contain rounded-lg border-2 border-gray-300"
             />
           </div>
-        </div>
+        )}
 
-        {/* Question Card */}
-        <div className="bg-white rounded-lg shadow-lg p-8 mb-6">
-          {currentQuestion.title && (
-            <div className="text-base font-medium text-gray-600 mb-2">
-              {currentQuestion.title}
-            </div>
-          )}
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            {currentQuestion.questionText}
-          </h2>
-          {currentQuestion.description && (
-            <p className="text-sm text-gray-700 mb-4">
-              {currentQuestion.description}
-            </p>
-          )}
-          {currentQuestion.imageUrl && (
-            <div className="flex justify-center mb-6">
-              <img
-                src={currentQuestion.imageUrl}
-                alt="Fragenbild"
-                className="max-w-full max-h-80 rounded-lg border-2 border-gray-300"
-              />
-            </div>
-          )}
-
-          <div className="space-y-3">
+        <div className={`${currentQuestion.answers.some(a => a.imageUrl) ? 'flex-1' : ''} ${
+          currentQuestion.answers.length === 2 ? "grid grid-cols-2 gap-2" :
+          currentQuestion.answers.length === 4 ? "grid grid-cols-2 gap-2" :
+          "flex flex-col gap-2"
+        }`}>
             {currentQuestion.answers.map((answer) => {
               const isSelected = selectedAnswerId === answer.id;
               const showResult = hasAnswered;
+              const hasImages = currentQuestion.answers.some(a => a.imageUrl);
 
               let buttonClass =
-                "w-full text-left px-6 py-4 rounded-lg border-2 transition font-medium ";
+                `w-full text-left p-3 rounded-lg border-4 transition font-bold text-base relative flex flex-col ${hasImages ? 'h-full' : ''} `;
 
               if (showResult) {
                 if (answer.isCorrect) {
@@ -191,33 +193,43 @@ export default function QuizPlayer({ quiz }: { quiz: Quiz }) {
                   disabled={hasAnswered}
                   className={buttonClass}
                 >
-                  <div className="flex items-center justify-between">
-                    <span>{answer.answerText}</span>
-                    {showResult && answer.isCorrect && (
-                      <span className="text-green-600 font-bold">✓</span>
-                    )}
-                    {showResult && isSelected && !answer.isCorrect && (
-                      <span className="text-red-600 font-bold">✗</span>
-                    )}
-                  </div>
+                  {answer.answerText && <span className="mb-1">{answer.answerText}</span>}
+                  {answer.imageUrl && (
+                    <div className="flex-1 relative min-h-[120px]">
+                      <img
+                        src={answer.imageUrl}
+                        alt="Antwortbild"
+                        className="absolute inset-0 w-full h-full object-cover rounded"
+                      />
+                    </div>
+                  )}
+                  {showResult && (
+                    <div className="absolute top-2 right-2">
+                      {answer.isCorrect && (
+                        <span className="text-green-600 font-bold text-xl bg-white rounded-full px-2">✓</span>
+                      )}
+                      {isSelected && !answer.isCorrect && (
+                        <span className="text-red-600 font-bold text-xl bg-white rounded-full px-2">✗</span>
+                      )}
+                    </div>
+                  )}
                 </button>
               );
             })}
           </div>
         </div>
 
-        {/* Next Button */}
-        {hasAnswered && (
-          <div className="text-center">
-            <button
-              onClick={handleNext}
-              className="bg-white text-blue-600 px-8 py-4 rounded-lg hover:bg-gray-100 transition font-bold text-lg shadow-lg"
-            >
-              {isLastQuestion ? "Ergebnis anzeigen" : "Nächste Frage →"}
-            </button>
-          </div>
-        )}
-      </div>
+      {/* Next Button */}
+      {hasAnswered && (
+        <div className="text-center flex-shrink-0">
+          <button
+            onClick={handleNext}
+            className="bg-white text-blue-600 px-8 py-3 rounded-lg hover:bg-gray-100 transition font-bold text-base shadow-lg"
+          >
+            {isLastQuestion ? "Ergebnis anzeigen" : "Nächste Frage →"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

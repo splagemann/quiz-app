@@ -15,8 +15,9 @@ export async function POST(request: NextRequest) {
         imageUrl,
         orderIndex,
         answers: {
-          create: answers.map((answer: { text: string; isCorrect: boolean }, index: number) => ({
+          create: answers.map((answer: { text: string | null; imageUrl: string | null; isCorrect: boolean }, index: number) => ({
             answerText: answer.text,
+            imageUrl: answer.imageUrl,
             isCorrect: answer.isCorrect,
             orderIndex: index,
           })),

@@ -23,7 +23,8 @@ type Quiz = {
     imageUrl?: string | null;
     answers: Array<{
       id: number;
-      answerText: string;
+      answerText: string | null;
+      imageUrl: string | null;
       isCorrect: boolean;
     }>;
   }>;
@@ -391,136 +392,118 @@ export default function MultiplayerHostPage() {
   const allAnswered = answeredPlayers.size === players.length && players.length > 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-500 to-blue-600 py-8 px-4">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-lg p-4 mb-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">{quiz.title}</h1>
-              <p className="text-sm text-gray-700">
-                Frage {currentQuestionIndex + 1} von {quiz.questions.length}
-              </p>
-            </div>
-            <div className="text-right">
-              <div className="text-sm text-gray-700">Spieler</div>
-              <div className="text-2xl font-bold text-blue-600">{players.length}</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Question */}
-        <div className="bg-white rounded-lg shadow-lg p-8 mb-6">
-          {currentQuestion.title && (
-            <div className="text-lg font-medium text-gray-600 mb-2 text-center">
-              {currentQuestion.title}
-            </div>
-          )}
-          <h2 className="text-3xl font-bold text-gray-900 mb-4 text-center">
-            {currentQuestion.questionText}
-          </h2>
-          {currentQuestion.description && (
-            <p className="text-gray-700 text-center mb-6">
-              {currentQuestion.description}
+    <div className="h-screen bg-gradient-to-br from-purple-500 to-blue-600 flex flex-col p-4">
+      {/* Header */}
+      <div className="bg-white rounded-lg shadow-lg p-3 mb-3 flex-shrink-0">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-lg font-bold text-gray-900">{quiz.title}</h1>
+            <p className="text-sm text-gray-700">
+              Frage {currentQuestionIndex + 1} von {quiz.questions.length}
             </p>
-          )}
-          {currentQuestion.imageUrl && (
-            <div className="flex justify-center mb-8">
-              <img
-                src={currentQuestion.imageUrl}
-                alt="Fragenbild"
-                className="max-w-2xl max-h-96 rounded-lg border-2 border-gray-300"
-              />
+          </div>
+          <div className="text-right">
+            <div className="text-sm text-gray-700">
+              {answeredPlayers.size}/{players.length} geantwortet
             </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {currentQuestion.answers.map((answer, index) => {
-              const isCorrect = answer.isCorrect;
-              const isRevealed = revealedAnswer !== null;
-
-              return (
-                <div
-                  key={answer.id}
-                  className={`p-6 rounded-lg border-4 font-bold text-xl ${
-                    isRevealed && isCorrect
-                      ? "bg-green-100 border-green-500 text-green-900"
-                      : isRevealed
-                      ? "bg-gray-100 border-gray-300 text-gray-700"
-                      : "bg-blue-50 border-blue-300 text-gray-900"
-                  }`}
-                >
-                  {String.fromCharCode(65 + index)}. {answer.answerText}
-                  {isRevealed && isCorrect && (
-                    <span className="ml-2 text-green-600">✓</span>
-                  )}
-                </div>
-              );
-            })}
           </div>
         </div>
+      </div>
 
-        {/* Players Status */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">
-            Spieler-Status ({answeredPlayers.size}/{players.length} geantwortet)
-          </h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-            {players.map((player) => {
-              const hasAnswered = answeredPlayers.has(player.id);
-              return (
-                <div
-                  key={player.id}
-                  className={`p-3 rounded-lg text-center ${
-                    hasAnswered
-                      ? "bg-green-100 border-2 border-green-500"
-                      : "bg-gray-100 border-2 border-gray-300"
-                  }`}
-                >
-                  <img
-                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${player.id}`}
-                    alt={player.playerName}
-                    className="w-12 h-12 mx-auto mb-1 rounded-full"
-                  />
-                  <div className="text-sm font-bold text-gray-900 truncate">
-                    {player.playerName}
-                  </div>
-                  <div className="text-xs text-gray-700 mt-1">
-                    {player.score} {player.score === 1 ? "Punkt" : "Punkte"}
-                  </div>
-                  <div className="text-lg mt-1">
-                    {hasAnswered ? "✓" : "⏳"}
-                  </div>
-                </div>
-              );
-            })}
+      {/* Question */}
+      <div className="bg-white rounded-lg shadow-lg p-6 mb-3 flex-1 flex flex-col overflow-hidden">
+        {currentQuestion.title && (
+          <div className="text-2xl font-medium text-gray-600 mb-3 text-center">
+            {currentQuestion.title}
           </div>
-        </div>
+        )}
+        <h2 className="text-5xl font-bold text-gray-900 mb-4 text-center">
+          {currentQuestion.questionText}
+        </h2>
+        {currentQuestion.description && (
+          <p className="text-xl text-gray-700 text-center mb-4">
+            {currentQuestion.description}
+          </p>
+        )}
+        {currentQuestion.imageUrl && (
+          <div className="flex justify-center mb-4 flex-1">
+            <img
+              src={currentQuestion.imageUrl}
+              alt="Fragenbild"
+              className="max-h-96 object-contain rounded-lg border-2 border-gray-300"
+            />
+          </div>
+        )}
 
-        {/* Controls */}
-        <div className="text-center">
-          {revealedAnswer !== null ? (
-            <button
-              onClick={nextQuestion}
-              className="bg-blue-600 text-white px-12 py-4 rounded-lg hover:bg-blue-700 transition font-bold text-xl shadow-lg"
-            >
-              {currentQuestionIndex < quiz.questions.length - 1
-                ? "Nächste Frage →"
-                : "Ergebnisse anzeigen"}
-            </button>
-          ) : allAnswered ? (
-            <div className="text-white text-xl">
-              Alle Spieler haben geantwortet! Antwort wird angezeigt...
-            </div>
-          ) : (
-            <button
-              onClick={revealAnswer}
-              className="bg-orange-500 text-white px-10 py-4 rounded-lg hover:bg-orange-600 transition font-bold text-xl shadow-lg"
-            >
-              Antwort jetzt aufdecken →
-            </button>
-          )}
+        <div className={`${currentQuestion.answers.some(a => a.imageUrl) ? 'flex-1' : ''} ${
+          currentQuestion.answers.length === 2 ? "grid grid-cols-2 gap-4" :
+          currentQuestion.answers.length === 4 ? "grid grid-cols-2 gap-4" :
+          "grid grid-cols-2 gap-4"
+        }`}>
+          {currentQuestion.answers.map((answer, index) => {
+            const isCorrect = answer.isCorrect;
+            const isRevealed = revealedAnswer !== null;
+            const hasImages = currentQuestion.answers.some(a => a.imageUrl);
+
+            return (
+              <div
+                key={answer.id}
+                className={`p-4 rounded-lg border-4 font-bold text-2xl relative flex flex-col ${hasImages ? 'h-full' : ''} ${
+                  isRevealed && isCorrect
+                    ? "bg-green-100 border-green-500 text-green-900"
+                    : isRevealed
+                    ? "bg-gray-100 border-gray-300 text-gray-700"
+                    : "bg-blue-50 border-blue-300 text-gray-900"
+                }`}
+              >
+                {answer.answerText && (
+                  <div className="mb-2">
+                    {String.fromCharCode(65 + index)}. {answer.answerText}
+                  </div>
+                )}
+                {answer.imageUrl && (
+                  <div className="flex-1 relative min-h-[200px]">
+                    <img
+                      src={answer.imageUrl}
+                      alt="Antwortbild"
+                      className="absolute inset-0 w-full h-full object-cover rounded"
+                    />
+                  </div>
+                )}
+                {isRevealed && isCorrect && (
+                  <div className="absolute top-2 right-2">
+                    <span className="text-green-600 text-4xl bg-white rounded-full px-2">✓</span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
+      </div>
+
+      {/* Controls */}
+      <div className="text-center flex-shrink-0">
+        {revealedAnswer !== null ? (
+          <button
+            onClick={nextQuestion}
+            className="bg-blue-600 text-white px-12 py-3 rounded-lg hover:bg-blue-700 transition font-bold text-xl shadow-lg"
+          >
+            {currentQuestionIndex < quiz.questions.length - 1
+              ? "Nächste Frage →"
+              : "Ergebnisse anzeigen"}
+          </button>
+        ) : allAnswered ? (
+          <div className="text-white text-xl font-bold">
+            Alle Spieler haben geantwortet! Antwort wird angezeigt...
+          </div>
+        ) : (
+          <button
+            onClick={revealAnswer}
+            className="bg-orange-500 text-white px-10 py-3 rounded-lg hover:bg-orange-600 transition font-bold text-xl shadow-lg"
+          >
+            Antwort jetzt aufdecken →
+          </button>
+        )}
       </div>
     </div>
   );

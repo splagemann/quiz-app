@@ -12,7 +12,8 @@ type Question = {
   imageUrl?: string | null;
   answers: Array<{
     id: number;
-    answerText: string;
+    answerText: string | null;
+    imageUrl: string | null;
     isCorrect: boolean;
   }>;
 };
@@ -317,58 +318,62 @@ export default function PlayerGamePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-500 to-blue-600 py-8 px-4">
-      <div className="max-w-2xl mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-lg p-4 mb-6">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center">
-              <img
-                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${playerId}`}
-                alt={myName}
-                className="w-12 h-12 rounded-full mr-3"
-              />
-              <div className="font-bold text-gray-900">{myName}</div>
-            </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold text-green-600">{myScore}</div>
-              <div className="text-xs text-gray-700">Punkte</div>
-            </div>
+    <div className="h-screen bg-gradient-to-br from-green-500 to-blue-600 flex flex-col p-3">
+      {/* Header */}
+      <div className="bg-white rounded-lg shadow-lg p-3 mb-3 flex-shrink-0">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center">
+            <img
+              src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${playerId}`}
+              alt={myName}
+              className="w-10 h-10 rounded-full mr-2"
+            />
+            <div className="font-bold text-gray-900 text-sm">{myName}</div>
+          </div>
+          <div className="text-right">
+            <div className="text-xl font-bold text-green-600">{myScore}</div>
+            <div className="text-xs text-gray-700">Punkte</div>
           </div>
         </div>
+      </div>
 
-        {/* Question */}
-        <div className="bg-white rounded-lg shadow-lg p-8 mb-6">
-          {currentQuestion.title && (
-            <div className="text-base font-medium text-gray-600 mb-2 text-center">
-              {currentQuestion.title}
-            </div>
-          )}
-          <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center">
-            {currentQuestion.questionText}
-          </h2>
-          {currentQuestion.description && (
-            <p className="text-sm text-gray-700 text-center mb-4">
-              {currentQuestion.description}
-            </p>
-          )}
-          {currentQuestion.imageUrl && (
-            <div className="flex justify-center mb-6">
-              <img
-                src={currentQuestion.imageUrl}
-                alt="Fragenbild"
-                className="max-w-full max-h-64 rounded-lg border-2 border-gray-300"
-              />
-            </div>
-          )}
+      {/* Question */}
+      <div className="bg-white rounded-lg shadow-lg p-4 mb-3 flex-1 flex flex-col overflow-hidden">
+        {currentQuestion.title && (
+          <div className="text-base font-medium text-gray-600 mb-2 text-center">
+            {currentQuestion.title}
+          </div>
+        )}
+        <h2 className="text-2xl font-bold text-gray-900 mb-3 text-center">
+          {currentQuestion.questionText}
+        </h2>
+        {currentQuestion.description && (
+          <p className="text-base text-gray-700 text-center mb-3">
+            {currentQuestion.description}
+          </p>
+        )}
+        {currentQuestion.imageUrl && (
+          <div className="flex justify-center mb-3 flex-1">
+            <img
+              src={currentQuestion.imageUrl}
+              alt="Fragenbild"
+              className="max-h-64 object-contain rounded-lg border-2 border-gray-300"
+            />
+          </div>
+        )}
 
-          <div className="space-y-3">
+        <div className={`${currentQuestion.answers.some(a => a.imageUrl) ? 'flex-1' : ''} ${
+          currentQuestion.answers.length === 2 ? "grid grid-cols-2 gap-2" :
+          currentQuestion.answers.length === 4 ? "grid grid-cols-2 gap-2" :
+          "flex flex-col gap-2"
+        }`}>
             {currentQuestion.answers.map((answer, index) => {
               const isSelected = selectedAnswer === answer.id;
               const isRevealed = revealedAnswerId !== null;
               const isCorrectAnswer = answer.isCorrect;
+              const hasImages = currentQuestion.answers.some(a => a.imageUrl);
 
-              let buttonClass = "w-full text-left px-6 py-4 rounded-lg border-4 transition font-bold text-lg ";
+              let buttonClass = `w-full text-left p-3 rounded-lg border-4 transition font-bold text-base relative flex flex-col ${hasImages ? 'h-full' : ''} `;
 
               if (isRevealed) {
                 if (isCorrectAnswer) {
@@ -391,33 +396,45 @@ export default function PlayerGamePage() {
                   disabled={selectedAnswer !== null}
                   className={buttonClass}
                 >
-                  <div className="flex items-center justify-between">
-                    <span>
+                  {answer.answerText && (
+                    <span className="mb-1">
                       {String.fromCharCode(65 + index)}. {answer.answerText}
                     </span>
-                    {isRevealed && isCorrectAnswer && (
-                      <span className="text-green-600 text-2xl">✓</span>
-                    )}
-                    {isRevealed && isSelected && !isCorrectAnswer && (
-                      <span className="text-red-600 text-2xl">✗</span>
-                    )}
-                  </div>
+                  )}
+                  {answer.imageUrl && (
+                    <div className="flex-1 relative min-h-[120px]">
+                      <img
+                        src={answer.imageUrl}
+                        alt="Antwortbild"
+                        className="absolute inset-0 w-full h-full object-cover rounded"
+                      />
+                    </div>
+                  )}
+                  {isRevealed && (
+                    <div className="absolute top-2 right-2">
+                      {isCorrectAnswer && (
+                        <span className="text-green-600 text-xl bg-white rounded-full px-2">✓</span>
+                      )}
+                      {isSelected && !isCorrectAnswer && (
+                        <span className="text-red-600 text-xl bg-white rounded-full px-2">✗</span>
+                      )}
+                    </div>
+                  )}
                 </button>
               );
             })}
           </div>
         </div>
 
-        {/* Status */}
-        {gameStatus === "answered" && revealedAnswerId === null && (
-          <div className="bg-white rounded-lg shadow-lg p-6 text-center">
-            <div className="text-2xl mb-2">⏳</div>
-            <p className="text-gray-700 font-medium">
-              Warte auf die anderen Spieler...
-            </p>
-          </div>
-        )}
-      </div>
+      {/* Status */}
+      {gameStatus === "answered" && revealedAnswerId === null && (
+        <div className="bg-white rounded-lg shadow-lg p-3 text-center flex-shrink-0">
+          <div className="text-xl mb-1">⏳</div>
+          <p className="text-gray-700 font-medium text-sm">
+            Warte auf die anderen Spieler...
+          </p>
+        </div>
+      )}
     </div>
   );
 }

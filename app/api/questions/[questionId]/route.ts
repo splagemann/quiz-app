@@ -10,22 +10,68 @@ export async function PUT(
     const body = await request.json();
     const { title, questionText, description, imageUrl, answers } = body;
 
+    const questionIdNum = parseInt(questionId);
+
+    // Get existing answers
+    const existingAnswers = await prisma.answer.findMany({
+      where: { questionId: questionIdNum },
+    });
+
+    // Separate new answers (negative IDs) from existing ones
+    const newAnswers = answers.filter((a: { id: number }) => a.id < 0);
+    const updatedAnswers = answers.filter((a: { id: number }) => a.id > 0);
+    const updatedAnswerIds = updatedAnswers.map((a: { id: number }) => a.id);
+
+    // Delete answers that are not in the updated list
+    const answersToDelete = existingAnswers.filter(
+      (a) => !updatedAnswerIds.includes(a.id)
+    );
+
+    for (const answer of answersToDelete) {
+      // Delete player answers first
+      await prisma.playerAnswer.deleteMany({
+        where: { answerId: answer.id },
+      });
+      // Then delete the answer
+      await prisma.answer.delete({
+        where: { id: answer.id },
+      });
+    }
+
+    // Update existing answers
+    for (const answer of updatedAnswers) {
+      await prisma.answer.update({
+        where: { id: answer.id },
+        data: {
+          answerText: answer.text,
+          imageUrl: answer.imageUrl,
+          isCorrect: answer.isCorrect,
+        },
+      });
+    }
+
+    // Create new answers
+    for (let i = 0; i < newAnswers.length; i++) {
+      const answer = newAnswers[i];
+      await prisma.answer.create({
+        data: {
+          questionId: questionIdNum,
+          answerText: answer.text,
+          imageUrl: answer.imageUrl,
+          isCorrect: answer.isCorrect,
+          orderIndex: existingAnswers.length + i,
+        },
+      });
+    }
+
+    // Update the question itself
     const question = await prisma.question.update({
-      where: { id: parseInt(questionId) },
+      where: { id: questionIdNum },
       data: {
         title,
         questionText,
         description,
         imageUrl,
-        answers: {
-          updateMany: answers.map((answer: { id: number; text: string; isCorrect: boolean }) => ({
-            where: { id: answer.id },
-            data: {
-              answerText: answer.text,
-              isCorrect: answer.isCorrect,
-            },
-          })),
-        },
       },
       include: {
         answers: true,
