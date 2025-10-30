@@ -499,7 +499,7 @@ export default function QuestionManager({
                     </div>
                     {(editQuestionImageUrl || question.imageUrl) && (
                       <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                        {t('currentImage', { url: editQuestionImageUrl || question.imageUrl })}
+                        {t('currentImage', { url: editQuestionImageUrl || question.imageUrl || '' })}
                       </p>
                     )}
                   </div>
