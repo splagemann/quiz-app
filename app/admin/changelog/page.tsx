@@ -3,10 +3,18 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { BackButton } from "@/app/components/BackButton";
 import { ReactNode } from 'react';
+import { isAuthenticated } from "@/lib/auth";
+import AuthForm from "@/app/components/AuthForm";
 
 export const dynamic = 'force-dynamic';
 
 export default async function ChangelogPage() {
+  // Check authentication
+  const authenticated = await isAuthenticated();
+  if (!authenticated) {
+    return <AuthForm redirectTo="/admin/changelog" />;
+  }
+
   const t = await getTranslations('admin');
   const tCommon = await getTranslations('common');
 

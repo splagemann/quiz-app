@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.3] - 2025-10-31
+
+### Fixed
+- DEFAULT_LANG environment variable now properly changes the default application language
+- ADMIN_PASSPHRASE environment variable now correctly enforces authentication on admin and host pages
+- CHANGELOG.md file is now included in Docker image (fixes 404 error on /admin/changelog)
+
+### Added
+- Authentication guards on all admin pages (/admin, /admin/create, /admin/[quizId]/edit, /admin/changelog)
+- Authentication guard on host landing page (/host)
+- Authentication prompt form shows when ADMIN_PASSPHRASE is configured
+
+### Changed
+- Updated lib/i18nConfig.ts to read DEFAULT_LANG from environment variable with fallback to 'en'
+- Converted /host page from client component to server component for authentication support
+
 ## [1.1.2] - 2025-10-31
 
 ### Fixed
