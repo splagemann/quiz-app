@@ -238,7 +238,7 @@ Automated Docker image creation, publishing, and release management:
 - **Triggers**: Pull requests to `main` branch
 - **Jobs**:
   - **Docker Build Test**: Validates Dockerfile builds successfully (linux/amd64 only, no push)
-  - **TypeScript Check**: Runs type checking and Next.js build
+  - **Build Check**: Runs Next.js build (includes TypeScript checking)
 - **Purpose**: Catch build errors before merging to main
 
 #### Docker Publish (`.github/workflows/docker-publish.yml`)
