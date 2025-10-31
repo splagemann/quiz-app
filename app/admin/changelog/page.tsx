@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { BackButton } from "@/app/components/BackButton";
+import { ReactNode } from 'react';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,7 +16,7 @@ export default async function ChangelogPage() {
 
   // Simple markdown parsing for display
   const lines = changelogContent.split('\n');
-  const parsedContent: JSX.Element[] = [];
+  const parsedContent: ReactNode[] = [];
 
   lines.forEach((line, index) => {
     if (line.startsWith('# ')) {
