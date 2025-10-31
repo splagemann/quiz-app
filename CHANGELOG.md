@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.4] - 2025-10-31
+
+### Fixed
+- Authentication form now displays proper translations instead of showing translation keys
+
+### Added
+- Complete translations for authentication form in English and German
+  - Auth form title and description
+  - Passphrase field label and placeholder
+  - Error messages for invalid passphrase
+  - Submit button text
+
 ## [1.1.3] - 2025-10-31
 
 ### Fixed
@@ -187,7 +199,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Environment-based configuration
 - German date formatting
 
-[Unreleased]: https://github.com/splagemann/quiz-app/compare/v1.1.1...HEAD
+[Unreleased]: https://github.com/splagemann/quiz-app/compare/v1.1.4...HEAD
+[1.1.4]: https://github.com/splagemann/quiz-app/compare/v1.1.3...v1.1.4
+[1.1.3]: https://github.com/splagemann/quiz-app/compare/v1.1.2...v1.1.3
+[1.1.2]: https://github.com/splagemann/quiz-app/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/splagemann/quiz-app/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/splagemann/quiz-app/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/splagemann/quiz-app/compare/v1.0.0...v1.0.1
