@@ -4,11 +4,19 @@ import { getLocale } from 'next-intl/server';
 import { prisma } from "@/lib/prisma";
 import { LanguageSelector } from "@/app/components/LanguageSelector";
 import { DarkModeToggle } from "@/app/components/DarkModeToggle";
+import { isAuthenticated } from "@/lib/auth";
+import AuthForm from "@/app/components/AuthForm";
 import packageJson from "@/package.json";
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminPage() {
+  // Check authentication
+  const authenticated = await isAuthenticated();
+  if (!authenticated) {
+    return <AuthForm redirectTo="/admin" />;
+  }
+
   const t = await getTranslations('admin');
   const tCommon = await getTranslations('common');
   const locale = await getLocale();

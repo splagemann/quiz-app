@@ -5,6 +5,8 @@ import { LanguageSelector } from "@/app/components/LanguageSelector";
 import { DarkModeToggle } from "@/app/components/DarkModeToggle";
 import { QuizLanguageSelector } from "@/app/components/QuizLanguageSelector";
 import { BackButton } from "@/app/components/BackButton";
+import { isAuthenticated } from "@/lib/auth";
+import AuthForm from "@/app/components/AuthForm";
 
 async function createQuiz(formData: FormData) {
   "use server";
@@ -31,6 +33,12 @@ async function createQuiz(formData: FormData) {
 export const dynamic = 'force-dynamic';
 
 export default async function CreateQuizPage() {
+  // Check authentication
+  const authenticated = await isAuthenticated();
+  if (!authenticated) {
+    return <AuthForm redirectTo="/admin/create" />;
+  }
+
   const t = await getTranslations('admin');
   const tCommon = await getTranslations('common');
 

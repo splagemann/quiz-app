@@ -1,10 +1,18 @@
-"use client";
-
 import Link from "next/link";
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
+import { isAuthenticated } from "@/lib/auth";
+import AuthForm from "@/app/components/AuthForm";
 
-export default function HostPage() {
-  const t = useTranslations('home');
+export const dynamic = 'force-dynamic';
+
+export default async function HostPage() {
+  // Check authentication
+  const authenticated = await isAuthenticated();
+  if (!authenticated) {
+    return <AuthForm redirectTo="/host" />;
+  }
+
+  const t = await getTranslations('home');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-600 to-purple-700 flex items-center justify-center px-4">

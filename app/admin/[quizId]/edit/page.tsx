@@ -8,6 +8,8 @@ import { LanguageSelector } from "@/app/components/LanguageSelector";
 import { DarkModeToggle } from "@/app/components/DarkModeToggle";
 import { QuizLanguageSelector } from "@/app/components/QuizLanguageSelector";
 import { BackButton } from "@/app/components/BackButton";
+import { isAuthenticated } from "@/lib/auth";
+import AuthForm from "@/app/components/AuthForm";
 
 export async function generateMetadata({
   params,
@@ -65,6 +67,13 @@ export default async function EditQuizPage({
   params: Promise<{ quizId: string }>;
 }) {
   const { quizId } = await params;
+
+  // Check authentication
+  const authenticated = await isAuthenticated();
+  if (!authenticated) {
+    return <AuthForm redirectTo={`/admin/${quizId}/edit`} />;
+  }
+
   const quizIdNum = parseInt(quizId);
 
   const t = await getTranslations('admin');
