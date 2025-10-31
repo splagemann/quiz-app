@@ -335,13 +335,19 @@ Pre-built Docker images are automatically published to GitHub Container Registry
 docker pull ghcr.io/splagemann/quiz-app:latest
 ```
 
-2. Run with Docker Compose:
+2. (Optional) Configure environment variables by creating a `.env` file:
+```bash
+cp .env.example .env
+# Edit .env to set DEFAULT_LANG and ADMIN_PASSPHRASE if needed
+```
+
+3. Run with Docker Compose:
 ```bash
 # The docker-compose.yml is already configured to use pre-built images
 docker compose up -d
 ```
 
-3. The application will be available at `http://localhost:3210`
+4. The application will be available at `http://localhost:3210`
 
 **Available Image Tags:**
 - `latest` - Latest stable build from main branch
@@ -395,6 +401,8 @@ docker run -d \
   -p 3210:3000 \
   -e DATABASE_URL=file:/app/data/quiz.db \
   -e NEXT_PUBLIC_APP_URL=http://localhost:3210 \
+  -e DEFAULT_LANG=en \
+  -e ADMIN_PASSPHRASE="" \
   -v quiz-data:/app/data \
   -v quiz-uploads:/app/public/uploads \
   --restart unless-stopped \
