@@ -233,7 +233,15 @@ npx prisma studio
 
 ### CI/CD Pipeline (GitHub Actions)
 Automated Docker image creation, publishing, and release management:
-- **Workflow File**: `.github/workflows/docker-publish.yml`
+
+#### PR Checks (`.github/workflows/pr-checks.yml`)
+- **Triggers**: Pull requests to `main` branch
+- **Jobs**:
+  - **Docker Build Test**: Validates Dockerfile builds successfully (linux/amd64 only, no push)
+  - **TypeScript Check**: Runs type checking and Next.js build
+- **Purpose**: Catch build errors before merging to main
+
+#### Docker Publish (`.github/workflows/docker-publish.yml`)
 - **Triggers**:
   - Push to `main` branch
   - Tags matching `v*` (e.g., v1.0.0)
@@ -266,6 +274,12 @@ The application can be deployed with Docker:
 ```bash
 docker pull ghcr.io/splagemann/quiz-app:latest
 ```
+
+**Environment Variables**:
+The `docker-compose.yml` supports the following environment variables:
+- `DEFAULT_LANG`: Default language for the application (defaults to 'en')
+- `ADMIN_PASSPHRASE`: Optional passphrase for /host and /admin sections
+- These can be set in a `.env` file or passed as environment variables
 
 ### Dynamic Rendering
 - Admin and game pages use `export const dynamic = 'force-dynamic'`
@@ -311,6 +325,8 @@ docker pull ghcr.io/splagemann/quiz-app:latest
 
 ### Environment Variables
 - `NEXT_PUBLIC_APP_URL`: Public URL for QR code and join links
+- `DEFAULT_LANG`: Default language for the application (defaults to 'en')
+- `ADMIN_PASSPHRASE`: Optional passphrase for /host and /admin sections
 - Configured in `.env` (see `.env.example`)
 
 ## API Routes
