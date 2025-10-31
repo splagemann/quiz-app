@@ -16,6 +16,14 @@
     "yes": "Ja",
     "no": "Nein"
   },
+  "auth": {
+    "title": "Authentifizierung erforderlich",
+    "authRequired": "Bitte gib die Passphrase ein, um auf diesen Bereich zuzugreifen",
+    "passphrase": "Passphrase",
+    "passphrasePlaceholder": "Passphrase eingeben",
+    "invalidPassphrase": "Ungültige Passphrase. Bitte versuche es erneut.",
+    "submit": "Anmelden"
+  },
   "home": {
     "title": "Quiz App",
     "welcome": "Willkommen zur Quiz App",
