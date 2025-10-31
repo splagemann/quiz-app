@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.2] - 2025-10-31
+
+### Fixed
+- Docker build error in changelog page (TypeScript JSX.Element type issue)
+- PR validation workflow now properly sets DATABASE_URL for Prisma generation
+
+### Added
+- PR validation workflow for automated build and Docker testing
+  - Validates Docker builds on all pull requests
+  - Runs Next.js build to catch TypeScript errors
+  - Prevents build failures from being merged to main
+- Environment variable support in Docker setup
+  - DEFAULT_LANG: Default language setting (defaults to 'en')
+  - ADMIN_PASSPHRASE: Optional passphrase for admin/host sections
+
+### Changed
+- Updated documentation for Docker environment variables
+- Improved CI/CD workflow descriptions in CLAUDE.md
+
 ## [1.1.1] - 2025-10-31
 
 ### Added
