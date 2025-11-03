@@ -427,7 +427,7 @@ export default function QuestionManager({
                 ]);
                 setAddQuestionImageUrl("");
               }}
-              className="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition"
+              className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition"
             >
               {tCommon('cancel')}
             </button>
@@ -628,7 +628,7 @@ export default function QuestionManager({
                         setEditAnswers([]);
                         setEditQuestionImageUrl("");
                       }}
-                      className="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition"
+                      className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition"
                     >
                       {tCommon('cancel')}
                     </button>
