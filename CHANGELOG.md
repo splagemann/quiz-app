@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2025-11-04
+
 ### Security
 - **API Route Authentication**: Added authentication checks to all admin-facing API routes
   - `/api/questions` (POST) - Create question endpoint now requires authentication
@@ -27,7 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Tests verify all admin API routes return 401 when unauthenticated
   - Tests verify path traversal attacks are prevented in file uploads
   - Updated existing tests to properly mock authentication
-  - All 205 tests pass with new security measures
+  - All 207 tests pass with new security measures
+  - Achieved 100% test coverage for all security-related route files
 
 ### Added
 - **Session Management Page** (`/admin/sessions`): Comprehensive admin interface for managing multiplayer game sessions
@@ -302,7 +305,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Environment-based configuration
 - German date formatting
 
-[Unreleased]: https://github.com/splagemann/quiz-app/compare/v1.1.4...HEAD
+[Unreleased]: https://github.com/splagemann/quiz-app/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/splagemann/quiz-app/compare/v1.2.0...v1.3.0
+[1.2.0]: https://github.com/splagemann/quiz-app/compare/v1.1.4...v1.2.0
 [1.1.4]: https://github.com/splagemann/quiz-app/compare/v1.1.3...v1.1.4
 [1.1.3]: https://github.com/splagemann/quiz-app/compare/v1.1.2...v1.1.3
 [1.1.2]: https://github.com/splagemann/quiz-app/compare/v1.1.1...v1.1.2
