@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **AdminHeader component**: Reusable header component for all admin pages
+  - Consistent header layout across admin area
+  - Integrated dark mode toggle and language selector
+  - Optional back button that appears in navigation button row
+  - Flexible button row for additional navigation actions via children prop
+  - Fully responsive with mobile support
+  - Internationalized back button text
+
+### Changed
+- **Admin page structure**: All admin pages now use AdminHeader component
+  - `/admin` - Quiz Management page
+  - `/admin/create` - Create Quiz page
+  - `/admin/[quizId]/edit` - Edit Quiz page
+  - `/admin/sessions` - Sessions Overview page
+  - `/admin/changelog` - Changelog page
+- **Sessions page**: Removed subtitle for cleaner header layout
+- **Back button positioning**: Moved from next to title to navigation button row
+
 ## [1.2.0] - 2025-11-03
 
 ### Added

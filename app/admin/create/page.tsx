@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation";
 import { getTranslations } from 'next-intl/server';
 import { prisma } from "@/lib/prisma";
-import { LanguageSelector } from "@/app/components/LanguageSelector";
-import { DarkModeToggle } from "@/app/components/DarkModeToggle";
+import { AdminHeader } from "@/app/components/AdminHeader";
 import { QuizLanguageSelector } from "@/app/components/QuizLanguageSelector";
 import { BackButton } from "@/app/components/BackButton";
 import { isAuthenticated } from "@/lib/auth";
@@ -46,29 +45,7 @@ export default async function CreateQuizPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-4 md:py-8 transition-colors">
       <div className="max-w-4xl mx-auto px-3 md:px-4">
-        <div className="flex flex-wrap justify-between items-center gap-3 mb-6 md:mb-8">
-          <div className="flex items-center gap-2 md:gap-4">
-            <BackButton
-              className="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors flex-shrink-0"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-                className="w-5 h-5 text-gray-700 dark:text-gray-200"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-              </svg>
-            </BackButton>
-            <h1 className="text-xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 truncate">{t('createNewQuiz')}</h1>
-          </div>
-          <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
-            <DarkModeToggle />
-            <LanguageSelector />
-          </div>
-        </div>
+        <AdminHeader title={t('createNewQuiz')} showBackButton={true} backButtonHref="/admin" />
 
         <form action={createQuiz} className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700/50 p-4 md:p-6">
           <div className="mb-6">
