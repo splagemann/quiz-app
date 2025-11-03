@@ -375,9 +375,13 @@ export default function QuestionManager({
                       ✕
                     </button>
                   )}
+                  {newAnswers.length <= 2 && (
+                    <div className="w-6 flex-shrink-0"></div>
+                  )}
                 </div>
-                <div className="ml-6 w-full max-w-full overflow-hidden">
-                  <div className="w-full max-w-full overflow-hidden">
+                <div className="flex items-start gap-2 w-full max-w-full">
+                  <div className="w-4 flex-shrink-0"></div>
+                  <div className="flex-1 min-w-0 w-full max-w-full overflow-hidden">
                     <input
                       type="file"
                       accept="image/*"
@@ -394,12 +398,13 @@ export default function QuestionManager({
                       }}
                       className="w-full max-w-full text-sm px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-600"
                     />
+                    {answer.imageUrl && (
+                      <div className="mt-2">
+                        <img src={answer.imageUrl} alt={t('answerImageAlt')} className="w-full max-w-xs rounded border border-gray-300 dark:border-gray-600" />
+                      </div>
+                    )}
                   </div>
-                  {answer.imageUrl && (
-                    <div className="mt-2">
-                      <img src={answer.imageUrl} alt={t('answerImageAlt')} className="w-full max-w-xs rounded border border-gray-300 dark:border-gray-600" />
-                    </div>
-                  )}
+                  <div className="w-6 flex-shrink-0"></div>
                 </div>
               </div>
             ))}
@@ -452,7 +457,7 @@ export default function QuestionManager({
                       type="text"
                       name="title"
                       defaultValue={question.title || ""}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                       placeholder={t('titlePlaceholder')}
                     />
                   </div>
@@ -465,7 +470,7 @@ export default function QuestionManager({
                       name="questionText"
                       defaultValue={question.questionText}
                       required
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                     />
                   </div>
                   <div>
@@ -476,7 +481,7 @@ export default function QuestionManager({
                       name="description"
                       defaultValue={question.description || ""}
                       rows={3}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                       placeholder={t('descriptionPlaceholder')}
                     />
                   </div>
@@ -495,7 +500,7 @@ export default function QuestionManager({
                               await handleImageUpload(file, true);
                             }
                           }}
-                          className="w-full max-w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-600 text-sm"
+                          className="w-full max-w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-700 text-sm"
                           disabled={uploadingImage}
                         />
                       </div>
@@ -534,7 +539,7 @@ export default function QuestionManager({
                       </div>
                     </div>
                     {editAnswers.map((answer, i) => (
-                      <div key={answer.id} className="mb-3 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-600 w-full max-w-full overflow-hidden">
+                      <div key={answer.id} className="mb-3 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 w-full max-w-full overflow-hidden">
                         <div className="flex items-center gap-2 mb-2 w-full max-w-full">
                           <input
                             type="radio"
@@ -556,7 +561,7 @@ export default function QuestionManager({
                               setEditAnswers(updated);
                             }}
                             placeholder={t('answerPlaceholder', { number: i + 1 })}
-                            className="flex-1 min-w-0 px-4 py-2 border border-gray-300 dark:border-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-500 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                            className="flex-1 min-w-0 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                           />
                           {editAnswers.length > 2 && (
                             <button
@@ -574,9 +579,13 @@ export default function QuestionManager({
                               ✕
                             </button>
                           )}
+                          {editAnswers.length <= 2 && (
+                            <div className="w-6 flex-shrink-0"></div>
+                          )}
                         </div>
-                        <div className="ml-6 w-full max-w-full overflow-hidden">
-                          <div className="w-full max-w-full overflow-hidden">
+                        <div className="flex items-start gap-2 w-full max-w-full">
+                          <div className="w-4 flex-shrink-0"></div>
+                          <div className="flex-1 min-w-0 w-full max-w-full overflow-hidden">
                             <input
                               type="file"
                               accept="image/*"
@@ -591,14 +600,15 @@ export default function QuestionManager({
                                   }
                                 }
                               }}
-                              className="w-full max-w-full text-sm px-2 py-1 border border-gray-300 dark:border-gray-500 rounded bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-500"
+                              className="w-full max-w-full text-sm px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-600"
                             />
+                            {answer.imageUrl && (
+                              <div className="mt-2">
+                                <img src={answer.imageUrl} alt={t('answerImageAlt')} className="w-full max-w-xs rounded border border-gray-300 dark:border-gray-600" />
+                              </div>
+                            )}
                           </div>
-                          {answer.imageUrl && (
-                            <div className="mt-2">
-                              <img src={answer.imageUrl} alt={t('answerImageAlt')} className="w-full max-w-xs rounded border border-gray-300 dark:border-gray-500" />
-                            </div>
-                          )}
+                          <div className="w-6 flex-shrink-0"></div>
                         </div>
                       </div>
                     ))}
