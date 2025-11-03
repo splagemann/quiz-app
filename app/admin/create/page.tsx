@@ -11,6 +11,12 @@ import { AdminFooter } from "@/app/components/AdminFooter";
 async function createQuiz(formData: FormData) {
   "use server";
 
+  // Re-check authentication (defense in depth)
+  const authenticated = await isAuthenticated();
+  if (!authenticated) {
+    throw new Error("Unauthorized");
+  }
+
   const title = formData.get("title") as string;
   const description = formData.get("description") as string;
   const language = (formData.get("language") as string) || "en";

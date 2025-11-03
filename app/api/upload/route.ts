@@ -1,8 +1,52 @@
 import { NextRequest, NextResponse } from "next/server";
 import { writeFile } from "fs/promises";
 import path from "path";
+import { isAuthenticated } from "@/lib/auth";
+
+// Map file signatures (magic numbers) to extensions
+const FILE_SIGNATURES: Record<string, string> = {
+  'ffd8ff': 'jpg',      // JPEG
+  '89504e47': 'png',    // PNG
+  '47494638': 'gif',    // GIF
+  '52494646': 'webp',   // WEBP (RIFF header)
+};
+
+/**
+ * Validate file type by checking magic numbers (file signature)
+ * More reliable than trusting MIME type from client
+ */
+function validateFileSignature(buffer: Buffer): string | null {
+  // Check first 4 bytes for signature
+  const signature = buffer.slice(0, 4).toString('hex');
+
+  // Check for exact matches
+  for (const [sig, ext] of Object.entries(FILE_SIGNATURES)) {
+    if (signature.startsWith(sig)) {
+      return ext;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Sanitize filename by removing all path separators and special characters
+ */
+function sanitizeFilename(filename: string): string {
+  // Remove path separators and other dangerous characters
+  return filename.replace(/[^a-zA-Z0-9._-]/g, '');
+}
 
 export async function POST(request: NextRequest) {
+  // Check authentication
+  const authenticated = await isAuthenticated();
+  if (!authenticated) {
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
   try {
     const formData = await request.formData();
     const file = formData.get("file") as File;
@@ -14,16 +58,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate file type
-    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
-    if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json(
-        { error: "Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed." },
-        { status: 400 }
-      );
-    }
-
-    // Validate file size (max 5MB)
+    // Validate file size first (max 5MB)
     const maxSize = 5 * 1024 * 1024; // 5MB
     if (file.size > maxSize) {
       return NextResponse.json(
@@ -32,21 +67,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate unique filename
-    const timestamp = Date.now();
-    const extension = file.name.split(".").pop();
-    const filename = `${timestamp}-${Math.random().toString(36).substring(7)}.${extension}`;
-
-    // Convert file to buffer
+    // Convert file to buffer for signature validation
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
+    // Validate file type by checking magic numbers (server-side validation)
+    const detectedExtension = validateFileSignature(buffer);
+    if (!detectedExtension) {
+      return NextResponse.json(
+        { error: "Invalid file type. Only JPEG, PNG, GIF, and WebP images are allowed." },
+        { status: 400 }
+      );
+    }
+
+    // Generate secure filename with validated extension
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substring(7);
+    const filename = `${timestamp}-${randomString}.${detectedExtension}`;
+
+    // Ensure filename contains no path separators (defense in depth)
+    const safeFilename = path.basename(filename);
+
     // Save file to public/uploads directory
-    const uploadPath = path.join(process.cwd(), "public", "uploads", filename);
+    const uploadPath = path.join(process.cwd(), "public", "uploads", safeFilename);
     await writeFile(uploadPath, buffer);
 
     // Return the URL
-    const imageUrl = `/uploads/${filename}`;
+    const imageUrl = `/uploads/${safeFilename}`;
 
     return NextResponse.json({ url: imageUrl });
   } catch (error) {

@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+- **API Route Authentication**: Added authentication checks to all admin-facing API routes
+  - `/api/questions` (POST) - Create question endpoint now requires authentication
+  - `/api/questions/[questionId]` (PUT, DELETE) - Update and delete endpoints now require authentication
+  - `/api/upload` (POST) - Image upload endpoint now requires authentication
+  - All endpoints return 401 Unauthorized for unauthenticated requests
+- **Server Action Authentication**: Added authentication checks to server actions (defense in depth)
+  - `createQuiz` server action now validates authentication
+  - `updateQuiz` server action now validates authentication
+  - `deleteQuiz` server action now validates authentication
+- **File Upload Security Enhancements**:
+  - Implemented server-side file type validation using magic numbers (file signatures)
+  - Added protection against path traversal attacks using `path.basename()`
+  - Replaced client-provided MIME type validation with server-side signature checking
+  - Validates JPEG (FFD8FF), PNG (89504E47), GIF (47494638), and WEBP (52494646) signatures
+  - Generates secure filenames independent of client input
+- **Test Coverage**: Added comprehensive integration tests for authentication
+  - Tests verify all admin API routes return 401 when unauthenticated
+  - Tests verify path traversal attacks are prevented in file uploads
+  - Updated existing tests to properly mock authentication
+  - All 205 tests pass with new security measures
+
 ### Added
 - **Session Management Page** (`/admin/sessions`): Comprehensive admin interface for managing multiplayer game sessions
   - Real-time session overview with automatic 10-second refresh

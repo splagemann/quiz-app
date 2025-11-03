@@ -5,6 +5,12 @@
 import { PUT, DELETE } from '@/app/api/questions/[questionId]/route';
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { isAuthenticated } from '@/lib/auth';
+
+// Mock authentication
+jest.mock('@/lib/auth', () => ({
+  isAuthenticated: jest.fn(),
+}));
 
 // Mock dependencies
 jest.mock('@/lib/prisma', () => ({
@@ -27,9 +33,12 @@ jest.mock('@/lib/prisma', () => ({
 
 describe('/api/questions/[questionId]', () => {
   const mockPrisma = prisma as jest.Mocked<typeof prisma>;
+  const mockIsAuthenticated = isAuthenticated as jest.MockedFunction<typeof isAuthenticated>;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Mock authenticated by default for existing tests
+    mockIsAuthenticated.mockResolvedValue(true);
   });
 
   describe('PUT', () => {
