@@ -2,8 +2,7 @@ import Link from "next/link";
 import { getTranslations } from 'next-intl/server';
 import { getLocale } from 'next-intl/server';
 import { prisma } from "@/lib/prisma";
-import { LanguageSelector } from "@/app/components/LanguageSelector";
-import { DarkModeToggle } from "@/app/components/DarkModeToggle";
+import { AdminHeader } from "@/app/components/AdminHeader";
 import { isAuthenticated } from "@/lib/auth";
 import AuthForm from "@/app/components/AuthForm";
 import { AdminFooter } from "@/app/components/AdminFooter";
@@ -35,22 +34,20 @@ export default async function AdminPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-4 md:py-8 transition-colors">
       <div className="max-w-4xl mx-auto px-3 md:px-4">
-        <div className="flex flex-wrap justify-between items-center gap-3 mb-6 md:mb-8">
-          <h1 className="text-xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">{t('quizManagement')}</h1>
-          <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
-            <DarkModeToggle />
-            <LanguageSelector />
-          </div>
-        </div>
-
-        <div className="mb-6">
+        <AdminHeader title={t('quizManagement')}>
           <Link
             href="/admin/create"
-            className="flex items-center justify-center bg-blue-600 dark:bg-blue-500 text-white px-6 h-10 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition w-full sm:w-auto sm:inline-flex"
+            className="flex items-center justify-center bg-gray-800 dark:bg-gray-800 text-white px-6 h-10 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-500 transition w-full sm:w-auto sm:inline-flex"
           >
             {t('createNewQuiz')}
           </Link>
-        </div>
+          <Link
+            href="/admin/sessions"
+            className="flex items-center justify-center bg-gray-800 dark:bg-gray-800 text-white px-6 h-10 rounded-lg hover:bg-purple-600 dark:hover:bg-purple-500 transition w-full sm:w-auto sm:inline-flex"
+          >
+            {t('viewSessions')}
+          </Link>
+        </AdminHeader>
 
         {quizzes.length === 0 ? (
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700/50 p-6 md:p-8 text-center">
@@ -61,7 +58,7 @@ export default async function AdminPage() {
             {quizzes.map((quiz) => (
               <div
                 key={quiz.id}
-                className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700/50 p-4 md:p-6 hover:shadow-md dark:hover:shadow-gray-700/70 transition"
+                className="bg-gray-200 dark:bg-gray-700 rounded-lg shadow dark:shadow-gray-700/50 p-4 md:p-6 hover:shadow-md dark:hover:shadow-gray-700/70 transition"
               >
                 <div className="flex flex-col sm:flex-row justify-between items-start gap-3">
                   <div className="flex-1 min-w-0 w-full sm:w-auto">
@@ -80,7 +77,7 @@ export default async function AdminPage() {
                   </div>
                   <Link
                     href={`/admin/${quiz.id}/edit`}
-                    className="bg-gray-800 dark:bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-900 dark:hover:bg-gray-600 transition text-center w-full sm:w-auto sm:ml-4 flex-shrink-0"
+                    className="bg-gray-800 dark:bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-900 dark:hover:bg-gray-600 transition text-center w-full sm:w-auto sm:ml-4 flex-shrink-0"
                   >
                     {tCommon('edit')}
                   </Link>

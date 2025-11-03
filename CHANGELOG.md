@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Session Management Page** (`/admin/sessions`): Comprehensive admin interface for managing multiplayer game sessions
+  - Real-time session overview with automatic 10-second refresh
+  - Status-based grouping (in progress, waiting, finished) with session counts
+  - Individual session deletion with confirmation dialog
+  - Bulk delete operations:
+    - Clear all finished sessions
+    - Clear stale in-progress sessions (older than 5 hours)
+    - Clear stale waiting sessions (older than 5 hours)
+  - Detailed session information display:
+    - Session code, quiz title, creation/start/finish times
+    - Player list with connection status and scores
+    - Current question number for in-progress games
+  - Mobile-responsive layout with dark mode support
+  - Full internationalization (English & German)
+  - API endpoint for batch session operations (`/api/admin/sessions`)
+- **AdminHeader component**: Reusable header component for all admin pages
+  - Consistent header layout across admin area
+  - Integrated dark mode toggle and language selector
+  - Optional back button that appears in navigation button row
+  - Flexible button row for additional navigation actions via children prop
+  - Fully responsive with mobile support
+  - Internationalized back button text
+
+### Changed
+- **Admin page structure**: All admin pages now use AdminHeader component
+  - `/admin` - Quiz Management page with "View Sessions" button
+  - `/admin/create` - Create Quiz page
+  - `/admin/[quizId]/edit` - Edit Quiz page
+  - `/admin/sessions` - Sessions Overview page
+  - `/admin/changelog` - Changelog page
+- **Sessions page**: Removed subtitle for cleaner header layout
+- **Back button positioning**: Moved from next to title to navigation button row
+
 ## [1.2.0] - 2025-11-03
 
 ### Added

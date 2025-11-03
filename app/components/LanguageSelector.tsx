@@ -41,7 +41,7 @@ export function LanguageSelector() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         disabled={isPending || isChanging}
-        className="flex items-center gap-2 px-3 h-10 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        className="flex items-center gap-2 px-3 h-10 rounded-lg bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
         aria-label="Select language"
       >
         <span className="text-lg">{flagMap[currentLocale]}</span>

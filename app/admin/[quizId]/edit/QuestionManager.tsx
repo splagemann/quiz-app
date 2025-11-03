@@ -236,12 +236,12 @@ export default function QuestionManager({
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700/50 p-4 md:p-6">
+    <div className="bg-gray-200 dark:bg-gray-700 rounded-lg shadow dark:shadow-gray-700/50 p-4 md:p-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
         <h2 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-gray-100">{t('questionsCount', { count: initialQuestions.length })}</h2>
         <button
           onClick={() => setIsAddingQuestion(true)}
-          className="bg-green-600 dark:bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-700 dark:hover:bg-green-600 transition w-full sm:w-auto"
+          className="bg-gray-800 dark:bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-green-600 dark:hover:bg-green-500 transition w-full sm:w-auto"
         >
           {tQuestion('addQuestion')}
         </button>
@@ -261,7 +261,7 @@ export default function QuestionManager({
             <input
               type="text"
               name="title"
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
               placeholder={t('titlePlaceholder')}
             />
           </div>
@@ -273,7 +273,7 @@ export default function QuestionManager({
               type="text"
               name="questionText"
               required
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
             />
           </div>
           <div className="mb-4">
@@ -283,7 +283,7 @@ export default function QuestionManager({
             <textarea
               name="description"
               rows={3}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
               placeholder={t('descriptionPlaceholder')}
             />
           </div>
@@ -291,25 +291,27 @@ export default function QuestionManager({
             <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
               {t('imageOptional')}
             </label>
-            <div className="flex gap-2">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={async (e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    await handleImageUpload(file, false);
-                  }
-                }}
-                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-700"
-                disabled={uploadingImage}
-              />
+            <div className="flex flex-col sm:flex-row gap-2 w-full">
+              <div className="flex-1 min-w-0 w-full overflow-hidden">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      await handleImageUpload(file, false);
+                    }
+                  }}
+                  className="w-full max-w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-700 text-sm"
+                  disabled={uploadingImage}
+                />
+              </div>
               {uploadingImage && (
-                <span className="text-gray-600 dark:text-gray-400 py-2">{t('uploading')}</span>
+                <span className="text-gray-600 dark:text-gray-400 py-2 text-sm whitespace-nowrap">{t('uploading')}</span>
               )}
             </div>
             {addQuestionImageUrl && (
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 break-all">
                 {t('imageUploaded', { url: addQuestionImageUrl })}
               </p>
             )}
@@ -325,7 +327,7 @@ export default function QuestionManager({
                   <button
                     type="button"
                     onClick={() => setNewAnswers([...newAnswers, { text: "", imageUrl: "", isCorrect: false }])}
-                    className="text-sm bg-green-500 dark:bg-green-600 text-white px-3 py-1 rounded hover:bg-green-600 dark:hover:bg-green-700 transition"
+                    className="text-sm bg-gray-800 dark:bg-gray-800 text-white px-3 py-1 rounded hover:bg-green-600 dark:hover:bg-green-500 transition"
                   >
                     {t('addAnswerButton')}
                   </button>
@@ -333,8 +335,8 @@ export default function QuestionManager({
               </div>
             </div>
             {newAnswers.map((answer, i) => (
-              <div key={i} className="mb-3 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700">
-                <div className="flex items-center gap-2 mb-2">
+              <div key={i} className="mb-3 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 w-full max-w-full overflow-hidden">
+                <div className="flex items-center gap-2 mb-2 w-full max-w-full">
                   <input
                     type="radio"
                     checked={answer.isCorrect}
@@ -344,7 +346,7 @@ export default function QuestionManager({
                         isCorrect: idx === i
                       })));
                     }}
-                    className="w-4 h-4 text-green-600"
+                    className="w-4 h-4 text-green-600 flex-shrink-0"
                   />
                   <input
                     type="text"
@@ -355,7 +357,7 @@ export default function QuestionManager({
                       setNewAnswers(updated);
                     }}
                     placeholder={t('answerPlaceholder', { number: i + 1 })}
-                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                    className="flex-1 min-w-0 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                   />
                   {newAnswers.length > 2 && (
                     <button
@@ -368,34 +370,41 @@ export default function QuestionManager({
                         }
                         setNewAnswers(updated);
                       }}
-                      className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 px-2"
+                      className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 px-2 flex-shrink-0"
                     >
                       ✕
                     </button>
                   )}
-                </div>
-                <div className="ml-6">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        const url = await handleAnswerImageUpload(file);
-                        if (url) {
-                          const updated = [...newAnswers];
-                          updated[i].imageUrl = url;
-                          setNewAnswers(updated);
-                        }
-                      }
-                    }}
-                    className="text-sm px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-gray-100 dark:bg-gray-600"
-                  />
-                  {answer.imageUrl && (
-                    <div className="mt-2">
-                      <img src={answer.imageUrl} alt={t('answerImageAlt')} className="w-full max-w-xs rounded border border-gray-300 dark:border-gray-600" />
-                    </div>
+                  {newAnswers.length <= 2 && (
+                    <div className="w-6 flex-shrink-0"></div>
                   )}
+                </div>
+                <div className="flex items-start gap-2 w-full max-w-full">
+                  <div className="w-4 flex-shrink-0"></div>
+                  <div className="flex-1 min-w-0 w-full max-w-full overflow-hidden">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const url = await handleAnswerImageUpload(file);
+                          if (url) {
+                            const updated = [...newAnswers];
+                            updated[i].imageUrl = url;
+                            setNewAnswers(updated);
+                          }
+                        }
+                      }}
+                      className="w-full max-w-full text-sm px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-600"
+                    />
+                    {answer.imageUrl && (
+                      <div className="mt-2">
+                        <img src={answer.imageUrl} alt={t('answerImageAlt')} className="w-full max-w-xs rounded border border-gray-300 dark:border-gray-600" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="w-6 flex-shrink-0"></div>
                 </div>
               </div>
             ))}
@@ -404,7 +413,7 @@ export default function QuestionManager({
           <div className="flex gap-2">
             <button
               type="submit"
-              className="bg-green-600 dark:bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-700 dark:hover:bg-green-600 transition"
+              className="bg-gray-800 dark:bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-green-600 dark:hover:bg-green-500 transition"
             >
               {t('saveQuestion')}
             </button>
@@ -418,7 +427,7 @@ export default function QuestionManager({
                 ]);
                 setAddQuestionImageUrl("");
               }}
-              className="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition"
+              className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition"
             >
               {tCommon('cancel')}
             </button>
@@ -434,7 +443,7 @@ export default function QuestionManager({
       ) : (
         <div className="space-y-4">
           {initialQuestions.map((question, index) => (
-            <div key={question.id} className="border border-gray-300 dark:border-gray-600 rounded-lg p-4 bg-white dark:bg-gray-700">
+            <div key={question.id} className="border border-gray-300 dark:border-gray-600 rounded-lg p-4 bg-gray-100 dark:bg-gray-600">
               {editingQuestionId === question.id ? (
                 <form
                   action={(formData) => handleUpdateQuestion(question.id, formData)}
@@ -448,7 +457,7 @@ export default function QuestionManager({
                       type="text"
                       name="title"
                       defaultValue={question.title || ""}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                       placeholder={t('titlePlaceholder')}
                     />
                   </div>
@@ -461,7 +470,7 @@ export default function QuestionManager({
                       name="questionText"
                       defaultValue={question.questionText}
                       required
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                     />
                   </div>
                   <div>
@@ -472,7 +481,7 @@ export default function QuestionManager({
                       name="description"
                       defaultValue={question.description || ""}
                       rows={3}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                       placeholder={t('descriptionPlaceholder')}
                     />
                   </div>
@@ -480,25 +489,27 @@ export default function QuestionManager({
                     <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
                       {t('imageOptional')}
                     </label>
-                    <div className="flex gap-2">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={async (e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            await handleImageUpload(file, true);
-                          }
-                        }}
-                        className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-600"
-                        disabled={uploadingImage}
-                      />
+                    <div className="flex flex-col sm:flex-row gap-2 w-full">
+                      <div className="flex-1 min-w-0 w-full overflow-hidden">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              await handleImageUpload(file, true);
+                            }
+                          }}
+                          className="w-full max-w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-700 text-sm"
+                          disabled={uploadingImage}
+                        />
+                      </div>
                       {uploadingImage && (
-                        <span className="text-gray-600 dark:text-gray-400 py-2">{t('uploading')}</span>
+                        <span className="text-gray-600 dark:text-gray-400 py-2 text-sm whitespace-nowrap">{t('uploading')}</span>
                       )}
                     </div>
                     {(editQuestionImageUrl || question.imageUrl) && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 break-all">
                         {t('currentImage', { url: editQuestionImageUrl || question.imageUrl || '' })}
                       </p>
                     )}
@@ -520,7 +531,7 @@ export default function QuestionManager({
                               isCorrect: false,
                               orderIndex: editAnswers.length
                             }])}
-                            className="text-sm bg-blue-500 dark:bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-600 dark:hover:bg-blue-700 transition"
+                            className="text-sm bg-gray-800 dark:bg-gray-800 text-white px-3 py-1 rounded hover:bg-blue-600 dark:hover:bg-blue-500 transition"
                           >
                             {t('addAnswerButton')}
                           </button>
@@ -528,8 +539,8 @@ export default function QuestionManager({
                       </div>
                     </div>
                     {editAnswers.map((answer, i) => (
-                      <div key={answer.id} className="mb-3 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-600">
-                        <div className="flex items-center gap-2 mb-2">
+                      <div key={answer.id} className="mb-3 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 w-full max-w-full overflow-hidden">
+                        <div className="flex items-center gap-2 mb-2 w-full max-w-full">
                           <input
                             type="radio"
                             checked={answer.isCorrect}
@@ -539,7 +550,7 @@ export default function QuestionManager({
                                 isCorrect: idx === i
                               })));
                             }}
-                            className="w-4 h-4 text-blue-600"
+                            className="w-4 h-4 text-blue-600 flex-shrink-0"
                           />
                           <input
                             type="text"
@@ -550,7 +561,7 @@ export default function QuestionManager({
                               setEditAnswers(updated);
                             }}
                             placeholder={t('answerPlaceholder', { number: i + 1 })}
-                            className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-500 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                            className="flex-1 min-w-0 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                           />
                           {editAnswers.length > 2 && (
                             <button
@@ -563,34 +574,41 @@ export default function QuestionManager({
                                 }
                                 setEditAnswers(updated);
                               }}
-                              className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 px-2"
+                              className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 px-2 flex-shrink-0"
                             >
                               ✕
                             </button>
                           )}
-                        </div>
-                        <div className="ml-6">
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={async (e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                const url = await handleAnswerImageUpload(file);
-                                if (url) {
-                                  const updated = [...editAnswers];
-                                  updated[i].imageUrl = url;
-                                  setEditAnswers(updated);
-                                }
-                              }
-                            }}
-                            className="text-sm px-2 py-1 border border-gray-300 dark:border-gray-500 rounded text-gray-900 dark:text-gray-100 dark:bg-gray-500"
-                          />
-                          {answer.imageUrl && (
-                            <div className="mt-2">
-                              <img src={answer.imageUrl} alt={t('answerImageAlt')} className="w-full max-w-xs rounded border border-gray-300 dark:border-gray-500" />
-                            </div>
+                          {editAnswers.length <= 2 && (
+                            <div className="w-6 flex-shrink-0"></div>
                           )}
+                        </div>
+                        <div className="flex items-start gap-2 w-full max-w-full">
+                          <div className="w-4 flex-shrink-0"></div>
+                          <div className="flex-1 min-w-0 w-full max-w-full overflow-hidden">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const url = await handleAnswerImageUpload(file);
+                                  if (url) {
+                                    const updated = [...editAnswers];
+                                    updated[i].imageUrl = url;
+                                    setEditAnswers(updated);
+                                  }
+                                }
+                              }}
+                              className="w-full max-w-full text-sm px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-600"
+                            />
+                            {answer.imageUrl && (
+                              <div className="mt-2">
+                                <img src={answer.imageUrl} alt={t('answerImageAlt')} className="w-full max-w-xs rounded border border-gray-300 dark:border-gray-600" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="w-6 flex-shrink-0"></div>
                         </div>
                       </div>
                     ))}
@@ -599,7 +617,7 @@ export default function QuestionManager({
                   <div className="flex gap-2">
                     <button
                       type="submit"
-                      className="bg-blue-600 dark:bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition"
+                      className="bg-gray-800 dark:bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-500 transition"
                     >
                       {tCommon('save')}
                     </button>
@@ -610,7 +628,7 @@ export default function QuestionManager({
                         setEditAnswers([]);
                         setEditQuestionImageUrl("");
                       }}
-                      className="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition"
+                      className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition"
                     >
                       {tCommon('cancel')}
                     </button>

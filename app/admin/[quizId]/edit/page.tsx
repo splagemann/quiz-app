@@ -4,10 +4,8 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import QuestionManager from "./QuestionManager";
 import DeleteButton from "./DeleteButton";
-import { LanguageSelector } from "@/app/components/LanguageSelector";
-import { DarkModeToggle } from "@/app/components/DarkModeToggle";
+import { AdminHeader } from "@/app/components/AdminHeader";
 import { QuizLanguageSelector } from "@/app/components/QuizLanguageSelector";
-import { BackButton } from "@/app/components/BackButton";
 import { isAuthenticated } from "@/lib/auth";
 import AuthForm from "@/app/components/AuthForm";
 import { AdminFooter } from "@/app/components/AdminFooter";
@@ -108,32 +106,10 @@ export default async function EditQuizPage({
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-4 md:py-8 transition-colors">
       <div className="max-w-4xl mx-auto px-3 md:px-4">
-        <div className="flex flex-wrap justify-between items-center gap-3 mb-6 md:mb-8">
-          <div className="flex items-center gap-2 md:gap-4">
-            <BackButton
-              className="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors flex-shrink-0"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-                className="w-5 h-5 text-gray-700 dark:text-gray-200"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-              </svg>
-            </BackButton>
-            <h1 className="text-xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 truncate">{t('editQuiz')}</h1>
-          </div>
-          <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
-            <DarkModeToggle />
-            <LanguageSelector />
-          </div>
-        </div>
+        <AdminHeader title={t('editQuiz')} showBackButton={true} backButtonHref="/admin" />
 
         {/* Quiz Details Form */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700/50 p-4 md:p-6 mb-6 md:mb-8">
+        <div className="bg-gray-200 dark:bg-gray-700 rounded-lg shadow dark:shadow-gray-700/50 p-4 md:p-6 mb-6 md:mb-8">
           <h2 className="text-lg md:text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">{t('quizDetails')}</h2>
           <form id="quiz-form" action={updateQuizWithId}>
             <div className="mb-4">
@@ -149,7 +125,7 @@ export default async function EditQuizPage({
                 name="title"
                 required
                 defaultValue={quiz.title}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400"
               />
             </div>
 
@@ -165,7 +141,7 @@ export default async function EditQuizPage({
                 name="description"
                 rows={4}
                 defaultValue={quiz.description || ""}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400"
               />
             </div>
 
@@ -185,7 +161,7 @@ export default async function EditQuizPage({
             <button
               type="submit"
               form="quiz-form"
-              className="flex-1 bg-blue-600 dark:bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition font-medium"
+              className="flex-1 bg-gray-800 dark:bg-gray-800 text-white px-6 py-3 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-500 transition font-medium"
             >
               {t('updateQuiz')}
             </button>

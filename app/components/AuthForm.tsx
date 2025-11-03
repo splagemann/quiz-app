@@ -46,7 +46,7 @@ export default function AuthForm({ redirectTo }: AuthFormProps) {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 transition-colors">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-gray-700/50">
+      <div className="max-w-md w-full space-y-8 p-8 bg-gray-200 dark:bg-gray-700 rounded-lg shadow-md dark:shadow-gray-700/50">
         <div>
           <h2 className="text-center text-3xl font-bold text-gray-900 dark:text-gray-100">
             {t('title')}
@@ -67,7 +67,7 @@ export default function AuthForm({ redirectTo }: AuthFormProps) {
               required
               value={passphrase}
               onChange={(e) => setPassphrase(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-100 dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400"
               placeholder={t('passphrasePlaceholder')}
               disabled={isLoading}
             />
@@ -83,7 +83,7 @@ export default function AuthForm({ redirectTo }: AuthFormProps) {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-2 px-4 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white font-medium rounded-md disabled:bg-blue-300 dark:disabled:bg-blue-700 disabled:cursor-not-allowed transition-colors"
+              className="w-full py-2 px-4 bg-gray-800 dark:bg-gray-800 hover:bg-blue-600 dark:hover:bg-blue-500 text-white font-medium rounded-md disabled:bg-gray-600 dark:disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors"
             >
               {isLoading ? t('common.loading') : t('submit')}
             </button>
