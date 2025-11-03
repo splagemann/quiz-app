@@ -99,7 +99,7 @@ export default async function AdminPage() {
 
         <div className="mt-8 text-center">
           <Link
-            href="/host"
+            href="/"
             className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
           >
             {t('backToHome')}

@@ -108,7 +108,7 @@ function QuizPlayerContent({ quiz }: { quiz: Quiz }) {
               {tSolo('selectAnotherQuiz')}
             </Link>
             <Link
-              href="/host"
+              href="/"
               className="block text-blue-600 hover:text-blue-800 underline mt-4"
             >
               {tQuiz('backToHome')}

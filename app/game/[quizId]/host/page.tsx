@@ -398,7 +398,7 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
                 {tMultiplayer('newGame')}
               </button>
               <button
-                onClick={() => router.push("/host")}
+                onClick={() => router.push("/")}
                 className="bg-gray-600 text-white px-8 py-3 rounded-lg hover:bg-gray-700 transition font-bold w-full sm:w-auto"
               >
                 {tCommon('back')}
