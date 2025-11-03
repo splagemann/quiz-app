@@ -261,7 +261,7 @@ export default function AdminSessionsPage() {
                     <button
                       onClick={handleClearStaleInProgress}
                       disabled={clearingStaleInProgress}
-                      className="inline-flex items-center justify-center px-3 py-1.5 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm"
+                      className="inline-flex items-center justify-center px-3 py-1.5 bg-gray-800 dark:bg-gray-800 text-white rounded-lg hover:bg-orange-600 dark:hover:bg-orange-500 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm"
                     >
                       {clearingStaleInProgress ? t("clearingStaleInProgress") : t("clearStaleInProgress")}
                     </button>
@@ -286,7 +286,7 @@ export default function AdminSessionsPage() {
                     <button
                       onClick={handleClearStaleWaiting}
                       disabled={clearingStaleWaiting}
-                      className="inline-flex items-center justify-center px-3 py-1.5 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm"
+                      className="inline-flex items-center justify-center px-3 py-1.5 bg-gray-800 dark:bg-gray-800 text-white rounded-lg hover:bg-orange-600 dark:hover:bg-orange-500 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm"
                     >
                       {clearingStaleWaiting ? t("clearingStaleWaiting") : t("clearStaleWaiting")}
                     </button>
@@ -310,7 +310,7 @@ export default function AdminSessionsPage() {
                   <button
                     onClick={handleClearFinished}
                     disabled={clearingFinished}
-                    className="inline-flex items-center justify-center px-3 py-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm"
+                    className="inline-flex items-center justify-center px-3 py-1.5 bg-gray-800 dark:bg-gray-800 text-white rounded-lg hover:bg-red-600 dark:hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm"
                   >
                     {clearingFinished ? t("clearingFinished") : t("clearFinished")}
                   </button>
@@ -427,7 +427,7 @@ export default function AdminSessionsPage() {
                         handleDelete(session.id, session.sessionCode)
                       }
                       disabled={deletingId === session.id}
-                      className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm whitespace-nowrap"
+                      className="px-4 py-2 bg-gray-800 dark:bg-gray-800 text-white rounded-lg hover:bg-red-600 dark:hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm whitespace-nowrap"
                     >
                       {deletingId === session.id
                         ? t("deleting")
