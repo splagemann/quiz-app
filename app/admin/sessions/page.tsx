@@ -245,7 +245,7 @@ export default function AdminSessionsPage() {
 
         {/* Sessions List */}
         {sessions.length === 0 ? (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 text-center">
+          <div className="bg-gray-200 dark:bg-gray-700 rounded-lg shadow-md p-6 text-center">
             <p className="text-gray-700 dark:text-gray-300">{t("noSessions")}</p>
           </div>
         ) : (
@@ -330,7 +330,7 @@ export default function AdminSessionsPage() {
 
   function SessionCardContent({ session }: { session: GameSession }) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 sm:p-6">
+      <div className="bg-gray-200 dark:bg-gray-700 rounded-lg shadow-md p-4 sm:p-6">
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                   {/* Session Info */}
                   <div className="flex-1 space-y-3">

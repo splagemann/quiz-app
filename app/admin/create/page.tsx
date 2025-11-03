@@ -47,7 +47,7 @@ export default async function CreateQuizPage() {
       <div className="max-w-4xl mx-auto px-3 md:px-4">
         <AdminHeader title={t('createNewQuiz')} showBackButton={true} backButtonHref="/admin" />
 
-        <form action={createQuiz} className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700/50 p-4 md:p-6">
+        <form action={createQuiz} className="bg-gray-200 dark:bg-gray-700 rounded-lg shadow dark:shadow-gray-700/50 p-4 md:p-6">
           <div className="mb-6">
             <label
               htmlFor="title"
@@ -60,7 +60,7 @@ export default async function CreateQuizPage() {
               id="title"
               name="title"
               required
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400"
               placeholder={t('quizTitlePlaceholder')}
             />
           </div>
@@ -76,7 +76,7 @@ export default async function CreateQuizPage() {
               id="description"
               name="description"
               rows={4}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400"
               placeholder={t('quizDescriptionPlaceholder')}
             />
           </div>
@@ -94,7 +94,7 @@ export default async function CreateQuizPage() {
           <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
             <button
               type="submit"
-              className="flex-1 bg-blue-500 dark:bg-blue-400 text-white px-6 py-3 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-500 transition font-medium"
+              className="flex-1 bg-gray-800 dark:bg-gray-800 text-white px-6 py-3 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-500 transition font-medium"
             >
               {t('createQuiz')}
             </button>

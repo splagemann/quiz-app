@@ -236,12 +236,12 @@ export default function QuestionManager({
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700/50 p-4 md:p-6">
+    <div className="bg-gray-200 dark:bg-gray-700 rounded-lg shadow dark:shadow-gray-700/50 p-4 md:p-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
         <h2 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-gray-100">{t('questionsCount', { count: initialQuestions.length })}</h2>
         <button
           onClick={() => setIsAddingQuestion(true)}
-          className="bg-green-600 dark:bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-700 dark:hover:bg-green-600 transition w-full sm:w-auto"
+          className="bg-gray-800 dark:bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-green-600 dark:hover:bg-green-500 transition w-full sm:w-auto"
         >
           {tQuestion('addQuestion')}
         </button>
@@ -325,7 +325,7 @@ export default function QuestionManager({
                   <button
                     type="button"
                     onClick={() => setNewAnswers([...newAnswers, { text: "", imageUrl: "", isCorrect: false }])}
-                    className="text-sm bg-green-500 dark:bg-green-600 text-white px-3 py-1 rounded hover:bg-green-600 dark:hover:bg-green-700 transition"
+                    className="text-sm bg-gray-800 dark:bg-gray-800 text-white px-3 py-1 rounded hover:bg-green-600 dark:hover:bg-green-500 transition"
                   >
                     {t('addAnswerButton')}
                   </button>
@@ -404,7 +404,7 @@ export default function QuestionManager({
           <div className="flex gap-2">
             <button
               type="submit"
-              className="bg-green-600 dark:bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-700 dark:hover:bg-green-600 transition"
+              className="bg-gray-800 dark:bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-green-600 dark:hover:bg-green-500 transition"
             >
               {t('saveQuestion')}
             </button>
@@ -434,7 +434,7 @@ export default function QuestionManager({
       ) : (
         <div className="space-y-4">
           {initialQuestions.map((question, index) => (
-            <div key={question.id} className="border border-gray-300 dark:border-gray-600 rounded-lg p-4 bg-white dark:bg-gray-700">
+            <div key={question.id} className="border border-gray-300 dark:border-gray-600 rounded-lg p-4 bg-gray-100 dark:bg-gray-600">
               {editingQuestionId === question.id ? (
                 <form
                   action={(formData) => handleUpdateQuestion(question.id, formData)}
@@ -520,7 +520,7 @@ export default function QuestionManager({
                               isCorrect: false,
                               orderIndex: editAnswers.length
                             }])}
-                            className="text-sm bg-blue-400 dark:bg-blue-400 text-white px-3 py-1 rounded hover:bg-blue-500 dark:hover:bg-blue-500 transition"
+                            className="text-sm bg-gray-800 dark:bg-gray-800 text-white px-3 py-1 rounded hover:bg-blue-600 dark:hover:bg-blue-500 transition"
                           >
                             {t('addAnswerButton')}
                           </button>
@@ -599,7 +599,7 @@ export default function QuestionManager({
                   <div className="flex gap-2">
                     <button
                       type="submit"
-                      className="bg-blue-500 dark:bg-blue-400 text-white px-4 py-2 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-500 transition"
+                      className="bg-gray-800 dark:bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-500 transition"
                     >
                       {tCommon('save')}
                     </button>

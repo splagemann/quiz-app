@@ -109,7 +109,7 @@ export default async function EditQuizPage({
         <AdminHeader title={t('editQuiz')} showBackButton={true} backButtonHref="/admin" />
 
         {/* Quiz Details Form */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700/50 p-4 md:p-6 mb-6 md:mb-8">
+        <div className="bg-gray-200 dark:bg-gray-700 rounded-lg shadow dark:shadow-gray-700/50 p-4 md:p-6 mb-6 md:mb-8">
           <h2 className="text-lg md:text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">{t('quizDetails')}</h2>
           <form id="quiz-form" action={updateQuizWithId}>
             <div className="mb-4">
@@ -125,7 +125,7 @@ export default async function EditQuizPage({
                 name="title"
                 required
                 defaultValue={quiz.title}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400"
               />
             </div>
 
@@ -141,7 +141,7 @@ export default async function EditQuizPage({
                 name="description"
                 rows={4}
                 defaultValue={quiz.description || ""}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-gray-100 dark:bg-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400"
               />
             </div>
 
@@ -161,7 +161,7 @@ export default async function EditQuizPage({
             <button
               type="submit"
               form="quiz-form"
-              className="flex-1 bg-blue-500 dark:bg-blue-400 text-white px-6 py-3 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-500 transition font-medium"
+              className="flex-1 bg-gray-800 dark:bg-gray-800 text-white px-6 py-3 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-500 transition font-medium"
             >
               {t('updateQuiz')}
             </button>

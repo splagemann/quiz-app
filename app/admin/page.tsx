@@ -37,13 +37,13 @@ export default async function AdminPage() {
         <AdminHeader title={t('quizManagement')}>
           <Link
             href="/admin/create"
-            className="flex items-center justify-center bg-blue-500 dark:bg-blue-400 text-white px-6 h-10 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-500 transition w-full sm:w-auto sm:inline-flex"
+            className="flex items-center justify-center bg-gray-800 dark:bg-gray-800 text-white px-6 h-10 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-500 transition w-full sm:w-auto sm:inline-flex"
           >
             {t('createNewQuiz')}
           </Link>
           <Link
             href="/admin/sessions"
-            className="flex items-center justify-center bg-purple-500 dark:bg-purple-400 text-white px-6 h-10 rounded-lg hover:bg-purple-600 dark:hover:bg-purple-500 transition w-full sm:w-auto sm:inline-flex"
+            className="flex items-center justify-center bg-gray-800 dark:bg-gray-800 text-white px-6 h-10 rounded-lg hover:bg-purple-600 dark:hover:bg-purple-500 transition w-full sm:w-auto sm:inline-flex"
           >
             {t('viewSessions')}
           </Link>
@@ -58,7 +58,7 @@ export default async function AdminPage() {
             {quizzes.map((quiz) => (
               <div
                 key={quiz.id}
-                className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700/50 p-4 md:p-6 hover:shadow-md dark:hover:shadow-gray-700/70 transition"
+                className="bg-gray-200 dark:bg-gray-700 rounded-lg shadow dark:shadow-gray-700/50 p-4 md:p-6 hover:shadow-md dark:hover:shadow-gray-700/70 transition"
               >
                 <div className="flex flex-col sm:flex-row justify-between items-start gap-3">
                   <div className="flex-1 min-w-0 w-full sm:w-auto">
@@ -77,7 +77,7 @@ export default async function AdminPage() {
                   </div>
                   <Link
                     href={`/admin/${quiz.id}/edit`}
-                    className="bg-gray-800 dark:bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-900 dark:hover:bg-gray-600 transition text-center w-full sm:w-auto sm:ml-4 flex-shrink-0"
+                    className="bg-gray-800 dark:bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-900 dark:hover:bg-gray-600 transition text-center w-full sm:w-auto sm:ml-4 flex-shrink-0"
                   >
                     {tCommon('edit')}
                   </Link>

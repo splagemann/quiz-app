@@ -91,7 +91,7 @@ export default async function ChangelogPage() {
       <div className="max-w-4xl mx-auto px-3 md:px-4">
         <AdminHeader title={t('changelog')} showBackButton={true} backButtonHref="/admin" />
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700/50 p-8">
+        <div className="bg-gray-200 dark:bg-gray-700 rounded-lg shadow dark:shadow-gray-700/50 p-8">
           <div className="prose prose-gray dark:prose-invert max-w-none">
             {parsedContent}
           </div>
