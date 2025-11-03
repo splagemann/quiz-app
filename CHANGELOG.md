@@ -9,14 +9,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.2.0] - 2025-11-03
 
+### Added
+- **New QuestionDisplay component**: Unified question and answer display across all game modes
+  - Supports host, solo, and multiplayer-player modes
+  - Dynamic grid layouts for answers
+  - State-based styling with visual feedback icons
+  - Eliminates ~235 lines of duplicate code
+- **AdminFooter component**: Consistent footer across all admin pages with app name, version, and GitHub link
+- **MIT License**: Project now includes MIT License file
+- **AI Disclaimer**: Prominent disclaimer in README that app is AI-generated
+- **Dark mode initialization script**: Prevents flash of light mode on page load by detecting system preference before render
+
 ### Changed
-- Updated README.md to accurately reflect internationalization features
+- **Route restructure**:
+  - `/game` → `/games` (quiz selection)
+  - `/game/join` → `/join` (player join flow)
+  - Removed `/host` management page (functionality merged into homepage)
+- **Homepage redesign**: Split into two sections - "Join Game" and "Browse Games"
+  - Direct session code entry on homepage
+  - Better mobile-friendly layout
+- **Mobile responsiveness improvements**:
+  - Admin overview, create, and edit pages optimized for mobile
+  - Language selector shows only flag emoji on mobile
+  - Quiz cards stack vertically on mobile
+  - Buttons stack vertically on mobile, horizontally on tablet+
+  - Responsive padding, text sizes, and spacing throughout
+- **Dark mode enhancements**:
+  - AuthForm now supports dark mode with system preference detection
+  - Consistent dark theme styling across all admin pages
+- **Documentation updates**:
+  - Updated README.md to accurately reflect internationalization features
   - Changed maximum answers per question from 6 to 4
-  - Clarified navigation paths (direct URL to /admin, Browse Games button on homepage)
+  - Clarified navigation paths
   - Added comprehensive i18n feature documentation
   - Updated Tech Stack to include next-intl
   - Condensed Project Structure section
-- Updated CLAUDE.md to document answer limits (2-4 answers per question)
+  - Updated CLAUDE.md to document answer limits (2-4 answers per question)
+
+### Fixed
+- **Game session state persistence**: Session state now properly initializes on GET requests, fixing issues with:
+  - Page refreshes during gameplay
+  - Players rejoining after disconnection
+  - Host reconnecting to active game session
+- **Mobile layout issues**: Fixed horizontal scroll issues on mobile devices across admin pages
+- **Text overflow**: Added break-words to prevent text overflow on quiz titles and descriptions
 
 ## [1.1.4] - 2025-10-31
 
