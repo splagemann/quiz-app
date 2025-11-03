@@ -291,25 +291,27 @@ export default function QuestionManager({
             <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
               {t('imageOptional')}
             </label>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={async (e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    await handleImageUpload(file, false);
-                  }
-                }}
-                className="flex-1 min-w-0 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-700 text-sm"
-                disabled={uploadingImage}
-              />
+            <div className="flex flex-col sm:flex-row gap-2 w-full">
+              <div className="flex-1 min-w-0 w-full overflow-hidden">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      await handleImageUpload(file, false);
+                    }
+                  }}
+                  className="w-full max-w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-700 text-sm"
+                  disabled={uploadingImage}
+                />
+              </div>
               {uploadingImage && (
                 <span className="text-gray-600 dark:text-gray-400 py-2 text-sm whitespace-nowrap">{t('uploading')}</span>
               )}
             </div>
             {addQuestionImageUrl && (
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 break-all">
                 {t('imageUploaded', { url: addQuestionImageUrl })}
               </p>
             )}
@@ -374,23 +376,25 @@ export default function QuestionManager({
                     </button>
                   )}
                 </div>
-                <div className="ml-6 max-w-full overflow-hidden">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        const url = await handleAnswerImageUpload(file);
-                        if (url) {
-                          const updated = [...newAnswers];
-                          updated[i].imageUrl = url;
-                          setNewAnswers(updated);
+                <div className="ml-6 w-full max-w-full overflow-hidden">
+                  <div className="w-full max-w-full overflow-hidden">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const url = await handleAnswerImageUpload(file);
+                          if (url) {
+                            const updated = [...newAnswers];
+                            updated[i].imageUrl = url;
+                            setNewAnswers(updated);
+                          }
                         }
-                      }
-                    }}
-                    className="w-full max-w-full text-sm px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-600"
-                  />
+                      }}
+                      className="w-full max-w-full text-sm px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-600"
+                    />
+                  </div>
                   {answer.imageUrl && (
                     <div className="mt-2">
                       <img src={answer.imageUrl} alt={t('answerImageAlt')} className="w-full max-w-xs rounded border border-gray-300 dark:border-gray-600" />
@@ -480,25 +484,27 @@ export default function QuestionManager({
                     <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
                       {t('imageOptional')}
                     </label>
-                    <div className="flex flex-col sm:flex-row gap-2">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={async (e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            await handleImageUpload(file, true);
-                          }
-                        }}
-                        className="flex-1 min-w-0 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-600 text-sm"
-                        disabled={uploadingImage}
-                      />
+                    <div className="flex flex-col sm:flex-row gap-2 w-full">
+                      <div className="flex-1 min-w-0 w-full overflow-hidden">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              await handleImageUpload(file, true);
+                            }
+                          }}
+                          className="w-full max-w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-600 text-sm"
+                          disabled={uploadingImage}
+                        />
+                      </div>
                       {uploadingImage && (
                         <span className="text-gray-600 dark:text-gray-400 py-2 text-sm whitespace-nowrap">{t('uploading')}</span>
                       )}
                     </div>
                     {(editQuestionImageUrl || question.imageUrl) && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 break-all">
                         {t('currentImage', { url: editQuestionImageUrl || question.imageUrl || '' })}
                       </p>
                     )}
@@ -569,23 +575,25 @@ export default function QuestionManager({
                             </button>
                           )}
                         </div>
-                        <div className="ml-6 max-w-full overflow-hidden">
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={async (e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                const url = await handleAnswerImageUpload(file);
-                                if (url) {
-                                  const updated = [...editAnswers];
-                                  updated[i].imageUrl = url;
-                                  setEditAnswers(updated);
+                        <div className="ml-6 w-full max-w-full overflow-hidden">
+                          <div className="w-full max-w-full overflow-hidden">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const url = await handleAnswerImageUpload(file);
+                                  if (url) {
+                                    const updated = [...editAnswers];
+                                    updated[i].imageUrl = url;
+                                    setEditAnswers(updated);
+                                  }
                                 }
-                              }
-                            }}
-                            className="w-full max-w-full text-sm px-2 py-1 border border-gray-300 dark:border-gray-500 rounded bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-500"
-                          />
+                              }}
+                              className="w-full max-w-full text-sm px-2 py-1 border border-gray-300 dark:border-gray-500 rounded bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-500"
+                            />
+                          </div>
                           {answer.imageUrl && (
                             <div className="mt-2">
                               <img src={answer.imageUrl} alt={t('answerImageAlt')} className="w-full max-w-xs rounded border border-gray-300 dark:border-gray-500" />
