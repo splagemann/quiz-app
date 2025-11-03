@@ -33,52 +33,52 @@ export default async function AdminPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 transition-colors">
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="mb-4">
-          <div className="flex justify-between items-center mb-4">
-            <div className="flex items-baseline gap-3">
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{t('quizManagement')}</h1>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-4 md:py-8 transition-colors">
+      <div className="max-w-4xl mx-auto px-3 md:px-4">
+        <div className="mb-4 md:mb-6">
+          <div className="flex flex-wrap justify-between items-start gap-3 mb-4">
+            <div className="flex flex-wrap items-baseline gap-2 md:gap-3">
+              <h1 className="text-xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">{t('quizManagement')}</h1>
               <Link
                 href="/admin/changelog"
-                className="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                className="text-xs md:text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex-shrink-0"
               >
                 v{packageJson.version}
               </Link>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
               <DarkModeToggle />
               <LanguageSelector />
             </div>
           </div>
           <Link
             href="/admin/create"
-            className="inline-flex items-center bg-blue-600 dark:bg-blue-500 text-white px-6 h-10 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition"
+            className="flex items-center justify-center bg-blue-600 dark:bg-blue-500 text-white px-6 h-10 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition w-full sm:w-auto sm:inline-flex"
           >
             {t('createNewQuiz')}
           </Link>
         </div>
 
         {quizzes.length === 0 ? (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700/50 p-8 text-center">
-            <p className="text-gray-700 dark:text-gray-300 text-lg">{t('noQuizzesMessage')}</p>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700/50 p-6 md:p-8 text-center">
+            <p className="text-gray-700 dark:text-gray-300 text-base md:text-lg">{t('noQuizzesMessage')}</p>
           </div>
         ) : (
-          <div className="grid gap-4">
+          <div className="grid gap-3 md:gap-4">
             {quizzes.map((quiz) => (
               <div
                 key={quiz.id}
-                className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700/50 p-6 hover:shadow-md dark:hover:shadow-gray-700/70 transition"
+                className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700/50 p-4 md:p-6 hover:shadow-md dark:hover:shadow-gray-700/70 transition"
               >
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                <div className="flex flex-col sm:flex-row justify-between items-start gap-3">
+                  <div className="flex-1 min-w-0 w-full sm:w-auto">
+                    <h2 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2 break-words">
                       {quiz.title}
                     </h2>
                     {quiz.description && (
-                      <p className="text-gray-700 dark:text-gray-300 mb-3">{quiz.description}</p>
+                      <p className="text-sm md:text-base text-gray-700 dark:text-gray-300 mb-3 break-words">{quiz.description}</p>
                     )}
-                    <div className="flex gap-4 text-sm text-gray-700 dark:text-gray-400 font-medium">
+                    <div className="flex flex-wrap gap-3 md:gap-4 text-xs md:text-sm text-gray-700 dark:text-gray-400 font-medium">
                       <span>{quiz._count.questions} {t('questions')}</span>
                       <span>
                         {t('createdAt')} {new Date(quiz.createdAt).toLocaleDateString(locale)}
@@ -87,7 +87,7 @@ export default async function AdminPage() {
                   </div>
                   <Link
                     href={`/admin/${quiz.id}/edit`}
-                    className="ml-4 bg-gray-800 dark:bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-900 dark:hover:bg-gray-600 transition"
+                    className="bg-gray-800 dark:bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-900 dark:hover:bg-gray-600 transition text-center w-full sm:w-auto sm:ml-4 flex-shrink-0"
                   >
                     {tCommon('edit')}
                   </Link>
