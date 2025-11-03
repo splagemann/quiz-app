@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Updated README.md to accurately reflect internationalization features
+  - Changed maximum answers per question from 6 to 4
+  - Clarified navigation paths (direct URL to /admin, Browse Games button on homepage)
+  - Added comprehensive i18n feature documentation
+  - Updated Tech Stack to include next-intl
+  - Condensed Project Structure section
+- Updated CLAUDE.md to document answer limits (2-4 answers per question)
+
 ## [1.1.4] - 2025-10-31
 
 ### Fixed

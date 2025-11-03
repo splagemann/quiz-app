@@ -428,6 +428,7 @@ Response: { isCorrect: boolean, score: number }
 12. **Docker Builds**: Require dummy DATABASE_URL for Prisma generation during build
 13. **TypeScript Types**: Quiz types in Client Components must include all optional fields (title, description, imageUrl, language)
 14. **Page Metadata**: Server Components can use `generateMetadata` for dynamic titles
+15. **Answer Limits**: Questions must have 2-4 answers (minimum 2, maximum 4). The QuestionManager enforces this with `newAnswers.length < 4` check
 
 ## Cascading Deletes
 
