@@ -105,12 +105,12 @@ export default async function EditQuizPage({
   const deleteQuizWithId = deleteQuiz.bind(null, quizIdNum);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 transition-colors">
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="flex justify-between items-center mb-8">
-          <div className="flex items-center gap-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-4 md:py-8 transition-colors">
+      <div className="max-w-4xl mx-auto px-3 md:px-4">
+        <div className="flex flex-wrap justify-between items-center gap-3 mb-6 md:mb-8">
+          <div className="flex items-center gap-2 md:gap-4">
             <BackButton
-              className="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+              className="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors flex-shrink-0"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -123,17 +123,17 @@ export default async function EditQuizPage({
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
               </svg>
             </BackButton>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{t('editQuiz')}</h1>
+            <h1 className="text-xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 truncate">{t('editQuiz')}</h1>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
             <DarkModeToggle />
             <LanguageSelector />
           </div>
         </div>
 
         {/* Quiz Details Form */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700/50 p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">{t('quizDetails')}</h2>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700/50 p-4 md:p-6 mb-6 md:mb-8">
+          <h2 className="text-lg md:text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">{t('quizDetails')}</h2>
           <form id="quiz-form" action={updateQuizWithId}>
             <div className="mb-4">
               <label
@@ -180,7 +180,7 @@ export default async function EditQuizPage({
 
           </form>
 
-          <div className="flex gap-4 mt-4">
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-4 mt-4">
             <button
               type="submit"
               form="quiz-form"
