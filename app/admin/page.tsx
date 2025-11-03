@@ -6,7 +6,7 @@ import { LanguageSelector } from "@/app/components/LanguageSelector";
 import { DarkModeToggle } from "@/app/components/DarkModeToggle";
 import { isAuthenticated } from "@/lib/auth";
 import AuthForm from "@/app/components/AuthForm";
-import packageJson from "@/package.json";
+import { AdminFooter } from "@/app/components/AdminFooter";
 
 export const dynamic = 'force-dynamic';
 
@@ -35,22 +35,15 @@ export default async function AdminPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-4 md:py-8 transition-colors">
       <div className="max-w-4xl mx-auto px-3 md:px-4">
-        <div className="mb-4 md:mb-6">
-          <div className="flex flex-wrap justify-between items-start gap-3 mb-4">
-            <div className="flex flex-wrap items-baseline gap-2 md:gap-3">
-              <h1 className="text-xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">{t('quizManagement')}</h1>
-              <Link
-                href="/admin/changelog"
-                className="text-xs md:text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex-shrink-0"
-              >
-                v{packageJson.version}
-              </Link>
-            </div>
-            <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
-              <DarkModeToggle />
-              <LanguageSelector />
-            </div>
+        <div className="flex flex-wrap justify-between items-center gap-3 mb-6 md:mb-8">
+          <h1 className="text-xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">{t('quizManagement')}</h1>
+          <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
+            <DarkModeToggle />
+            <LanguageSelector />
           </div>
+        </div>
+
+        <div className="mb-6">
           <Link
             href="/admin/create"
             className="flex items-center justify-center bg-blue-600 dark:bg-blue-500 text-white px-6 h-10 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition w-full sm:w-auto sm:inline-flex"
@@ -97,14 +90,7 @@ export default async function AdminPage() {
           </div>
         )}
 
-        <div className="mt-8 text-center">
-          <Link
-            href="/"
-            className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
-          >
-            {t('backToHome')}
-          </Link>
-        </div>
+        <AdminFooter />
       </div>
     </div>
   );

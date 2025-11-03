@@ -10,6 +10,7 @@ import { QuizLanguageSelector } from "@/app/components/QuizLanguageSelector";
 import { BackButton } from "@/app/components/BackButton";
 import { isAuthenticated } from "@/lib/auth";
 import AuthForm from "@/app/components/AuthForm";
+import { AdminFooter } from "@/app/components/AdminFooter";
 
 export async function generateMetadata({
   params,
@@ -196,6 +197,8 @@ export default async function EditQuizPage({
 
         {/* Question Manager */}
         <QuestionManager quizId={quizIdNum} questions={quiz.questions} />
+
+        <AdminFooter />
       </div>
     </div>
   );

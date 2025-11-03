@@ -7,6 +7,7 @@ import { QuizLanguageSelector } from "@/app/components/QuizLanguageSelector";
 import { BackButton } from "@/app/components/BackButton";
 import { isAuthenticated } from "@/lib/auth";
 import AuthForm from "@/app/components/AuthForm";
+import { AdminFooter } from "@/app/components/AdminFooter";
 
 async function createQuiz(formData: FormData) {
   "use server";
@@ -127,6 +128,7 @@ export default async function CreateQuizPage() {
             </BackButton>
           </div>
         </form>
+        <AdminFooter />
       </div>
     </div>
   );
