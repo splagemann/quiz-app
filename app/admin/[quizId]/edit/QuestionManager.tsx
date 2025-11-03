@@ -335,8 +335,8 @@ export default function QuestionManager({
               </div>
             </div>
             {newAnswers.map((answer, i) => (
-              <div key={i} className="mb-3 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700">
-                <div className="flex items-center gap-2 mb-2">
+              <div key={i} className="mb-3 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 w-full max-w-full overflow-hidden">
+                <div className="flex items-center gap-2 mb-2 w-full max-w-full">
                   <input
                     type="radio"
                     checked={answer.isCorrect}
@@ -346,7 +346,7 @@ export default function QuestionManager({
                         isCorrect: idx === i
                       })));
                     }}
-                    className="w-4 h-4 text-green-600"
+                    className="w-4 h-4 text-green-600 flex-shrink-0"
                   />
                   <input
                     type="text"
@@ -357,7 +357,7 @@ export default function QuestionManager({
                       setNewAnswers(updated);
                     }}
                     placeholder={t('answerPlaceholder', { number: i + 1 })}
-                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                    className="flex-1 min-w-0 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                   />
                   {newAnswers.length > 2 && (
                     <button
@@ -370,7 +370,7 @@ export default function QuestionManager({
                         }
                         setNewAnswers(updated);
                       }}
-                      className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 px-2"
+                      className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 px-2 flex-shrink-0"
                     >
                       ✕
                     </button>
@@ -534,8 +534,8 @@ export default function QuestionManager({
                       </div>
                     </div>
                     {editAnswers.map((answer, i) => (
-                      <div key={answer.id} className="mb-3 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-600">
-                        <div className="flex items-center gap-2 mb-2">
+                      <div key={answer.id} className="mb-3 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-600 w-full max-w-full overflow-hidden">
+                        <div className="flex items-center gap-2 mb-2 w-full max-w-full">
                           <input
                             type="radio"
                             checked={answer.isCorrect}
@@ -545,7 +545,7 @@ export default function QuestionManager({
                                 isCorrect: idx === i
                               })));
                             }}
-                            className="w-4 h-4 text-blue-600"
+                            className="w-4 h-4 text-blue-600 flex-shrink-0"
                           />
                           <input
                             type="text"
@@ -556,7 +556,7 @@ export default function QuestionManager({
                               setEditAnswers(updated);
                             }}
                             placeholder={t('answerPlaceholder', { number: i + 1 })}
-                            className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-500 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                            className="flex-1 min-w-0 px-4 py-2 border border-gray-300 dark:border-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-500 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                           />
                           {editAnswers.length > 2 && (
                             <button
@@ -569,7 +569,7 @@ export default function QuestionManager({
                                 }
                                 setEditAnswers(updated);
                               }}
-                              className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 px-2"
+                              className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 px-2 flex-shrink-0"
                             >
                               ✕
                             </button>
