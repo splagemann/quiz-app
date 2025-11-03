@@ -29,7 +29,11 @@
     "welcome": "Welcome to Quiz App",
     "playQuiz": "Play Quiz",
     "adminArea": "Admin Area",
-    "hostManagement": "Host & Manage"
+    "hostManagement": "Host & Manage",
+    "browseGames": "Browse Games",
+    "browseGamesDescription": "View and play available quizzes",
+    "joinGameDescription": "Enter a session code to join a multiplayer game",
+    "or": "or"
   },
   "admin": {
     "title": "Admin Area",
@@ -76,8 +80,8 @@
     "noQuizzesMessage": "No quizzes available yet.",
     "createFirst": "Create your first quiz in the admin area",
     "createInAdmin": "Create one in the admin area",
-    "playButton": "Play →",
-    "backToQuizSelection": "← Back to quiz selection",
+    "playButton": "Play",
+    "backToQuizSelection": "Back to quiz selection",
     "backToHome": "Back to home"
   },
   "question": {
@@ -141,7 +145,7 @@
     "noPlayersYet": "No players joined yet",
     "startGame": "Start Game",
     "nextQuestion": "Next Question",
-    "nextQuestionArrow": "Next Question →",
+    "nextQuestionArrow": "Next Question",
     "results": "Results",
     "newGame": "New Game",
     "revealAnswer": "Reveal Answer",

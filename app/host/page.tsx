@@ -23,7 +23,7 @@ export default async function HostPage() {
 
         <div className="grid md:grid-cols-2 gap-6 mb-8">
           <Link
-            href="/game"
+            href="/games"
             className="bg-white rounded-lg shadow-xl p-8 hover:shadow-2xl transition transform hover:scale-105"
           >
             <div className="text-5xl mb-4">🎮</div>

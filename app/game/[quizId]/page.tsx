@@ -49,49 +49,49 @@ export default async function QuizModePage({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center px-4">
-      <div className="max-w-2xl w-full">
-        <div className="bg-white rounded-lg shadow-2xl p-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2 text-center">
+    <div className="min-h-screen bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center px-3 py-4">
+      <div className="max-w-md w-full">
+        <div className="bg-white rounded-lg shadow-2xl p-4">
+          <h1 className="text-xl font-bold text-gray-900 mb-2 text-center">
             {quiz.title}
           </h1>
           {quiz.description && (
-            <p className="text-gray-700 mb-6 text-center">{quiz.description}</p>
+            <p className="text-gray-700 mb-3 text-center text-sm">{quiz.description}</p>
           )}
-          <p className="text-gray-700 text-center mb-8">
+          <p className="text-gray-700 text-center mb-3 text-sm">
             {quiz._count.questions} {tAdmin('questions')}
           </p>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             <Link
               href={`/game/${quiz.id}/solo`}
-              className="block bg-blue-600 text-white text-center px-8 py-4 rounded-lg hover:bg-blue-700 transition font-bold text-lg shadow-lg"
+              className="block bg-blue-600 text-white text-center px-4 py-3 rounded-lg font-bold text-lg"
             >
               🎮 {t('playSolo')}
-              <p className="text-sm font-normal mt-1 opacity-90">
+              <p className="text-xs font-normal mt-1 opacity-90">
                 {t('playSoloDescription')}
               </p>
             </Link>
 
             <Link
               href={`/game/${quiz.id}/host`}
-              className="block bg-green-600 text-white text-center px-8 py-4 rounded-lg hover:bg-green-700 transition font-bold text-lg shadow-lg"
+              className="block bg-green-600 text-white text-center px-4 py-3 rounded-lg font-bold text-lg"
             >
               👥 {t('hostMultiplayer')}
-              <p className="text-sm font-normal mt-1 opacity-90">
+              <p className="text-xs font-normal mt-1 opacity-90">
                 {t('hostMultiplayerDescription')}
               </p>
             </Link>
           </div>
+        </div>
 
-          <div className="mt-8 text-center">
-            <Link
-              href="/game"
-              className="text-blue-600 hover:text-blue-800 underline"
-            >
-              {t('backToQuizSelection')}
-            </Link>
-          </div>
+        <div className="mt-4 text-center">
+          <Link
+            href="/games"
+            className="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg font-medium"
+          >
+            ← {t('backToQuizSelection')}
+          </Link>
         </div>
       </div>
     </div>

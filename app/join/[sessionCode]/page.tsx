@@ -101,7 +101,7 @@ export default function JoinGamePage() {
 
         <div className="mt-6 text-center">
           <Link
-            href="/game"
+            href="/"
             className="text-gray-700 hover:text-gray-900 underline"
           >
             {tQuiz('backToQuizSelection')}
