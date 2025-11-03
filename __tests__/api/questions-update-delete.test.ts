@@ -138,6 +138,68 @@ describe('/api/questions/[questionId]', () => {
       expect(data.questionText).toBe('Simple question');
     });
 
+    it('should create new answers when adding to existing question', async () => {
+      const questionId = '10';
+      const existingAnswers = [
+        { id: 1, answerText: 'Old Answer', imageUrl: null, isCorrect: true, orderIndex: 0 },
+      ];
+      const updatedQuestion = {
+        id: 10,
+        title: 'Question',
+        questionText: 'Updated Question',
+        description: null,
+        imageUrl: null,
+        answers: [],
+      };
+
+      mockPrisma.answer.findMany.mockResolvedValue(existingAnswers as any);
+      mockPrisma.answer.update.mockResolvedValue({} as any);
+      mockPrisma.answer.create.mockResolvedValue({} as any);
+      mockPrisma.question.update.mockResolvedValue(updatedQuestion as any);
+
+      const request = new NextRequest(
+        `http://localhost:3210/api/questions/${questionId}`,
+        {
+          method: 'PUT',
+          body: JSON.stringify({
+            title: 'Question',
+            questionText: 'Updated Question',
+            description: null,
+            imageUrl: null,
+            answers: [
+              { id: 1, text: 'Updated Old Answer', imageUrl: null, isCorrect: true },
+              { id: -1, text: 'New Answer 1', imageUrl: null, isCorrect: false },
+              { id: -2, text: 'New Answer 2', imageUrl: null, isCorrect: false },
+            ],
+          }),
+        }
+      );
+
+      const params = Promise.resolve({ questionId });
+      const response = await PUT(request, { params });
+
+      expect(response.status).toBe(200);
+      expect(mockPrisma.answer.create).toHaveBeenCalledTimes(2);
+      expect(mockPrisma.answer.create).toHaveBeenCalledWith({
+        data: {
+          questionId: 10,
+          answerText: 'New Answer 1',
+          imageUrl: null,
+          isCorrect: false,
+          orderIndex: 1,
+        },
+      });
+      expect(mockPrisma.answer.create).toHaveBeenCalledWith({
+        data: {
+          questionId: 10,
+          answerText: 'New Answer 2',
+          imageUrl: null,
+          isCorrect: false,
+          orderIndex: 2,
+        },
+      });
+    });
+
     it('should return 500 on database error', async () => {
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
       const questionId = '10';

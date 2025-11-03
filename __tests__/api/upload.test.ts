@@ -129,4 +129,31 @@ describe('/api/upload', () => {
     expect(callArgs[0]).toContain('public/uploads');
     expect(callArgs[0]).not.toContain('..');
   });
+
+  it('should return 500 error when file write fails', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    const { writeFile } = require('fs/promises');
+
+    const imageContent = new Uint8Array([0xFF, 0xD8, 0xFF, 0xE0]); // JPEG header
+    const file = new File([imageContent], 'test.jpg', { type: 'image/jpeg' });
+    const formData = new FormData();
+    formData.append('file', file);
+
+    // Mock writeFile to throw an error
+    writeFile.mockRejectedValue(new Error('Disk full'));
+
+    const request = new NextRequest('http://localhost:3210/api/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    const response = await POST(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(data.error).toBe('Failed to upload file');
+    expect(consoleErrorSpy).toHaveBeenCalled();
+
+    consoleErrorSpy.mockRestore();
+  });
 });

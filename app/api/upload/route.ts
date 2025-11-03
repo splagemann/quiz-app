@@ -29,14 +29,6 @@ function validateFileSignature(buffer: Buffer): string | null {
   return null;
 }
 
-/**
- * Sanitize filename by removing all path separators and special characters
- */
-function sanitizeFilename(filename: string): string {
-  // Remove path separators and other dangerous characters
-  return filename.replace(/[^a-zA-Z0-9._-]/g, '');
-}
-
 export async function POST(request: NextRequest) {
   // Check authentication
   const authenticated = await isAuthenticated();
