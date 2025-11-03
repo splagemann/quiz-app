@@ -94,7 +94,7 @@ export default async function CreateQuizPage() {
           <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
             <button
               type="submit"
-              className="flex-1 bg-blue-600 dark:bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition font-medium"
+              className="flex-1 bg-blue-500 dark:bg-blue-400 text-white px-6 py-3 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-500 transition font-medium"
             >
               {t('createQuiz')}
             </button>

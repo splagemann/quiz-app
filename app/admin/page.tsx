@@ -37,13 +37,13 @@ export default async function AdminPage() {
         <AdminHeader title={t('quizManagement')}>
           <Link
             href="/admin/create"
-            className="flex items-center justify-center bg-blue-600 dark:bg-blue-500 text-white px-6 h-10 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition w-full sm:w-auto sm:inline-flex"
+            className="flex items-center justify-center bg-blue-500 dark:bg-blue-400 text-white px-6 h-10 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-500 transition w-full sm:w-auto sm:inline-flex"
           >
             {t('createNewQuiz')}
           </Link>
           <Link
             href="/admin/sessions"
-            className="flex items-center justify-center bg-purple-600 dark:bg-purple-500 text-white px-6 h-10 rounded-lg hover:bg-purple-700 dark:hover:bg-purple-600 transition w-full sm:w-auto sm:inline-flex"
+            className="flex items-center justify-center bg-purple-500 dark:bg-purple-400 text-white px-6 h-10 rounded-lg hover:bg-purple-600 dark:hover:bg-purple-500 transition w-full sm:w-auto sm:inline-flex"
           >
             {t('viewSessions')}
           </Link>

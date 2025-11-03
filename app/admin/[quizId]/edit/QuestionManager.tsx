@@ -520,7 +520,7 @@ export default function QuestionManager({
                               isCorrect: false,
                               orderIndex: editAnswers.length
                             }])}
-                            className="text-sm bg-blue-500 dark:bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-600 dark:hover:bg-blue-700 transition"
+                            className="text-sm bg-blue-400 dark:bg-blue-400 text-white px-3 py-1 rounded hover:bg-blue-500 dark:hover:bg-blue-500 transition"
                           >
                             {t('addAnswerButton')}
                           </button>
@@ -599,7 +599,7 @@ export default function QuestionManager({
                   <div className="flex gap-2">
                     <button
                       type="submit"
-                      className="bg-blue-600 dark:bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition"
+                      className="bg-blue-500 dark:bg-blue-400 text-white px-4 py-2 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-500 transition"
                     >
                       {tCommon('save')}
                     </button>
