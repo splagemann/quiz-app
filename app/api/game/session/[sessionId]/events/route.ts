@@ -21,6 +21,9 @@ export async function GET(
     return new Response("Session nicht gefunden", { status: 404 });
   }
 
+  // Initialize session in memory if not already present
+  gameStateManager.initSession(sessionId);
+
   // Create a ReadableStream for SSE
   const stream = new ReadableStream({
     start(controller) {

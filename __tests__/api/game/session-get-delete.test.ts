@@ -21,6 +21,7 @@ jest.mock('@/lib/gameState', () => ({
   gameStateManager: {
     broadcast: jest.fn(),
     cleanupSession: jest.fn(),
+    initSession: jest.fn(),
   },
 }));
 
