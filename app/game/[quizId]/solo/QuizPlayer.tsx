@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { NextIntlClientProvider, useTranslations } from "next-intl";
+import QuestionDisplay from "@/app/components/QuestionDisplay";
 
 type Answer = {
   id: number;
@@ -101,7 +102,7 @@ function QuizPlayerContent({ quiz }: { quiz: Quiz }) {
               {tSolo('tryAgain')}
             </button>
             <Link
-              href="/game"
+              href="/games"
               className="block w-full bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition font-medium"
             >
               {tSolo('selectAnotherQuiz')}
@@ -147,87 +148,14 @@ function QuizPlayerContent({ quiz }: { quiz: Quiz }) {
 
       {/* Question Card */}
       <div className="bg-white rounded-lg shadow-lg p-4 mb-3 flex-1 flex flex-col overflow-hidden">
-        {currentQuestion.title && (
-          <div className="text-base font-medium text-gray-600 mb-2">
-            {currentQuestion.title}
-          </div>
-        )}
-        <h2 className="text-2xl font-bold text-gray-900 mb-3">
-          {currentQuestion.questionText}
-        </h2>
-        {currentQuestion.description && (
-          <p className="text-base text-gray-700 mb-3">
-            {currentQuestion.description}
-          </p>
-        )}
-        {currentQuestion.imageUrl && (
-          <div className="flex justify-center mb-3 flex-1">
-            <img
-              src={currentQuestion.imageUrl}
-              alt={tSolo('questionImage')}
-              className="max-h-64 object-contain rounded-lg border-2 border-gray-300"
-            />
-          </div>
-        )}
-
-        <div className={`${currentQuestion.answers.some(a => a.imageUrl) ? 'flex-1' : ''} ${
-          currentQuestion.answers.length === 2 ? "grid grid-cols-2 gap-2" :
-          currentQuestion.answers.length === 4 ? "grid grid-cols-2 gap-2" :
-          "flex flex-col gap-2"
-        }`}>
-            {currentQuestion.answers.map((answer) => {
-              const isSelected = selectedAnswerId === answer.id;
-              const showResult = hasAnswered;
-              const hasImages = currentQuestion.answers.some(a => a.imageUrl);
-
-              let buttonClass =
-                `w-full text-left p-3 rounded-lg border-4 transition font-bold text-base relative flex flex-col ${hasImages ? 'h-full' : ''} `;
-
-              if (showResult) {
-                if (answer.isCorrect) {
-                  buttonClass += "border-green-500 bg-green-50 text-green-900";
-                } else if (isSelected) {
-                  buttonClass += "border-red-500 bg-red-50 text-red-900";
-                } else {
-                  buttonClass += "border-gray-300 bg-gray-50 text-gray-700";
-                }
-              } else {
-                buttonClass +=
-                  "border-gray-300 hover:border-blue-500 hover:bg-blue-50 cursor-pointer text-gray-900";
-              }
-
-              return (
-                <button
-                  key={answer.id}
-                  onClick={() => handleAnswerSelect(answer.id)}
-                  disabled={hasAnswered}
-                  className={buttonClass}
-                >
-                  {answer.answerText && <span className="mb-1">{answer.answerText}</span>}
-                  {answer.imageUrl && (
-                    <div className="flex-1 relative min-h-[120px]">
-                      <img
-                        src={answer.imageUrl}
-                        alt={tSolo('answerImage')}
-                        className="absolute inset-0 w-full h-full object-cover rounded"
-                      />
-                    </div>
-                  )}
-                  {showResult && (
-                    <div className="absolute top-2 right-2">
-                      {answer.isCorrect && (
-                        <span className="text-green-600 font-bold text-xl bg-white rounded-full px-2">✓</span>
-                      )}
-                      {isSelected && !answer.isCorrect && (
-                        <span className="text-red-600 font-bold text-xl bg-white rounded-full px-2">✗</span>
-                      )}
-                    </div>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        <QuestionDisplay
+          question={currentQuestion}
+          mode="solo"
+          selectedAnswerId={selectedAnswerId}
+          hasAnswered={hasAnswered}
+          onAnswerSelect={handleAnswerSelect}
+        />
+      </div>
 
       {/* Next Button */}
       {hasAnswered && (
@@ -236,7 +164,7 @@ function QuizPlayerContent({ quiz }: { quiz: Quiz }) {
             onClick={handleNext}
             className="bg-white text-blue-600 px-8 py-3 rounded-lg hover:bg-gray-100 transition font-bold text-base shadow-lg"
           >
-            {isLastQuestion ? tMultiplayer('results') : tMultiplayer('nextQuestionArrow')}
+            {isLastQuestion ? tMultiplayer('results') : `${tMultiplayer('nextQuestionArrow')} →`}
           </button>
         </div>
       )}
