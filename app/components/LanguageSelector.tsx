@@ -45,7 +45,7 @@ export function LanguageSelector() {
         aria-label="Select language"
       >
         <span className="text-lg">{flagMap[currentLocale]}</span>
-        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+        <span className="hidden md:inline text-sm font-medium text-gray-700 dark:text-gray-200">
           {localeLabels[currentLocale]}
         </span>
         <svg

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { NextIntlClientProvider, useTranslations } from "next-intl";
 import type { GameEvent } from "@/lib/gameEvents";
+import QuestionDisplay from "@/app/components/QuestionDisplay";
 
 // Import translation files
 import enMessages from "@/locales/en.json";
@@ -157,7 +158,7 @@ function PlayerGameContent() {
 
         case "session_ended":
           eventSource.close();
-          router.push("/game");
+          router.push("/games");
           break;
       }
     };
@@ -210,7 +211,7 @@ function PlayerGameContent() {
           <h1 className="text-2xl font-bold text-red-600 mb-4">{tCommon('error')}</h1>
           <p className="text-gray-700 mb-6">{error}</p>
           <button
-            onClick={() => router.push("/game")}
+            onClick={() => router.push("/games")}
             className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
           >
             {tQuiz('backToQuizSelection')}
@@ -352,92 +353,14 @@ function PlayerGameContent() {
 
       {/* Question */}
       <div className="bg-white rounded-lg shadow-lg p-4 mb-3 flex-1 flex flex-col overflow-y-auto min-h-0">
-        {currentQuestion.title && (
-          <div className="text-base font-medium text-gray-600 mb-2 text-center">
-            {currentQuestion.title}
-          </div>
-        )}
-        <h2 className="text-2xl font-bold text-gray-900 mb-3 text-center">
-          {currentQuestion.questionText}
-        </h2>
-        {currentQuestion.description && (
-          <p className="text-base text-gray-700 text-center mb-3">
-            {currentQuestion.description}
-          </p>
-        )}
-        {currentQuestion.imageUrl && (
-          <div className="flex justify-center mb-3 flex-1">
-            <img
-              src={currentQuestion.imageUrl}
-              alt={tMultiplayer('questionImage')}
-              className="max-h-64 object-contain rounded-lg border-2 border-gray-300"
-            />
-          </div>
-        )}
-
-        <div className={`${currentQuestion.answers.some(a => a.imageUrl) ? 'flex-1' : ''} ${
-          currentQuestion.answers.length === 2 ? "grid grid-cols-1 sm:grid-cols-2 gap-2" :
-          currentQuestion.answers.length === 4 ? "grid grid-cols-2 gap-2" :
-          "flex flex-col gap-2"
-        }`}>
-            {currentQuestion.answers.map((answer, index) => {
-              const isSelected = selectedAnswer === answer.id;
-              const isRevealed = revealedAnswerId !== null;
-              const isCorrectAnswer = answer.isCorrect;
-              const hasImages = currentQuestion.answers.some(a => a.imageUrl);
-
-              let buttonClass = `w-full text-left p-3 rounded-lg border-4 transition font-bold text-base relative flex flex-col ${hasImages ? 'h-full' : ''} `;
-
-              if (isRevealed) {
-                if (isCorrectAnswer) {
-                  buttonClass += "bg-green-100 border-green-500 text-green-900";
-                } else if (isSelected) {
-                  buttonClass += "bg-red-100 border-red-500 text-red-900";
-                } else {
-                  buttonClass += "bg-gray-100 border-gray-300 text-gray-700";
-                }
-              } else if (isSelected) {
-                buttonClass += "bg-blue-50 border-blue-500 text-blue-900";
-              } else {
-                buttonClass += "bg-white border-gray-300 text-gray-900 hover:border-blue-500 hover:bg-blue-50";
-              }
-
-              return (
-                <button
-                  key={answer.id}
-                  onClick={() => submitAnswer(answer.id)}
-                  disabled={selectedAnswer !== null}
-                  className={buttonClass}
-                >
-                  {answer.answerText && (
-                    <span className="mb-1">
-                      {answer.answerText}
-                    </span>
-                  )}
-                  {answer.imageUrl && (
-                    <div className="flex-1 relative min-h-[120px]">
-                      <img
-                        src={answer.imageUrl}
-                        alt={tMultiplayer('answerImage')}
-                        className="absolute inset-0 w-full h-full object-contain rounded"
-                      />
-                    </div>
-                  )}
-                  {isRevealed && (
-                    <div className="absolute top-2 right-2">
-                      {isCorrectAnswer && (
-                        <span className="text-green-600 text-xl bg-white rounded-full px-2">✓</span>
-                      )}
-                      {isSelected && !isCorrectAnswer && (
-                        <span className="text-red-600 text-xl bg-white rounded-full px-2">✗</span>
-                      )}
-                    </div>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        <QuestionDisplay
+          question={currentQuestion}
+          mode="multiplayer-player"
+          revealedAnswerId={revealedAnswerId}
+          selectedAnswerId={selectedAnswer}
+          onAnswerSelect={submitAnswer}
+        />
+      </div>
 
       {/* Status */}
       {gameStatus === "answered" && revealedAnswerId === null && (

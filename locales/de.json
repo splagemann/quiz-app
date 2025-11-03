@@ -29,7 +29,11 @@
     "welcome": "Willkommen zur Quiz App",
     "playQuiz": "Quiz spielen",
     "adminArea": "Admin-Bereich",
-    "hostManagement": "Hosten & Verwalten"
+    "hostManagement": "Hosten & Verwalten",
+    "browseGames": "Spiele durchsuchen",
+    "browseGamesDescription": "Verfügbare Quizzes anzeigen und spielen",
+    "joinGameDescription": "Code eingeben um einem Spiel beizutreten",
+    "or": "oder"
   },
   "admin": {
     "title": "Admin-Bereich",
@@ -76,8 +80,8 @@
     "noQuizzesMessage": "Noch keine Quiz verfügbar.",
     "createFirst": "Erstelle dein erstes Quiz im Admin-Bereich",
     "createInAdmin": "Erstelle eines im Admin-Bereich",
-    "playButton": "Spielen →",
-    "backToQuizSelection": "← Zurück zur Quiz-Auswahl",
+    "playButton": "Spielen",
+    "backToQuizSelection": "Zurück zur Quiz-Auswahl",
     "backToHome": "Zurück zur Startseite"
   },
   "question": {
@@ -141,7 +145,7 @@
     "noPlayersYet": "Noch keine Spieler beigetreten",
     "startGame": "Spiel starten",
     "nextQuestion": "Nächste Frage",
-    "nextQuestionArrow": "Nächste Frage →",
+    "nextQuestionArrow": "Nächste Frage",
     "results": "Ergebnisse",
     "newGame": "Neues Spiel",
     "revealAnswer": "Antwort aufdecken",

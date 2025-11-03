@@ -7,6 +7,7 @@ import { QuizLanguageSelector } from "@/app/components/QuizLanguageSelector";
 import { BackButton } from "@/app/components/BackButton";
 import { isAuthenticated } from "@/lib/auth";
 import AuthForm from "@/app/components/AuthForm";
+import { AdminFooter } from "@/app/components/AdminFooter";
 
 async function createQuiz(formData: FormData) {
   "use server";
@@ -43,12 +44,12 @@ export default async function CreateQuizPage() {
   const tCommon = await getTranslations('common');
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 transition-colors">
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="flex justify-between items-center mb-8">
-          <div className="flex items-center gap-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-4 md:py-8 transition-colors">
+      <div className="max-w-4xl mx-auto px-3 md:px-4">
+        <div className="flex flex-wrap justify-between items-center gap-3 mb-6 md:mb-8">
+          <div className="flex items-center gap-2 md:gap-4">
             <BackButton
-              className="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+              className="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors flex-shrink-0"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -61,15 +62,15 @@ export default async function CreateQuizPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
               </svg>
             </BackButton>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{t('createNewQuiz')}</h1>
+            <h1 className="text-xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 truncate">{t('createNewQuiz')}</h1>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
             <DarkModeToggle />
             <LanguageSelector />
           </div>
         </div>
 
-        <form action={createQuiz} className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700/50 p-6">
+        <form action={createQuiz} className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700/50 p-4 md:p-6">
           <div className="mb-6">
             <label
               htmlFor="title"
@@ -113,7 +114,7 @@ export default async function CreateQuizPage() {
             <QuizLanguageSelector name="language" id="language" defaultValue="en" />
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
             <button
               type="submit"
               className="flex-1 bg-blue-600 dark:bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition font-medium"
@@ -127,6 +128,7 @@ export default async function CreateQuizPage() {
             </BackButton>
           </div>
         </form>
+        <AdminFooter />
       </div>
     </div>
   );

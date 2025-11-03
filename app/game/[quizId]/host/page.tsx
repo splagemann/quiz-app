@@ -5,6 +5,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { NextIntlClientProvider, useTranslations } from "next-intl";
 import QRCode from "qrcode";
 import  type { GameEvent } from "@/lib/gameEvents";
+import QuestionDisplay from "@/app/components/QuestionDisplay";
 
 // Import translation files
 import enMessages from "@/locales/en.json";
@@ -62,6 +63,7 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
   const [publicUrl, setPublicUrl] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [finalScores, setFinalScores] = useState<Array<{ playerId: string; playerName: string; score: number }>>([]);
+  const [newPlayerIds, setNewPlayerIds] = useState<Set<string>>(new Set());
 
   // Initialize game session
   useEffect(() => {
@@ -102,7 +104,7 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
         // Generate QR code
         const appPublicUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
         setPublicUrl(appPublicUrl);
-        const joinUrl = `${appPublicUrl}/game/join/${session.sessionCode}`;
+        const joinUrl = `${appPublicUrl}/join/${session.sessionCode}`;
         const qrUrl = await QRCode.toDataURL(joinUrl, {
           width: 300,
           margin: 2,
@@ -145,7 +147,7 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
         // Generate QR code
         const appPublicUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
         setPublicUrl(appPublicUrl);
-        const joinUrl = `${appPublicUrl}/game/join/${data.sessionCode}`;
+        const joinUrl = `${appPublicUrl}/join/${data.sessionCode}`;
         const qrUrl = await QRCode.toDataURL(joinUrl, {
           width: 300,
           margin: 2,
@@ -176,6 +178,16 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
       switch (data.type) {
         case "player_joined":
           setPlayers(prev => [...prev, data.player]);
+          // Mark as new player for pop animation
+          setNewPlayerIds(prev => new Set(prev).add(data.player.id));
+          // Remove from new players after animation completes
+          setTimeout(() => {
+            setNewPlayerIds(prev => {
+              const next = new Set(prev);
+              next.delete(data.player.id);
+              return next;
+            });
+          }, 600);
           break;
         case "player_left":
           setPlayers(prev => prev.filter(p => p.id !== data.playerId));
@@ -333,19 +345,19 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
 
   if (gameStatus === "finished") {
     return (
-      <div className="h-screen bg-gradient-to-br from-purple-500 to-blue-600 p-4 flex flex-col">
+      <div className="h-screen bg-gradient-to-br from-purple-500 to-blue-600 p-3 flex flex-col">
         <div className="w-full h-full overflow-y-auto">
-          <div className="bg-white rounded-lg shadow-2xl p-8 h-full flex flex-col">
-            <h1 className="text-4xl font-bold text-gray-900 text-center mb-8">
+          <div className="bg-white rounded-lg shadow-2xl p-4 sm:p-8 h-full flex flex-col">
+            <h1 className="text-2xl sm:text-4xl font-bold text-gray-900 text-center mb-4 sm:mb-8">
               🏆 {tMultiplayer('gameFinished')}
             </h1>
 
-            <div className="flex-1 overflow-y-auto mb-8">
-              <div className="space-y-4">
+            <div className="flex-1 overflow-y-auto mb-4 sm:mb-8 min-h-0">
+              <div className="space-y-3 sm:space-y-4">
                 {finalScores.map((player, index) => (
                   <div
                     key={player.playerId}
-                    className={`p-6 rounded-lg flex items-center justify-between ${
+                    className={`p-3 sm:p-6 rounded-lg flex items-center justify-between gap-2 ${
                       index === 0
                         ? "bg-yellow-100 border-4 border-yellow-400"
                         : index === 1
@@ -355,22 +367,22 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
                         : "bg-gray-50 border-2 border-gray-300"
                     }`}
                   >
-                    <div className="flex items-center">
-                      <div className="text-4xl font-bold mr-4 w-12">
+                    <div className="flex items-center gap-2 sm:gap-0 flex-1 min-w-0">
+                      <div className="text-2xl sm:text-4xl font-bold sm:mr-4 w-8 sm:w-12 flex-shrink-0">
                         {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `${index + 1}.`}
                       </div>
                       <img
                         src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${player.playerId}`}
                         alt={player.playerName}
-                        className="w-16 h-16 rounded-full mr-4"
+                        className="w-12 h-12 sm:w-16 sm:h-16 rounded-full sm:mr-4 flex-shrink-0"
                       />
-                      <div>
-                        <div className="text-2xl font-bold text-gray-900">
+                      <div className="min-w-0 flex-1">
+                        <div className="text-base sm:text-2xl font-bold text-gray-900 truncate">
                           {player.playerName}
                         </div>
                       </div>
                     </div>
-                    <div className="text-3xl font-bold text-gray-900">
+                    <div className="text-lg sm:text-3xl font-bold text-gray-900 flex-shrink-0">
                       {player.score} {player.score === 1 ? tMultiplayer('point') : tMultiplayer('points')}
                     </div>
                   </div>
@@ -378,16 +390,16 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
               </div>
             </div>
 
-            <div className="flex gap-4 justify-center flex-shrink-0">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center flex-shrink-0">
               <button
-                onClick={() => router.push("/game")}
-                className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition font-bold"
+                onClick={() => router.push("/games")}
+                className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition font-bold w-full sm:w-auto"
               >
                 {tMultiplayer('newGame')}
               </button>
               <button
-                onClick={() => router.push("/host")}
-                className="bg-gray-600 text-white px-8 py-3 rounded-lg hover:bg-gray-700 transition font-bold"
+                onClick={() => router.push("/")}
+                className="bg-gray-600 text-white px-8 py-3 rounded-lg hover:bg-gray-700 transition font-bold w-full sm:w-auto"
               >
                 {tCommon('back')}
               </button>
@@ -400,86 +412,122 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
 
   if (gameStatus === "waiting") {
     return (
-      <div className="h-screen bg-gradient-to-br from-purple-500 to-blue-600 p-4 flex flex-col">
-        <div className="w-full h-full overflow-y-auto">
-          <div className="bg-white rounded-lg shadow-2xl p-8 h-full flex flex-col">
-            <h1 className="text-3xl font-bold text-gray-900 text-center mb-2">
+      <div className="h-screen bg-gradient-to-br from-purple-500 to-blue-600 p-3 flex flex-col">
+        <div className="w-full h-full overflow-hidden">
+          <div className="bg-white rounded-lg shadow-2xl p-3 sm:p-8 h-full flex flex-col">
+            <h1 className="text-xl sm:text-3xl font-bold text-gray-900 text-center mb-1 sm:mb-2 flex-shrink-0">
               {quiz.title}
             </h1>
-            <p className="text-gray-700 text-center mb-8">
+            <p className="text-gray-700 text-center mb-3 sm:mb-6 text-xs sm:text-base flex-shrink-0">
               {tMultiplayer('waitingForPlayers')}
             </p>
 
-            <div className="grid md:grid-cols-2 gap-8 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-6 flex-shrink-0">
               <div className="text-center">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">
+                <h2 className="text-xs sm:text-xl font-bold text-gray-900 mb-1 sm:mb-3">
                   {tMultiplayer('scanQRCode')}
                 </h2>
                 {qrCodeUrl && (
                   <img
                     src={qrCodeUrl}
-                    alt="QR Code"
-                    className="mx-auto mb-4 border-4 border-gray-300 rounded-lg"
+                    alt={tMultiplayer('qrCode')}
+                    className="mx-auto mb-1 sm:mb-3 border-2 sm:border-4 border-gray-300 rounded-lg max-w-[140px] sm:max-w-[280px]"
                   />
                 )}
-                <p className="text-gray-700">
+                <p className="text-gray-700 text-xs sm:text-base hidden sm:block">
                   {tMultiplayer('playersCanScanQR')}
                 </p>
               </div>
 
               <div className="text-center flex flex-col justify-center">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">
-                  {tMultiplayer('orEnterGameCode')}
+                <h2 className="text-xs sm:text-xl font-bold text-gray-900 mb-1 sm:mb-3">
+                  {tMultiplayer('orEnterCode')}
                 </h2>
-                <div className="bg-gray-100 rounded-lg p-8 mb-4">
-                  <div className="text-6xl font-bold text-gray-900 tracking-wider">
+                <div className="bg-gray-100 rounded-lg p-2 sm:p-7 mb-1 sm:mb-3">
+                  <div className="text-xl sm:text-6xl font-bold text-gray-900 tracking-wider break-all">
                     {sessionCode}
                   </div>
                 </div>
-                <p className="text-gray-700">
+                <p className="text-gray-700 text-xs sm:text-base break-all hidden sm:block">
                   {tMultiplayer('goToUrl')} <span className="font-bold">{publicUrl}</span>
                 </p>
               </div>
             </div>
 
-            <div className="flex-1 mb-8 flex flex-col">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">
+            {/* Spacer to push players list and button to bottom */}
+            <div className="flex-1 min-h-0"></div>
+
+            <div className="mb-3 sm:mb-6 flex-shrink-0">
+              <h2 className="text-base sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-4 flex-shrink-0">
                 {tMultiplayer('players')} ({players.length})
               </h2>
               {players.length === 0 ? (
-                <div className="flex-1 flex items-center justify-center">
-                  <p className="text-gray-700 text-center text-2xl">
+                <div className="h-24 sm:h-32 flex items-center justify-center">
+                  <p className="text-gray-700 text-center text-sm sm:text-2xl">
                     {tMultiplayer('noPlayersYet')}
                   </p>
                 </div>
               ) : (
-                <div className="flex-1 overflow-y-auto">
-                  <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
-                    {players.map((player) => (
-                      <div
-                        key={player.id}
-                        className="bg-blue-100 border-2 border-blue-300 rounded-lg p-4 text-center"
-                      >
-                        <img
-                          src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${player.id}`}
-                          alt={player.playerName}
-                          className="w-16 h-16 mx-auto mb-2 rounded-full"
-                        />
-                        <div className="font-bold text-gray-900 text-sm">
-                          {player.playerName}
+                <div className="overflow-hidden relative h-24 sm:h-40">
+                  <style dangerouslySetInnerHTML={{__html: `
+                    @keyframes scroll-horizontal {
+                      0% { transform: translateX(0); }
+                      100% { transform: translateX(-50%); }
+                    }
+                    @keyframes pop-in {
+                      0% {
+                        transform: scale(0);
+                        opacity: 0;
+                      }
+                      50% {
+                        transform: scale(1.2);
+                      }
+                      100% {
+                        transform: scale(1);
+                        opacity: 1;
+                      }
+                    }
+                    .player-pop {
+                      animation: pop-in 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+                    }
+                  `}} />
+                  <div
+                    className="flex gap-2 sm:gap-4 h-full items-center"
+                    style={{
+                      animation: `scroll-horizontal ${Math.max(20, players.length * 3)}s linear infinite`
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.animationPlayState = 'paused'}
+                    onMouseLeave={(e) => e.currentTarget.style.animationPlayState = 'running'}
+                  >
+                    {/* Duplicate players for infinite scroll effect */}
+                    {[...players, ...players].map((player, index) => {
+                      const isNew = newPlayerIds.has(player.id) && index < players.length;
+                      return (
+                        <div
+                          key={`${player.id}-${index}`}
+                          className={`bg-blue-100 border-2 border-blue-300 rounded-lg p-2 sm:p-4 text-center flex-shrink-0 w-20 sm:w-32 ${isNew ? 'player-pop' : ''}`}
+                        >
+                          <img
+                            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${player.id}`}
+                            alt={player.playerName}
+                            className="w-12 h-12 sm:w-20 sm:h-20 mx-auto mb-1 sm:mb-2 rounded-full"
+                          />
+                          <div className="font-bold text-gray-900 text-xs sm:text-sm truncate">
+                            {player.playerName}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="text-center">
+            <div className="text-center flex-shrink-0">
               <button
                 onClick={startGame}
                 disabled={players.length === 0}
-                className={`px-12 py-4 rounded-lg font-bold text-xl transition ${
+                className={`px-6 sm:px-12 py-2 sm:py-4 rounded-lg font-bold text-base sm:text-xl transition w-full sm:w-auto ${
                   players.length === 0
                     ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                     : "bg-green-600 text-white hover:bg-green-700 shadow-lg"
@@ -502,32 +550,34 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
     <div className="h-screen bg-gradient-to-br from-purple-500 to-blue-600 flex flex-col p-4">
       {/* Header */}
       <div className="bg-white rounded-lg shadow-lg p-3 mb-3 flex-shrink-0">
-        <div className="flex justify-between items-center gap-4">
-          <div>
-            <h1 className="text-lg font-bold text-gray-900">{quiz.title}</h1>
-            <p className="text-sm text-gray-700">
-              {tMultiplayer('questionOf', { current: currentQuestionIndex + 1, total: quiz.questions.length })}
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="text-right">
-              <div className="text-sm text-gray-700">
+        <div className="flex flex-col gap-2">
+          <div className="flex justify-between items-start gap-2">
+            <div>
+              <h1 className="text-base sm:text-lg font-bold text-gray-900">{quiz.title}</h1>
+              <p className="text-xs sm:text-sm text-gray-700">
+                {tMultiplayer('questionOf', { current: currentQuestionIndex + 1, total: quiz.questions.length })}
+              </p>
+            </div>
+            <div className="text-right flex-shrink-0">
+              <div className="text-xs sm:text-sm text-gray-700">
                 {tMultiplayer('playersAnswered', { answered: answeredPlayers.size, total: players.length })}
               </div>
             </div>
+          </div>
+          <div className="flex justify-center">
             {revealedAnswer !== null ? (
               <button
                 onClick={nextQuestion}
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition font-bold shadow-lg whitespace-nowrap"
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition font-bold shadow-lg whitespace-nowrap w-full sm:w-auto"
               >
                 {currentQuestionIndex < quiz.questions.length - 1
-                  ? tMultiplayer('nextQuestionArrow')
+                  ? `${tMultiplayer('nextQuestionArrow')} →`
                   : tMultiplayer('results')}
               </button>
             ) : (
               <button
                 onClick={revealAnswer}
-                className={`px-6 py-2 rounded-lg transition font-bold shadow-lg whitespace-nowrap ${
+                className={`px-6 py-2 rounded-lg transition font-bold shadow-lg whitespace-nowrap w-full sm:w-auto ${
                   allAnswered
                     ? "bg-green-600 text-white hover:bg-green-700"
                     : answeredPlayers.size > 0
@@ -544,76 +594,11 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
 
       {/* Question */}
       <div className="bg-white rounded-lg shadow-lg p-6 mb-3 flex-1 flex flex-col overflow-hidden">
-        {currentQuestion.title && (
-          <div className="text-2xl font-medium text-gray-600 mb-3 text-center">
-            {currentQuestion.title}
-          </div>
-        )}
-        <h2 className="text-5xl font-bold text-gray-900 mb-4 text-center">
-          {currentQuestion.questionText}
-        </h2>
-        {currentQuestion.description && (
-          <p className="text-xl text-gray-700 text-center mb-4">
-            {currentQuestion.description}
-          </p>
-        )}
-        {currentQuestion.imageUrl && (
-          <div className="flex justify-center mb-4 flex-1">
-            <img
-              src={currentQuestion.imageUrl}
-              alt={tMultiplayer('questionImage')}
-              className="max-h-96 object-contain rounded-lg border-2 border-gray-300"
-            />
-          </div>
-        )}
-
-        <div className={`${currentQuestion.answers.some(a => a.imageUrl) ? 'flex-1' : ''} ${
-          currentQuestion.answers.length === 2 ? "grid grid-cols-1 sm:grid-cols-2 gap-4" :
-          currentQuestion.answers.length === 4 ? "grid grid-cols-2 gap-4" :
-          "grid grid-cols-2 gap-4"
-        }`}>
-          {currentQuestion.answers.map((answer, index) => {
-            const isCorrect = answer.isCorrect;
-            const isRevealed = revealedAnswer !== null;
-            const hasImages = currentQuestion.answers.some(a => a.imageUrl);
-
-            let containerClass = `p-4 rounded-lg border-4 font-bold text-2xl relative flex flex-col ${hasImages ? 'h-full' : ''} `;
-            if (isRevealed && isCorrect) {
-              containerClass += "bg-green-100 border-green-500 text-green-900";
-            } else if (isRevealed) {
-              containerClass += "bg-gray-100 border-gray-300 text-gray-700";
-            } else {
-              containerClass += "bg-gray-50 border-gray-300 text-gray-900";
-            }
-
-            return (
-              <div
-                key={answer.id}
-                className={containerClass}
-              >
-                {answer.answerText && (
-                  <div className="mb-2">
-                    {answer.answerText}
-                  </div>
-                )}
-                {answer.imageUrl && (
-                  <div className="flex-1 relative min-h-[200px]">
-                    <img
-                      src={answer.imageUrl}
-                      alt={tMultiplayer('answerImage')}
-                      className="absolute inset-0 w-full h-full object-contain rounded"
-                    />
-                  </div>
-                )}
-                {isRevealed && isCorrect && (
-                  <div className="absolute top-2 right-2">
-                    <span className="text-green-600 text-4xl bg-white rounded-full px-2">✓</span>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+        <QuestionDisplay
+          question={currentQuestion}
+          mode="host"
+          revealedAnswerId={revealedAnswer}
+        />
       </div>
     </div>
   );

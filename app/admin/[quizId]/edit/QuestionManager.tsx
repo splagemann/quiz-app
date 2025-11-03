@@ -236,12 +236,12 @@ export default function QuestionManager({
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700/50 p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{t('questionsCount', { count: initialQuestions.length })}</h2>
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700/50 p-4 md:p-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
+        <h2 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-gray-100">{t('questionsCount', { count: initialQuestions.length })}</h2>
         <button
           onClick={() => setIsAddingQuestion(true)}
-          className="bg-green-600 dark:bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-700 dark:hover:bg-green-600 transition"
+          className="bg-green-600 dark:bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-700 dark:hover:bg-green-600 transition w-full sm:w-auto"
         >
           {tQuestion('addQuestion')}
         </button>
@@ -393,7 +393,7 @@ export default function QuestionManager({
                   />
                   {answer.imageUrl && (
                     <div className="mt-2">
-                      <img src={answer.imageUrl} alt={t('answerImageAlt')} className="max-w-xs rounded border border-gray-300 dark:border-gray-600" />
+                      <img src={answer.imageUrl} alt={t('answerImageAlt')} className="w-full max-w-xs rounded border border-gray-300 dark:border-gray-600" />
                     </div>
                   )}
                 </div>
@@ -588,7 +588,7 @@ export default function QuestionManager({
                           />
                           {answer.imageUrl && (
                             <div className="mt-2">
-                              <img src={answer.imageUrl} alt={t('answerImageAlt')} className="max-w-xs rounded border border-gray-300 dark:border-gray-500" />
+                              <img src={answer.imageUrl} alt={t('answerImageAlt')} className="w-full max-w-xs rounded border border-gray-300 dark:border-gray-500" />
                             </div>
                           )}
                         </div>
@@ -618,18 +618,18 @@ export default function QuestionManager({
                 </form>
               ) : (
                 <>
-                  <div className="flex justify-between items-start mb-3">
-                    <div className="flex-1">
+                  <div className="flex flex-col sm:flex-row justify-between items-start gap-3 mb-3">
+                    <div className="flex-1 min-w-0">
                       {question.title && (
                         <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
                           {question.title}
                         </div>
                       )}
-                      <h3 className="font-semibold text-lg text-gray-900 dark:text-gray-100">
+                      <h3 className="font-semibold text-base md:text-lg text-gray-900 dark:text-gray-100 break-words">
                         {index + 1}. {question.questionText}
                       </h3>
                       {question.description && (
-                        <p className="text-sm text-gray-700 dark:text-gray-300 mt-2">
+                        <p className="text-sm text-gray-700 dark:text-gray-300 mt-2 break-words">
                           {question.description}
                         </p>
                       )}
@@ -637,11 +637,11 @@ export default function QuestionManager({
                         <img
                           src={question.imageUrl}
                           alt={t('questionImageAlt')}
-                          className="mt-3 max-w-md rounded-lg border border-gray-300 dark:border-gray-600"
+                          className="mt-3 w-full max-w-md rounded-lg border border-gray-300 dark:border-gray-600"
                         />
                       )}
                     </div>
-                    <div className="flex gap-2 ml-4">
+                    <div className="flex gap-2 flex-shrink-0 self-end sm:self-start">
                       <button
                         onClick={() => {
                           setEditingQuestionId(question.id);
@@ -681,7 +681,7 @@ export default function QuestionManager({
                           <img
                             src={answer.imageUrl}
                             alt={t('answerImageAlt')}
-                            className="mt-2 max-w-xs rounded border border-gray-300 dark:border-gray-500"
+                            className="mt-2 w-full max-w-xs rounded border border-gray-300 dark:border-gray-500"
                           />
                         )}
                       </div>

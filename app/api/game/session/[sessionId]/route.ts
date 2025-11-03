@@ -41,6 +41,9 @@ export async function GET(
       );
     }
 
+    // Initialize session in memory if not already present
+    gameStateManager.initSession(sessionId);
+
     return NextResponse.json(session);
   } catch (error) {
     console.error("Error fetching session:", error);
