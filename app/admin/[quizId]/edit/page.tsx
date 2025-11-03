@@ -30,6 +30,12 @@ export async function generateMetadata({
 async function updateQuiz(quizId: number, formData: FormData) {
   "use server";
 
+  // Re-check authentication (defense in depth)
+  const authenticated = await isAuthenticated();
+  if (!authenticated) {
+    throw new Error("Unauthorized");
+  }
+
   const title = formData.get("title") as string;
   const description = formData.get("description") as string;
   const language = (formData.get("language") as string) || "en";
@@ -52,6 +58,12 @@ async function updateQuiz(quizId: number, formData: FormData) {
 
 async function deleteQuiz(quizId: number) {
   "use server";
+
+  // Re-check authentication (defense in depth)
+  const authenticated = await isAuthenticated();
+  if (!authenticated) {
+    throw new Error("Unauthorized");
+  }
 
   await prisma.quiz.delete({
     where: { id: quizId },
