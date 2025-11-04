@@ -66,6 +66,8 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
   const [finalScores, setFinalScores] = useState<Array<{ playerId: string; playerName: string; score: number }>>([]);
   const [newPlayerIds, setNewPlayerIds] = useState<Set<string>>(new Set());
   const playerListRef = useRef<HTMLDivElement>(null);
+  const hasInitialized = useRef(false); // Prevent duplicate session creation in StrictMode
+  const isMountedRef = useRef(false);
 
   // Auto-scroll to show new players on the left
   useEffect(() => {
@@ -74,23 +76,26 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
     }
   }, [players.length]);
 
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
   // Initialize game session
   useEffect(() => {
-    // Prevent multiple session creation
-    let cancelled = false;
-
     async function loadExistingSession(sid: string) {
-      if (cancelled) return;
-
       try {
         const response = await fetch(`/api/game/session/${sid}`);
-        if (!response.ok || cancelled) {
+        if (!response.ok) {
           setError(tCommon('error'));
           return;
         }
 
         const session = await response.json();
-        if (cancelled) return;
+
+        if (!isMountedRef.current) return;
 
         setSessionCode(session.sessionCode);
         setSessionId(session.id);
@@ -125,17 +130,18 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
           width: 300,
           margin: 2,
         });
+        if (!isMountedRef.current) return;
         setQrCodeUrl(qrUrl);
       } catch (err) {
         console.error("Error loading session:", err);
-        if (!cancelled) {
+        if (isMountedRef.current) {
           setError(tCommon('error'));
         }
       }
     }
 
     async function initSession() {
-      if (cancelled) return;
+      console.log("Initializing new session for quiz ID:", quizId);
 
       try {
         const response = await fetch("/api/game/session", {
@@ -144,14 +150,15 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
           body: JSON.stringify({ quizId }),
         });
 
-        if (!response.ok || cancelled) {
+        if (!response.ok) {
           const data = await response.json();
           setError(data.error || tCommon('error'));
           return;
         }
 
         const data = await response.json();
-        if (cancelled) return;
+
+        if (!isMountedRef.current) return;
 
         setSessionCode(data.sessionCode);
         setSessionId(data.sessionId);
@@ -174,10 +181,11 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
           width: 300,
           margin: 2,
         });
+        if (!isMountedRef.current) return;
         setQrCodeUrl(qrUrl);
       } catch (err) {
         console.error("Error initializing session:", err);
-        if (!cancelled) {
+        if (isMountedRef.current) {
           setError(tCommon('error'));
         }
       }
@@ -186,14 +194,14 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
     if (existingSessionId) {
       loadExistingSession(existingSessionId);
     } else {
-      initSession();
+      if (!hasInitialized.current) {
+        hasInitialized.current = true;
+        initSession();
+      }
     }
 
-    // Cleanup function to prevent race conditions
-    return () => {
-      cancelled = true;
-    };
-  }, [quizId, existingSessionId, router, onQuizLoaded]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quizId, existingSessionId]);
 
   // Connect to SSE for real-time updates
   useEffect(() => {
