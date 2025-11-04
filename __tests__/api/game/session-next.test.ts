@@ -14,6 +14,9 @@ jest.mock('@/lib/prisma', () => ({
       findUnique: jest.fn(),
       update: jest.fn(),
     },
+    player: {
+      update: jest.fn(),
+    },
   },
 }));
 
@@ -208,6 +211,114 @@ describe('/api/game/session/[sessionId]/next', () => {
 
       expect(response.status).toBe(400);
       expect(data.error).toContain('nicht aktiv');
+    });
+
+    it('should award bonus point to marked player at game end', async () => {
+      const sessionId = 'session-123';
+      const mockSession = {
+        id: sessionId,
+        status: 'in_progress',
+        currentQuestion: 1,
+        quiz: {
+          questions: [
+            { id: 10, questionText: 'Q1', orderIndex: 0 },
+            { id: 11, questionText: 'Q2', orderIndex: 1 },
+          ],
+        },
+        players: [
+          { id: 'player-1', playerName: 'Player1', score: 100, markedToWin: false },
+          { id: 'player-2', playerName: 'Player2', score: 50, markedToWin: true },
+          { id: 'player-3', playerName: 'Player3', score: 75, markedToWin: false },
+        ],
+      };
+
+      const mockUpdatedSession = {
+        ...mockSession,
+        status: 'finished',
+        finishedAt: new Date(),
+        players: [
+          { id: 'player-1', playerName: 'Player1', score: 100 },
+          { id: 'player-2', playerName: 'Player2', score: 51 }, // Bonus point added
+          { id: 'player-3', playerName: 'Player3', score: 75 },
+        ],
+      };
+
+      mockPrisma.gameSession.findUnique.mockResolvedValue(mockSession as any);
+      (mockPrisma as any).player.update.mockResolvedValue({
+        id: 'player-2',
+        score: 51,
+      });
+      mockPrisma.gameSession.update.mockResolvedValue(mockUpdatedSession as any);
+      mockGameStateManager.broadcast.mockResolvedValue(undefined);
+
+      const request = new NextRequest(`http://localhost:3210/api/game/session/${sessionId}/next`, {
+        method: 'POST',
+      });
+
+      const params = Promise.resolve({ sessionId });
+      const response = await POST(request, { params });
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.success).toBe(true);
+      expect(data.gameFinished).toBe(true);
+
+      // Verify that bonus point was awarded to marked player
+      expect((mockPrisma as any).player.update).toHaveBeenCalledWith({
+        where: { id: 'player-2' },
+        data: { score: { increment: 1 } },
+      });
+
+      // Verify final scores include the bonus point
+      expect(data.finalScores).toContainEqual({
+        playerId: 'player-2',
+        playerName: 'Player2',
+        score: 51,
+      });
+    });
+
+    it('should finish game without bonus point if no player is marked', async () => {
+      const sessionId = 'session-123';
+      const mockSession = {
+        id: sessionId,
+        status: 'in_progress',
+        currentQuestion: 1,
+        quiz: {
+          questions: [
+            { id: 10, questionText: 'Q1', orderIndex: 0 },
+            { id: 11, questionText: 'Q2', orderIndex: 1 },
+          ],
+        },
+        players: [
+          { id: 'player-1', playerName: 'Player1', score: 100, markedToWin: false },
+          { id: 'player-2', playerName: 'Player2', score: 50, markedToWin: false },
+        ],
+      };
+
+      const mockUpdatedSession = {
+        ...mockSession,
+        status: 'finished',
+        finishedAt: new Date(),
+      };
+
+      mockPrisma.gameSession.findUnique.mockResolvedValue(mockSession as any);
+      mockPrisma.gameSession.update.mockResolvedValue(mockUpdatedSession as any);
+      mockGameStateManager.broadcast.mockResolvedValue(undefined);
+
+      const request = new NextRequest(`http://localhost:3210/api/game/session/${sessionId}/next`, {
+        method: 'POST',
+      });
+
+      const params = Promise.resolve({ sessionId });
+      const response = await POST(request, { params });
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.success).toBe(true);
+      expect(data.gameFinished).toBe(true);
+
+      // Verify that player.update was NOT called (no marked player)
+      expect((mockPrisma as any).player.update).not.toHaveBeenCalled();
     });
 
     it('should return 500 on database error', async () => {

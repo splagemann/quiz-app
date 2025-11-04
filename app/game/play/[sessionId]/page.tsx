@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { NextIntlClientProvider, useTranslations } from "next-intl";
+import toast from 'react-hot-toast';
 import type { GameEvent } from "@/lib/gameEvents";
 import QuestionDisplay from "@/app/components/QuestionDisplay";
 
@@ -189,7 +190,7 @@ function PlayerGameContent() {
 
       if (!response.ok) {
         const data = await response.json();
-        alert(data.error || tCommon('error'));
+        toast.error(data.error || tCommon('error'));
         setSelectedAnswer(null);
         return;
       }
@@ -199,7 +200,7 @@ function PlayerGameContent() {
       setGameStatus("answered");
     } catch (err) {
       console.error("Error submitting answer:", err);
-      alert(tCommon('error'));
+      toast.error(tCommon('error'));
       setSelectedAnswer(null);
     }
   };

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from 'next-intl';
+import toast from 'react-hot-toast';
+import { useConfirm } from '@/app/components/ConfirmDialog';
 
 type Answer = {
   id: number;
@@ -36,6 +38,7 @@ export default function QuestionManager({
   questions: Question[];
 }) {
   const router = useRouter();
+  const confirm = useConfirm();
   const t = useTranslations('questionManager');
   const tQuestion = useTranslations('question');
   const tCommon = useTranslations('common');
@@ -70,7 +73,7 @@ export default function QuestionManager({
 
       if (!response.ok) {
         const error = await response.json();
-        alert(error.error || tQuestion('imageUploadError'));
+        toast.error(error.error || tQuestion('imageUploadError'));
         return null;
       }
 
@@ -83,7 +86,7 @@ export default function QuestionManager({
       return data.url;
     } catch (err) {
       console.error("Error uploading image:", err);
-      alert(t('networkErrorUploading'));
+      toast.error(t('networkErrorUploading'));
       return null;
     } finally {
       setUploadingImage(false);
@@ -104,7 +107,7 @@ export default function QuestionManager({
 
       if (!response.ok) {
         const error = await response.json();
-        alert(error.error || tQuestion('imageUploadError'));
+        toast.error(error.error || tQuestion('imageUploadError'));
         return null;
       }
 
@@ -112,7 +115,7 @@ export default function QuestionManager({
       return data.url;
     } catch (err) {
       console.error("Error uploading image:", err);
-      alert(t('networkErrorUploading'));
+      toast.error(t('networkErrorUploading'));
       return null;
     }
   }
@@ -125,15 +128,15 @@ export default function QuestionManager({
     // Validate: at least one answer must have text or image
     const validAnswers = newAnswers.filter(a => a.text.trim() || a.imageUrl);
     if (!questionText) {
-      alert(tValidation('questionTextRequired'));
+      toast.error(tValidation('questionTextRequired'));
       return;
     }
     if (validAnswers.length < 2) {
-      alert(t('minAnswersValidation'));
+      toast.error(t('minAnswersValidation'));
       return;
     }
     if (!newAnswers.some(a => a.isCorrect)) {
-      alert(tValidation('atLeastOneCorrect'));
+      toast.error(tValidation('atLeastOneCorrect'));
       return;
     }
 
@@ -162,10 +165,11 @@ export default function QuestionManager({
         { text: "", imageUrl: "", isCorrect: true },
         { text: "", imageUrl: "", isCorrect: false },
       ]);
+      toast.success(t('questionCreated'));
       router.refresh();
     } else {
       const error = await response.json();
-      alert(error.error || t('errorCreatingQuestion'));
+      toast.error(error.error || t('errorCreatingQuestion'));
     }
   }
 
@@ -181,15 +185,15 @@ export default function QuestionManager({
     // Validate: at least one answer must have text or image
     const validAnswers = editAnswers.filter(a => (a.answerText && a.answerText.trim()) || a.imageUrl);
     if (!questionText) {
-      alert(tValidation('questionTextRequired'));
+      toast.error(tValidation('questionTextRequired'));
       return;
     }
     if (validAnswers.length < 2) {
-      alert(t('minAnswersEditValidation'));
+      toast.error(t('minAnswersEditValidation'));
       return;
     }
     if (!editAnswers.some(a => a.isCorrect)) {
-      alert(tValidation('atLeastOneCorrect'));
+      toast.error(tValidation('atLeastOneCorrect'));
       return;
     }
 
@@ -214,15 +218,24 @@ export default function QuestionManager({
       setEditingQuestionId(null);
       setEditQuestionImageUrl("");
       setEditAnswers([]);
+      toast.success(t('questionUpdated'));
       router.refresh();
     } else {
       const error = await response.json();
-      alert(error.error || t('errorUpdatingQuestion'));
+      toast.error(error.error || t('errorUpdatingQuestion'));
     }
   }
 
   async function handleDeleteQuestion(questionId: number) {
-    if (!confirm(tQuestion('deleteConfirm'))) {
+    const confirmed = await confirm({
+      title: tQuestion('deleteQuestion'),
+      message: tQuestion('deleteConfirm'),
+      confirmText: tCommon('delete'),
+      cancelText: tCommon('cancel'),
+      confirmColor: 'red',
+    });
+
+    if (!confirmed) {
       return;
     }
 
@@ -231,7 +244,10 @@ export default function QuestionManager({
     });
 
     if (response.ok) {
+      toast.success(t('questionDeleted'));
       router.refresh();
+    } else {
+      toast.error(t('errorDeletingQuestion'));
     }
   }
 

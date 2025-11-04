@@ -122,6 +122,7 @@ describe('/api/admin/sessions', () => {
               playerName: true,
               score: true,
               isConnected: true,
+              markedToWin: true,
               joinedAt: true,
             },
             orderBy: {

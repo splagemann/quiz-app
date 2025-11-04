@@ -30,6 +30,7 @@ export async function GET(req: NextRequest) {
             playerName: true,
             score: true,
             isConnected: true,
+            markedToWin: true,
             joinedAt: true,
           },
           orderBy: {

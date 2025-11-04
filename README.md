@@ -33,6 +33,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Image Upload**: Upload images directly (stored locally)
 - **Answer Management**: Each question has 2-4 possible answers, with flexible configuration and image support
 - **Quiz Overview**: Display all created quizzes with question count and metadata
+- **Session Management**: View and manage all active multiplayer game sessions
+  - Real-time session monitoring with automatic refresh
+  - Individual and bulk session deletion
+  - **Mark Player to Win**: Special feature for celebrations - mark a player who will automatically win (crown emoji visible only in admin)
 
 ### Single Player Mode
 - **Quiz Selection**: Browse and select available quizzes
@@ -159,6 +163,7 @@ npm run dev
 - score
 - joinedAt
 - isConnected
+- markedToWin (boolean, default: false)
 
 ### PlayerAnswer
 - id (primary key)

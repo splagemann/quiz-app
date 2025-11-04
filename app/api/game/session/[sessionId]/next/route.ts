@@ -48,7 +48,16 @@ export async function POST(
 
     // Check if there are more questions
     if (nextIndex >= session.quiz.questions.length) {
-      // Game is finished
+      // Game is finished - award bonus point to marked player
+      const markedPlayer = session.players.find(p => p.markedToWin);
+      if (markedPlayer) {
+        await prisma.player.update({
+          where: { id: markedPlayer.id },
+          data: { score: { increment: 1 } },
+        });
+      }
+
+      // Update session status and fetch with updated scores
       const updatedSession = await prisma.gameSession.update({
         where: { id: sessionId },
         data: {

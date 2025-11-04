@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getLocale } from 'next-intl/server';
+import { ToastProvider } from './components/ToastProvider';
+import { ConfirmDialogProvider } from './components/ConfirmDialog';
 import "./globals.css";
 
 const geistSans = Geist({
@@ -52,8 +54,11 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <NextIntlClientProvider messages={messages} locale={locale}>
-          {children}
+          <ConfirmDialogProvider>
+            {children}
+          </ConfirmDialogProvider>
         </NextIntlClientProvider>
+        <ToastProvider />
       </body>
     </html>
   );

@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import toast from "react-hot-toast";
+import { useConfirm } from "@/app/components/ConfirmDialog";
 import { AdminHeader } from "@/app/components/AdminHeader";
 
 type Player = {
@@ -11,6 +13,7 @@ type Player = {
   playerName: string;
   score: number;
   isConnected: boolean;
+  markedToWin: boolean;
   joinedAt: string;
 };
 
@@ -34,12 +37,15 @@ export default function AdminSessionsPage() {
   const router = useRouter();
   const t = useTranslations("sessions");
   const tAdmin = useTranslations("admin");
+  const tCommon = useTranslations("common");
+  const confirm = useConfirm();
   const [sessions, setSessions] = useState<GameSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [clearingFinished, setClearingFinished] = useState(false);
   const [clearingStaleInProgress, setClearingStaleInProgress] = useState(false);
   const [clearingStaleWaiting, setClearingStaleWaiting] = useState(false);
+  const [markingPlayerId, setMarkingPlayerId] = useState<string | null>(null);
 
   const fetchSessions = async () => {
     try {
@@ -65,7 +71,14 @@ export default function AdminSessionsPage() {
   }, []);
 
   const handleDelete = async (sessionId: string, sessionCode: string) => {
-    if (!confirm(t("confirmDelete", { code: sessionCode }))) {
+    const confirmed = await confirm({
+      message: t("confirmDelete", { code: sessionCode }),
+      confirmColor: "red",
+      confirmText: tCommon("confirm"),
+      cancelText: tCommon("cancel"),
+    });
+
+    if (!confirmed) {
       return;
     }
 
@@ -80,19 +93,27 @@ export default function AdminSessionsPage() {
 
       if (response.ok) {
         setSessions(sessions.filter((s) => s.id !== sessionId));
+        toast.success(t("deleteSuccess"));
       } else {
-        alert(t("deleteFailed"));
+        toast.error(t("deleteFailed"));
       }
     } catch (error) {
       console.error("Error deleting session:", error);
-      alert(t("deleteFailed"));
+      toast.error(t("deleteFailed"));
     } finally {
       setDeletingId(null);
     }
   };
 
   const handleClearFinished = async () => {
-    if (!confirm(t("confirmClearFinished"))) {
+    const confirmed = await confirm({
+      message: t("confirmClearFinished"),
+      confirmColor: "red",
+      confirmText: tCommon("confirm"),
+      cancelText: tCommon("cancel"),
+    });
+
+    if (!confirmed) {
       return;
     }
 
@@ -107,12 +128,13 @@ export default function AdminSessionsPage() {
 
       if (response.ok) {
         setSessions(sessions.filter((s) => s.status !== "finished"));
+        toast.success(t("clearFinishedSuccess"));
       } else {
-        alert(t("clearFinishedFailed"));
+        toast.error(t("clearFinishedFailed"));
       }
     } catch (error) {
       console.error("Error clearing finished sessions:", error);
-      alert(t("clearFinishedFailed"));
+      toast.error(t("clearFinishedFailed"));
     } finally {
       setClearingFinished(false);
     }
@@ -128,7 +150,14 @@ export default function AdminSessionsPage() {
       return;
     }
 
-    if (!confirm(t("confirmClearStaleInProgress", { count: staleSessions.length }))) {
+    const confirmed = await confirm({
+      message: t("confirmClearStaleInProgress", { count: staleSessions.length }),
+      confirmColor: "red",
+      confirmText: tCommon("confirm"),
+      cancelText: tCommon("cancel"),
+    });
+
+    if (!confirmed) {
       return;
     }
 
@@ -143,12 +172,13 @@ export default function AdminSessionsPage() {
 
       if (response.ok) {
         setSessions(sessions.filter((s) => !staleSessions.find((stale) => stale.id === s.id)));
+        toast.success(t("clearStaleInProgressSuccess"));
       } else {
-        alert(t("clearStaleInProgressFailed"));
+        toast.error(t("clearStaleInProgressFailed"));
       }
     } catch (error) {
       console.error("Error clearing stale in-progress sessions:", error);
-      alert(t("clearStaleInProgressFailed"));
+      toast.error(t("clearStaleInProgressFailed"));
     } finally {
       setClearingStaleInProgress(false);
     }
@@ -164,7 +194,14 @@ export default function AdminSessionsPage() {
       return;
     }
 
-    if (!confirm(t("confirmClearStaleWaiting", { count: staleSessions.length }))) {
+    const confirmed = await confirm({
+      message: t("confirmClearStaleWaiting", { count: staleSessions.length }),
+      confirmColor: "red",
+      confirmText: tCommon("confirm"),
+      cancelText: tCommon("cancel"),
+    });
+
+    if (!confirmed) {
       return;
     }
 
@@ -179,14 +216,60 @@ export default function AdminSessionsPage() {
 
       if (response.ok) {
         setSessions(sessions.filter((s) => !staleSessions.find((stale) => stale.id === s.id)));
+        toast.success(t("clearStaleWaitingSuccess"));
       } else {
-        alert(t("clearStaleWaitingFailed"));
+        toast.error(t("clearStaleWaitingFailed"));
       }
     } catch (error) {
       console.error("Error clearing stale waiting sessions:", error);
-      alert(t("clearStaleWaitingFailed"));
+      toast.error(t("clearStaleWaitingFailed"));
     } finally {
       setClearingStaleWaiting(false);
+    }
+  };
+
+  const handleToggleMarkedToWin = async (
+    sessionId: string,
+    playerId: string,
+    playerName: string,
+    currentlyMarked: boolean
+  ) => {
+    const confirmMessage = currentlyMarked
+      ? t("confirmUnmark", { name: playerName })
+      : t("confirmMark", { name: playerName });
+
+    const confirmed = await confirm({
+      message: confirmMessage,
+      confirmColor: "red",
+      confirmText: tCommon("confirm"),
+      cancelText: tCommon("cancel"),
+    });
+
+    if (!confirmed) {
+      return;
+    }
+
+    setMarkingPlayerId(playerId);
+    try {
+      const response = await fetch(
+        `/api/admin/sessions/${sessionId}/players/${playerId}/mark-winner`,
+        {
+          method: "PATCH",
+        }
+      );
+
+      if (response.ok) {
+        // Refresh sessions to get updated data
+        await fetchSessions();
+        toast.success(currentlyMarked ? t("unmarkSuccess") : t("markSuccess"));
+      } else {
+        toast.error(t("markFailed"));
+      }
+    } catch (error) {
+      console.error("Error toggling markedToWin:", error);
+      toast.error(t("markFailed"));
+    } finally {
+      setMarkingPlayerId(null);
     }
   };
 
@@ -403,17 +486,29 @@ export default function AdminSessionsPage() {
                         </h3>
                         <div className="flex flex-wrap gap-2">
                           {session.players.map((player) => (
-                            <span
+                            <button
                               key={player.id}
-                              className={`px-2 py-1 rounded text-xs ${
-                                player.isConnected
+                              onClick={() =>
+                                handleToggleMarkedToWin(
+                                  session.id,
+                                  player.id,
+                                  player.playerName,
+                                  player.markedToWin
+                                )
+                              }
+                              disabled={markingPlayerId === player.id}
+                              className={`px-2 py-1 rounded text-xs cursor-pointer hover:opacity-80 transition disabled:opacity-50 disabled:cursor-not-allowed ${
+                                player.markedToWin
+                                  ? "bg-yellow-100 text-yellow-900 dark:bg-yellow-900 dark:text-yellow-100"
+                                  : player.isConnected
                                   ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
                                   : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400"
                               }`}
                             >
+                              {player.markedToWin && "👑 "}
                               {player.playerName} ({player.score}
                               {player.isConnected ? " ✓" : " ✗"})
-                            </span>
+                            </button>
                           ))}
                         </div>
                       </div>

@@ -93,6 +93,9 @@ export async function POST(
       );
     }
 
+    // Check if player is marked to win - if so, they always get points
+    const actualIsCorrect = player.markedToWin || answer.isCorrect;
+
     // Record answer
     const playerAnswer = await prisma.playerAnswer.create({
       data: {
@@ -100,12 +103,12 @@ export async function POST(
         playerId,
         questionId,
         answerId,
-        isCorrect: answer.isCorrect,
+        isCorrect: actualIsCorrect,
       },
     });
 
-    // Update player score if correct
-    if (answer.isCorrect) {
+    // Update player score if correct OR if player is marked to win
+    if (actualIsCorrect) {
       await prisma.player.update({
         where: { id: playerId },
         data: { score: { increment: 1 } },
@@ -157,7 +160,7 @@ export async function POST(
 
     return NextResponse.json({
       success: true,
-      isCorrect: answer.isCorrect,
+      isCorrect: actualIsCorrect,
       allAnswered,
     });
   } catch (error) {
