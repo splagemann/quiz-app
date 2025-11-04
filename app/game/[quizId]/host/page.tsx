@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { NextIntlClientProvider, useTranslations } from "next-intl";
 import QRCode from "qrcode";
+import toast from 'react-hot-toast';
 import  type { GameEvent } from "@/lib/gameEvents";
 import QuestionDisplay from "@/app/components/QuestionDisplay";
 
@@ -262,7 +263,7 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
 
       if (!response.ok) {
         const data = await response.json();
-        alert(data.error || tCommon('error'));
+        toast.error(data.error || tCommon('error'));
         return;
       }
 
@@ -272,7 +273,7 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
       setRevealedAnswer(null);
     } catch (err) {
       console.error("Error starting game:", err);
-      alert(tCommon('error'));
+      toast.error(tCommon('error'));
     }
   };
 
@@ -284,7 +285,7 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
 
       if (!response.ok) {
         const data = await response.json();
-        alert(data.error || tCommon('error'));
+        toast.error(data.error || tCommon('error'));
         return;
       }
 
@@ -300,7 +301,7 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
       }
     } catch (err) {
       console.error("Error moving to next question:", err);
-      alert(tCommon('error'));
+      toast.error(tCommon('error'));
     }
   };
 
@@ -312,12 +313,12 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
 
       if (!response.ok) {
         const data = await response.json();
-        alert(data.error || tCommon('error'));
+        toast.error(data.error || tCommon('error'));
         return;
       }
     } catch (err) {
       console.error("Error revealing answer:", err);
-      alert(tCommon('error'));
+      toast.error(tCommon('error'));
     }
   };
 

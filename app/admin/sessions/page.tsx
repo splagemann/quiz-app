@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import toast from "react-hot-toast";
+import { useConfirm } from "@/app/components/ConfirmDialog";
 import { AdminHeader } from "@/app/components/AdminHeader";
 
 type Player = {
@@ -35,6 +37,8 @@ export default function AdminSessionsPage() {
   const router = useRouter();
   const t = useTranslations("sessions");
   const tAdmin = useTranslations("admin");
+  const tCommon = useTranslations("common");
+  const confirm = useConfirm();
   const [sessions, setSessions] = useState<GameSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -67,7 +71,14 @@ export default function AdminSessionsPage() {
   }, []);
 
   const handleDelete = async (sessionId: string, sessionCode: string) => {
-    if (!confirm(t("confirmDelete", { code: sessionCode }))) {
+    const confirmed = await confirm({
+      message: t("confirmDelete", { code: sessionCode }),
+      confirmColor: "red",
+      confirmText: tCommon("confirm"),
+      cancelText: tCommon("cancel"),
+    });
+
+    if (!confirmed) {
       return;
     }
 
@@ -82,19 +93,27 @@ export default function AdminSessionsPage() {
 
       if (response.ok) {
         setSessions(sessions.filter((s) => s.id !== sessionId));
+        toast.success(t("deleteSuccess"));
       } else {
-        alert(t("deleteFailed"));
+        toast.error(t("deleteFailed"));
       }
     } catch (error) {
       console.error("Error deleting session:", error);
-      alert(t("deleteFailed"));
+      toast.error(t("deleteFailed"));
     } finally {
       setDeletingId(null);
     }
   };
 
   const handleClearFinished = async () => {
-    if (!confirm(t("confirmClearFinished"))) {
+    const confirmed = await confirm({
+      message: t("confirmClearFinished"),
+      confirmColor: "red",
+      confirmText: tCommon("confirm"),
+      cancelText: tCommon("cancel"),
+    });
+
+    if (!confirmed) {
       return;
     }
 
@@ -109,12 +128,13 @@ export default function AdminSessionsPage() {
 
       if (response.ok) {
         setSessions(sessions.filter((s) => s.status !== "finished"));
+        toast.success(t("clearFinishedSuccess"));
       } else {
-        alert(t("clearFinishedFailed"));
+        toast.error(t("clearFinishedFailed"));
       }
     } catch (error) {
       console.error("Error clearing finished sessions:", error);
-      alert(t("clearFinishedFailed"));
+      toast.error(t("clearFinishedFailed"));
     } finally {
       setClearingFinished(false);
     }
@@ -130,7 +150,14 @@ export default function AdminSessionsPage() {
       return;
     }
 
-    if (!confirm(t("confirmClearStaleInProgress", { count: staleSessions.length }))) {
+    const confirmed = await confirm({
+      message: t("confirmClearStaleInProgress", { count: staleSessions.length }),
+      confirmColor: "red",
+      confirmText: tCommon("confirm"),
+      cancelText: tCommon("cancel"),
+    });
+
+    if (!confirmed) {
       return;
     }
 
@@ -145,12 +172,13 @@ export default function AdminSessionsPage() {
 
       if (response.ok) {
         setSessions(sessions.filter((s) => !staleSessions.find((stale) => stale.id === s.id)));
+        toast.success(t("clearStaleInProgressSuccess"));
       } else {
-        alert(t("clearStaleInProgressFailed"));
+        toast.error(t("clearStaleInProgressFailed"));
       }
     } catch (error) {
       console.error("Error clearing stale in-progress sessions:", error);
-      alert(t("clearStaleInProgressFailed"));
+      toast.error(t("clearStaleInProgressFailed"));
     } finally {
       setClearingStaleInProgress(false);
     }
@@ -166,7 +194,14 @@ export default function AdminSessionsPage() {
       return;
     }
 
-    if (!confirm(t("confirmClearStaleWaiting", { count: staleSessions.length }))) {
+    const confirmed = await confirm({
+      message: t("confirmClearStaleWaiting", { count: staleSessions.length }),
+      confirmColor: "red",
+      confirmText: tCommon("confirm"),
+      cancelText: tCommon("cancel"),
+    });
+
+    if (!confirmed) {
       return;
     }
 
@@ -181,12 +216,13 @@ export default function AdminSessionsPage() {
 
       if (response.ok) {
         setSessions(sessions.filter((s) => !staleSessions.find((stale) => stale.id === s.id)));
+        toast.success(t("clearStaleWaitingSuccess"));
       } else {
-        alert(t("clearStaleWaitingFailed"));
+        toast.error(t("clearStaleWaitingFailed"));
       }
     } catch (error) {
       console.error("Error clearing stale waiting sessions:", error);
-      alert(t("clearStaleWaitingFailed"));
+      toast.error(t("clearStaleWaitingFailed"));
     } finally {
       setClearingStaleWaiting(false);
     }
@@ -202,7 +238,14 @@ export default function AdminSessionsPage() {
       ? t("confirmUnmark", { name: playerName })
       : t("confirmMark", { name: playerName });
 
-    if (!confirm(confirmMessage)) {
+    const confirmed = await confirm({
+      message: confirmMessage,
+      confirmColor: "red",
+      confirmText: tCommon("confirm"),
+      cancelText: tCommon("cancel"),
+    });
+
+    if (!confirmed) {
       return;
     }
 
@@ -218,12 +261,13 @@ export default function AdminSessionsPage() {
       if (response.ok) {
         // Refresh sessions to get updated data
         await fetchSessions();
+        toast.success(currentlyMarked ? t("unmarkSuccess") : t("markSuccess"));
       } else {
-        alert(t("markFailed"));
+        toast.error(t("markFailed"));
       }
     } catch (error) {
       console.error("Error toggling markedToWin:", error);
-      alert(t("markFailed"));
+      toast.error(t("markFailed"));
     } finally {
       setMarkingPlayerId(null);
     }
