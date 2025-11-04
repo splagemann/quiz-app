@@ -273,7 +273,13 @@
       "waiting": "Waiting",
       "in_progress": "In Progress",
       "finished": "Finished"
-    }
+    },
+    "markToWin": "Mark as winner",
+    "unmarkToWin": "Remove winner marking",
+    "markedToWin": "Marked to win",
+    "confirmMark": "Mark {name} to always receive correct points? This player will automatically win the game.",
+    "confirmUnmark": "Remove winner marking from {name}?",
+    "markFailed": "Failed to update player marking"
   },
   "metadata": {
     "defaultTitle": "Quiz App",

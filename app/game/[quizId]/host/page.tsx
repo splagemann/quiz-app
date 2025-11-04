@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { NextIntlClientProvider, useTranslations } from "next-intl";
 import QRCode from "qrcode";
@@ -64,18 +64,33 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
   const [error, setError] = useState<string>("");
   const [finalScores, setFinalScores] = useState<Array<{ playerId: string; playerName: string; score: number }>>([]);
   const [newPlayerIds, setNewPlayerIds] = useState<Set<string>>(new Set());
+  const playerListRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to show new players on the left
+  useEffect(() => {
+    if (playerListRef.current && players.length > 0) {
+      playerListRef.current.scrollLeft = 0;
+    }
+  }, [players.length]);
 
   // Initialize game session
   useEffect(() => {
+    // Prevent multiple session creation
+    let cancelled = false;
+
     async function loadExistingSession(sid: string) {
+      if (cancelled) return;
+
       try {
         const response = await fetch(`/api/game/session/${sid}`);
-        if (!response.ok) {
+        if (!response.ok || cancelled) {
           setError(tCommon('error'));
           return;
         }
 
         const session = await response.json();
+        if (cancelled) return;
+
         setSessionCode(session.sessionCode);
         setSessionId(session.id);
         setQuiz(session.quiz);
@@ -112,11 +127,15 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
         setQrCodeUrl(qrUrl);
       } catch (err) {
         console.error("Error loading session:", err);
-        setError(tCommon('error'));
+        if (!cancelled) {
+          setError(tCommon('error'));
+        }
       }
     }
 
     async function initSession() {
+      if (cancelled) return;
+
       try {
         const response = await fetch("/api/game/session", {
           method: "POST",
@@ -124,13 +143,15 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
           body: JSON.stringify({ quizId }),
         });
 
-        if (!response.ok) {
+        if (!response.ok || cancelled) {
           const data = await response.json();
           setError(data.error || tCommon('error'));
           return;
         }
 
         const data = await response.json();
+        if (cancelled) return;
+
         setSessionCode(data.sessionCode);
         setSessionId(data.sessionId);
         setQuiz(data.quiz);
@@ -155,7 +176,9 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
         setQrCodeUrl(qrUrl);
       } catch (err) {
         console.error("Error initializing session:", err);
-        setError(tCommon('error'));
+        if (!cancelled) {
+          setError(tCommon('error'));
+        }
       }
     }
 
@@ -164,7 +187,12 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
     } else {
       initSession();
     }
-  }, [quizId, existingSessionId, router, tCommon]);
+
+    // Cleanup function to prevent race conditions
+    return () => {
+      cancelled = true;
+    };
+  }, [quizId, existingSessionId, router, onQuizLoaded]);
 
   // Connect to SSE for real-time updates
   useEffect(() => {
@@ -468,12 +496,8 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
                   </p>
                 </div>
               ) : (
-                <div className="overflow-hidden relative h-24 sm:h-40">
+                <div ref={playerListRef} className="overflow-x-auto overflow-y-hidden relative h-24 sm:h-40 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
                   <style dangerouslySetInnerHTML={{__html: `
-                    @keyframes scroll-horizontal {
-                      0% { transform: translateX(0); }
-                      100% { transform: translateX(-50%); }
-                    }
                     @keyframes pop-in {
                       0% {
                         transform: scale(0);
@@ -491,20 +515,12 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
                       animation: pop-in 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
                     }
                   `}} />
-                  <div
-                    className="flex gap-2 sm:gap-4 h-full items-center"
-                    style={{
-                      animation: `scroll-horizontal ${Math.max(20, players.length * 3)}s linear infinite`
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.animationPlayState = 'paused'}
-                    onMouseLeave={(e) => e.currentTarget.style.animationPlayState = 'running'}
-                  >
-                    {/* Duplicate players for infinite scroll effect */}
-                    {[...players, ...players].map((player, index) => {
-                      const isNew = newPlayerIds.has(player.id) && index < players.length;
+                  <div className="flex flex-row gap-2 sm:gap-4 h-full items-center pl-2">
+                    {[...players].reverse().map((player) => {
+                      const isNew = newPlayerIds.has(player.id);
                       return (
                         <div
-                          key={`${player.id}-${index}`}
+                          key={player.id}
                           className={`bg-blue-100 border-2 border-blue-300 rounded-lg p-2 sm:p-4 text-center flex-shrink-0 w-20 sm:w-32 ${isNew ? 'player-pop' : ''}`}
                         >
                           <img

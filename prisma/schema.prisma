@@ -75,6 +75,7 @@ model Player {
   score       Int            @default(0)
   joinedAt    DateTime       @default(now())
   isConnected Boolean        @default(true)
+  markedToWin Boolean        @default(false)
   session     GameSession    @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   answers     PlayerAnswer[]
 

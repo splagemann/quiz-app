@@ -11,6 +11,7 @@ type Player = {
   playerName: string;
   score: number;
   isConnected: boolean;
+  markedToWin: boolean;
   joinedAt: string;
 };
 
@@ -40,6 +41,7 @@ export default function AdminSessionsPage() {
   const [clearingFinished, setClearingFinished] = useState(false);
   const [clearingStaleInProgress, setClearingStaleInProgress] = useState(false);
   const [clearingStaleWaiting, setClearingStaleWaiting] = useState(false);
+  const [markingPlayerId, setMarkingPlayerId] = useState<string | null>(null);
 
   const fetchSessions = async () => {
     try {
@@ -187,6 +189,43 @@ export default function AdminSessionsPage() {
       alert(t("clearStaleWaitingFailed"));
     } finally {
       setClearingStaleWaiting(false);
+    }
+  };
+
+  const handleToggleMarkedToWin = async (
+    sessionId: string,
+    playerId: string,
+    playerName: string,
+    currentlyMarked: boolean
+  ) => {
+    const confirmMessage = currentlyMarked
+      ? t("confirmUnmark", { name: playerName })
+      : t("confirmMark", { name: playerName });
+
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+
+    setMarkingPlayerId(playerId);
+    try {
+      const response = await fetch(
+        `/api/admin/sessions/${sessionId}/players/${playerId}/mark-winner`,
+        {
+          method: "PATCH",
+        }
+      );
+
+      if (response.ok) {
+        // Refresh sessions to get updated data
+        await fetchSessions();
+      } else {
+        alert(t("markFailed"));
+      }
+    } catch (error) {
+      console.error("Error toggling markedToWin:", error);
+      alert(t("markFailed"));
+    } finally {
+      setMarkingPlayerId(null);
     }
   };
 
@@ -403,17 +442,29 @@ export default function AdminSessionsPage() {
                         </h3>
                         <div className="flex flex-wrap gap-2">
                           {session.players.map((player) => (
-                            <span
+                            <button
                               key={player.id}
-                              className={`px-2 py-1 rounded text-xs ${
-                                player.isConnected
+                              onClick={() =>
+                                handleToggleMarkedToWin(
+                                  session.id,
+                                  player.id,
+                                  player.playerName,
+                                  player.markedToWin
+                                )
+                              }
+                              disabled={markingPlayerId === player.id}
+                              className={`px-2 py-1 rounded text-xs cursor-pointer hover:opacity-80 transition disabled:opacity-50 disabled:cursor-not-allowed ${
+                                player.markedToWin
+                                  ? "bg-yellow-100 text-yellow-900 dark:bg-yellow-900 dark:text-yellow-100"
+                                  : player.isConnected
                                   ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
                                   : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400"
                               }`}
                             >
+                              {player.markedToWin && "👑 "}
                               {player.playerName} ({player.score}
                               {player.isConnected ? " ✓" : " ✗"})
-                            </span>
+                            </button>
                           ))}
                         </div>
                       </div>
