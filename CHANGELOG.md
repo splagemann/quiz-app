@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Mark Player to Win Feature**: Special admin feature for celebrations and special occasions
+  - Click player badge in admin session overview to mark them with a crown emoji (👑)
+  - Marked players automatically receive points regardless of answer correctness
+  - Marked players receive a bonus point at game end
+  - Mutual exclusion: Only one player per session can be marked at a time
+  - Crown is only visible in admin section, hidden from host and players during gameplay
+  - New API endpoint: `PATCH /api/admin/sessions/:sessionId/players/:playerId/mark-winner`
+  - Comprehensive test coverage (8 test cases, 95.65% coverage)
+- **Improved Waiting Screen UX**:
+  - New players appear on the left with pop-in animation
+  - Removed slideshow animation for better clarity
+  - Manual horizontal scrolling support for many players
+  - Auto-scroll to show new players joining
+
+### Fixed
+- **Multiplayer session creation bug**: Prevents duplicate session creation in React StrictMode
+  - Added React refs (`hasInitialized`, `isMountedRef`) for proper component lifecycle management
+  - Prevents duplicate API calls when StrictMode mounts components twice in development
+  - Safe async state updates that prevent memory leaks
+
+### Changed
+- **Test coverage improvements**: Added 8 new tests for mark-winner endpoint
+  - Coverage increased from 94.26% to 98.61% overall
+  - Mark-winner endpoint: 0% → 95.65% coverage
+  - Total test suites: 22 → 23
+  - Total tests: 207 → 215
+
 ## [1.3.0] - 2025-11-04
 
 ### Security
