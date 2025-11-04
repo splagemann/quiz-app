@@ -1,0 +1,251 @@
+name: Automated Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Version bump type'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      dry_run:
+        description: 'Dry run (no changes will be made)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Get current version
+        id: current_version
+        run: |
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "current=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "Current version: $CURRENT_VERSION"
+
+      - name: Bump version
+        id: bump_version
+        run: |
+          NEW_VERSION=$(npm version ${{ github.event.inputs.version_type }} --no-git-tag-version)
+          NEW_VERSION=${NEW_VERSION#v}
+          echo "new=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "New version: $NEW_VERSION"
+
+      - name: Validate CHANGELOG entry exists
+        id: validate_changelog
+        run: |
+          NEW_VERSION="${{ steps.bump_version.outputs.new }}"
+          if ! grep -q "## \[$NEW_VERSION\]" CHANGELOG.md; then
+            echo "❌ CHANGELOG.md does not contain an entry for version $NEW_VERSION"
+            echo "Please update CHANGELOG.md with release notes before creating a release."
+            echo ""
+            echo "Add an entry like:"
+            echo ""
+            echo "## [$NEW_VERSION] - $(date +%Y-%m-%d)"
+            echo ""
+            echo "### Added"
+            echo "- New feature description"
+            echo ""
+            echo "### Fixed"
+            echo "- Bug fix description"
+            echo ""
+            echo "has_changelog=false" >> $GITHUB_OUTPUT
+            exit 1
+          else
+            echo "✅ CHANGELOG entry found for version $NEW_VERSION"
+            echo "has_changelog=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create release branch
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        id: create_branch
+        run: |
+          BRANCH_NAME="release/v${{ steps.bump_version.outputs.new }}"
+          git checkout -b "$BRANCH_NAME"
+          git add package.json package-lock.json CHANGELOG.md
+          git commit -m "chore: prepare release v${{ steps.bump_version.outputs.new }}" \
+            -m "" \
+            -m "🤖 Generated with [Claude Code](https://claude.com/claude-code)" \
+            -m "" \
+            -m "Co-Authored-By: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+          git push -u origin "$BRANCH_NAME"
+          echo "branch=$BRANCH_NAME" >> $GITHUB_OUTPUT
+
+      - name: Create Pull Request
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        id: create_pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const version = '${{ steps.bump_version.outputs.new }}';
+
+            // Extract release notes from CHANGELOG
+            const changelog = fs.readFileSync('CHANGELOG.md', 'utf8');
+            const versionSection = changelog.match(new RegExp(`## \\[${version}\\][\\s\\S]*?(?=## \\[|$)`));
+            let releaseNotes = versionSection ? versionSection[0] : `Release v${version}`;
+
+            // Construct PR body
+            const prBody = [
+              `## Release v${version}`,
+              '',
+              'This PR was automatically created by the release workflow.',
+              '',
+              releaseNotes,
+              '',
+              '---',
+              '',
+              '🤖 Generated with [Claude Code](https://claude.com/claude-code)',
+              '',
+              '**Note:** After merging this PR, the release tag will be created automatically.'
+            ].join('\n');
+
+            // Create PR
+            const { data: pr } = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `chore: prepare release v${version}`,
+              head: '${{ steps.create_branch.outputs.branch }}',
+              base: 'main',
+              body: prBody
+            });
+
+            console.log(`Created PR #${pr.number}`);
+            return pr.number;
+
+      - name: Enable auto-merge (requires branch protection)
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = ${{ steps.create_pr.outputs.result }};
+
+            try {
+              await github.rest.pulls.merge({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+                merge_method: 'squash'
+              });
+              console.log(`✅ PR #${prNumber} merged successfully`);
+            } catch (error) {
+              console.log(`ℹ️ Could not auto-merge PR #${prNumber}`);
+              console.log(`   This may require manual approval due to branch protection rules.`);
+              console.log(`   PR URL: https://github.com/${context.repo.owner}/${context.repo.repo}/pull/${prNumber}`);
+              throw error;
+            }
+
+      - name: Wait for PR merge
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = ${{ steps.create_pr.outputs.result }};
+
+            // Poll for PR merge status
+            let merged = false;
+            for (let i = 0; i < 30; i++) {
+              const { data: pr } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber
+              });
+
+              if (pr.merged) {
+                console.log(`✅ PR #${prNumber} has been merged`);
+                merged = true;
+                break;
+              }
+
+              console.log(`⏳ Waiting for PR #${prNumber} to be merged... (${i + 1}/30)`);
+              await new Promise(resolve => setTimeout(resolve, 10000)); // Wait 10 seconds
+            }
+
+            if (!merged) {
+              throw new Error('PR was not merged within the timeout period. Please merge manually and run the tag creation step separately.');
+            }
+
+      - name: Checkout main and create tag
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: |
+          git checkout main
+          git pull origin main
+          git tag -a "v${{ steps.bump_version.outputs.new }}" \
+            -m "Release v${{ steps.bump_version.outputs.new }}" \
+            -m "" \
+            -m "### Added" \
+            -m "- See CHANGELOG.md for details" \
+            -m "" \
+            -m "### Fixed" \
+            -m "- See CHANGELOG.md for details" \
+            -m "" \
+            -m "### Changed" \
+            -m "- See CHANGELOG.md for details" \
+            -m "" \
+            -m "🤖 Generated with [Claude Code](https://claude.com/claude-code)"
+          git push origin "v${{ steps.bump_version.outputs.new }}"
+          echo "✅ Tagged and pushed v${{ steps.bump_version.outputs.new }}"
+
+      - name: Summary
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: |
+          echo "## 🎉 Release v${{ steps.bump_version.outputs.new }} completed!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Previous version:** ${{ steps.current_version.outputs.current }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **New version:** ${{ steps.bump_version.outputs.new }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **PR:** #${{ steps.create_pr.outputs.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tag:** v${{ steps.bump_version.outputs.new }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The Docker build workflow will now:" >> $GITHUB_STEP_SUMMARY
+          echo "- Build multi-platform Docker images" >> $GITHUB_STEP_SUMMARY
+          echo "- Publish to GitHub Container Registry" >> $GITHUB_STEP_SUMMARY
+          echo "- Create a GitHub release with CHANGELOG notes" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 [View releases](https://github.com/${{ github.repository }}/releases)" >> $GITHUB_STEP_SUMMARY
+
+      - name: Dry run summary
+        if: ${{ github.event.inputs.dry_run == 'true' }}
+        run: |
+          echo "## 🔍 Dry Run Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Would bump version from ${{ steps.current_version.outputs.current }} to ${{ steps.bump_version.outputs.new }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.validate_changelog.outputs.has_changelog }}" = "true" ]; then
+            echo "CHANGELOG validation: ✅ Passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "CHANGELOG validation: ❌ Failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "No changes were made (dry run mode)." >> $GITHUB_STEP_SUMMARY
