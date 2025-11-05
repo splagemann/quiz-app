@@ -9,6 +9,9 @@ import { QuizLanguageSelector } from "@/app/components/QuizLanguageSelector";
 import { isAuthenticated } from "@/lib/auth";
 import AuthForm from "@/app/components/AuthForm";
 import { AdminFooter } from "@/app/components/AdminFooter";
+import { Card } from "@/app/components/Card";
+import { Button } from "@/app/components/Button";
+import { FormInput } from "@/app/components/FormInput";
 
 export async function generateMetadata({
   params,
@@ -121,41 +124,28 @@ export default async function EditQuizPage({
         <AdminHeader title={t('editQuiz')} showBackButton={true} backButtonHref="/admin" />
 
         {/* Quiz Details Form */}
-        <div className="bg-gray-200 dark:bg-gray-700 rounded-lg shadow dark:shadow-gray-700/50 p-4 md:p-6 mb-6 md:mb-8">
+        <Card variant="form" className="p-4 md:p-6 mb-6 md:mb-8">
           <h2 className="text-lg md:text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">{t('quizDetails')}</h2>
           <form id="quiz-form" action={updateQuizWithId}>
-            <div className="mb-4">
-              <label
-                htmlFor="title"
-                className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2"
-              >
-                {t('quizTitleRequired')}
-              </label>
-              <input
-                type="text"
-                id="title"
-                name="title"
-                required
-                defaultValue={quiz.title}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400"
-              />
-            </div>
+            <FormInput
+              type="text"
+              id="title"
+              name="title"
+              label={t('quizTitleRequired')}
+              defaultValue={quiz.title}
+              required
+              className="mb-4"
+            />
 
-            <div className="mb-4">
-              <label
-                htmlFor="description"
-                className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2"
-              >
-                {t('quizDescription')}
-              </label>
-              <textarea
-                id="description"
-                name="description"
-                rows={4}
-                defaultValue={quiz.description || ""}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400"
-              />
-            </div>
+            <FormInput
+              as="textarea"
+              id="description"
+              name="description"
+              label={t('quizDescription')}
+              defaultValue={quiz.description || ""}
+              rows={4}
+              className="mb-4"
+            />
 
             <div className="mb-4">
               <label
@@ -170,18 +160,21 @@ export default async function EditQuizPage({
           </form>
 
           <div className="flex flex-col sm:flex-row gap-3 md:gap-4 mt-4">
-            <button
+            <Button
               type="submit"
               form="quiz-form"
-              className="flex-1 bg-gray-800 dark:bg-gray-800 text-white px-6 py-3 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-500 transition font-medium"
+              variant="primary"
+              size="lg"
+              fullWidth
+              className="flex-1"
             >
               {t('updateQuiz')}
-            </button>
+            </Button>
             <form action={deleteQuizWithId} className="flex-1">
               <DeleteButton />
             </form>
           </div>
-        </div>
+        </Card>
 
         {/* Question Manager */}
         <QuestionManager quizId={quizIdNum} questions={quiz.questions} />

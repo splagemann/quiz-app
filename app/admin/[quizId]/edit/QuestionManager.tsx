@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from 'next-intl';
 import toast from 'react-hot-toast';
 import { useConfirm } from '@/app/components/ConfirmDialog';
+import { Button } from '@/app/components/Button';
+import { Card } from '@/app/components/Card';
+import { FormInput } from '@/app/components/FormInput';
 
 type Answer = {
   id: number;
@@ -252,15 +255,17 @@ export default function QuestionManager({
   }
 
   return (
-    <div className="bg-gray-200 dark:bg-gray-700 rounded-lg shadow dark:shadow-gray-700/50 p-4 md:p-6">
+    <Card variant="form" className="p-4 md:p-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
         <h2 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-gray-100">{t('questionsCount', { count: initialQuestions.length })}</h2>
-        <button
+        <Button
           onClick={() => setIsAddingQuestion(true)}
-          className="bg-gray-800 dark:bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-green-600 dark:hover:bg-green-500 transition w-full sm:w-auto"
+          variant="success"
+          size="md"
+          className="w-full sm:w-auto"
         >
           {tQuestion('addQuestion')}
-        </button>
+        </Button>
       </div>
 
       {/* Add Question Form */}
@@ -270,39 +275,28 @@ export default function QuestionManager({
           className="mb-6 p-4 border-2 border-green-200 dark:border-green-700 rounded-lg bg-green-50 dark:bg-green-900/20"
         >
           <h3 className="font-semibold mb-4 text-gray-900 dark:text-gray-100">{t('newQuestion')}</h3>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
-              {t('titleOptional')}
-            </label>
-            <input
-              type="text"
-              name="title"
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
-              placeholder={t('titlePlaceholder')}
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
-              {t('questionTextRequired')}
-            </label>
-            <input
-              type="text"
-              name="questionText"
-              required
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
-              {tQuestion('description')}
-            </label>
-            <textarea
-              name="description"
-              rows={3}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
-              placeholder={t('descriptionPlaceholder')}
-            />
-          </div>
+          <FormInput
+            type="text"
+            name="title"
+            label={t('titleOptional')}
+            placeholder={t('titlePlaceholder')}
+            className="mb-4"
+          />
+          <FormInput
+            type="text"
+            name="questionText"
+            label={t('questionTextRequired')}
+            required
+            className="mb-4"
+          />
+          <FormInput
+            as="textarea"
+            name="description"
+            label={tQuestion('description')}
+            placeholder={t('descriptionPlaceholder')}
+            rows={3}
+            className="mb-4"
+          />
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
               {t('imageOptional')}
@@ -340,13 +334,14 @@ export default function QuestionManager({
               </label>
               <div className="flex gap-2">
                 {newAnswers.length < 4 && (
-                  <button
+                  <Button
                     type="button"
                     onClick={() => setNewAnswers([...newAnswers, { text: "", imageUrl: "", isCorrect: false }])}
-                    className="text-sm bg-gray-800 dark:bg-gray-800 text-white px-3 py-1 rounded hover:bg-green-600 dark:hover:bg-green-500 transition"
+                    variant="success"
+                    size="sm"
                   >
                     {t('addAnswerButton')}
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>
@@ -427,13 +422,14 @@ export default function QuestionManager({
           </div>
 
           <div className="flex gap-2">
-            <button
+            <Button
               type="submit"
-              className="bg-gray-800 dark:bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-green-600 dark:hover:bg-green-500 transition"
+              variant="success"
+              size="md"
             >
               {t('saveQuestion')}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={() => {
                 setIsAddingQuestion(false);
@@ -443,10 +439,11 @@ export default function QuestionManager({
                 ]);
                 setAddQuestionImageUrl("");
               }}
-              className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition"
+              variant="secondary"
+              size="md"
             >
               {tCommon('cancel')}
-            </button>
+            </Button>
           </div>
         </form>
       )}
@@ -465,42 +462,28 @@ export default function QuestionManager({
                   action={(formData) => handleUpdateQuestion(question.id, formData)}
                   className="space-y-4"
                 >
-                  <div>
-                    <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
-                      {t('titleOptional')}
-                    </label>
-                    <input
-                      type="text"
-                      name="title"
-                      defaultValue={question.title || ""}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
-                      placeholder={t('titlePlaceholder')}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
-                      {t('questionTextRequired')}
-                    </label>
-                    <input
-                      type="text"
-                      name="questionText"
-                      defaultValue={question.questionText}
-                      required
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
-                      {tQuestion('description')}
-                    </label>
-                    <textarea
-                      name="description"
-                      defaultValue={question.description || ""}
-                      rows={3}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
-                      placeholder={t('descriptionPlaceholder')}
-                    />
-                  </div>
+                  <FormInput
+                    type="text"
+                    name="title"
+                    label={t('titleOptional')}
+                    defaultValue={question.title || ""}
+                    placeholder={t('titlePlaceholder')}
+                  />
+                  <FormInput
+                    type="text"
+                    name="questionText"
+                    label={t('questionTextRequired')}
+                    defaultValue={question.questionText}
+                    required
+                  />
+                  <FormInput
+                    as="textarea"
+                    name="description"
+                    label={tQuestion('description')}
+                    defaultValue={question.description || ""}
+                    placeholder={t('descriptionPlaceholder')}
+                    rows={3}
+                  />
                   <div>
                     <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
                       {t('imageOptional')}
@@ -538,7 +521,7 @@ export default function QuestionManager({
                       </label>
                       <div className="flex gap-2">
                         {editAnswers.length < 4 && (
-                          <button
+                          <Button
                             type="button"
                             onClick={() => setEditAnswers([...editAnswers, {
                               id: -Date.now(), // Temporary negative ID for new answers
@@ -547,10 +530,11 @@ export default function QuestionManager({
                               isCorrect: false,
                               orderIndex: editAnswers.length
                             }])}
-                            className="text-sm bg-gray-800 dark:bg-gray-800 text-white px-3 py-1 rounded hover:bg-blue-600 dark:hover:bg-blue-500 transition"
+                            variant="primary"
+                            size="sm"
                           >
                             {t('addAnswerButton')}
-                          </button>
+                          </Button>
                         )}
                       </div>
                     </div>
@@ -631,23 +615,25 @@ export default function QuestionManager({
                   </div>
 
                   <div className="flex gap-2">
-                    <button
+                    <Button
                       type="submit"
-                      className="bg-gray-800 dark:bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-500 transition"
+                      variant="primary"
+                      size="md"
                     >
                       {tCommon('save')}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
                       onClick={() => {
                         setEditingQuestionId(null);
                         setEditAnswers([]);
                         setEditQuestionImageUrl("");
                       }}
-                      className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition"
+                      variant="secondary"
+                      size="md"
                     >
                       {tCommon('cancel')}
-                    </button>
+                    </Button>
                   </div>
                 </form>
               ) : (
@@ -727,6 +713,6 @@ export default function QuestionManager({
           ))}
         </div>
       )}
-    </div>
+    </Card>
   );
 }

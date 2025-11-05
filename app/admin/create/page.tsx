@@ -7,6 +7,9 @@ import { BackButton } from "@/app/components/BackButton";
 import { isAuthenticated } from "@/lib/auth";
 import AuthForm from "@/app/components/AuthForm";
 import { AdminFooter } from "@/app/components/AdminFooter";
+import { Card } from "@/app/components/Card";
+import { Button } from "@/app/components/Button";
+import { FormInput } from "@/app/components/FormInput";
 
 async function createQuiz(formData: FormData) {
   "use server";
@@ -53,64 +56,48 @@ export default async function CreateQuizPage() {
       <div className="max-w-4xl mx-auto px-3 md:px-4">
         <AdminHeader title={t('createNewQuiz')} showBackButton={true} backButtonHref="/admin" />
 
-        <form action={createQuiz} className="bg-gray-200 dark:bg-gray-700 rounded-lg shadow dark:shadow-gray-700/50 p-4 md:p-6">
-          <div className="mb-6">
-            <label
-              htmlFor="title"
-              className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2"
-            >
-              {t('quizTitleRequired')}
-            </label>
-            <input
+        <Card variant="form" className="p-4 md:p-6">
+          <form action={createQuiz}>
+            <FormInput
               type="text"
               id="title"
               name="title"
-              required
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+              label={t('quizTitleRequired')}
               placeholder={t('quizTitlePlaceholder')}
+              required
             />
-          </div>
 
-          <div className="mb-6">
-            <label
-              htmlFor="description"
-              className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2"
-            >
-              {t('quizDescription')}
-            </label>
-            <textarea
+            <FormInput
+              as="textarea"
               id="description"
               name="description"
-              rows={4}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+              label={t('quizDescription')}
               placeholder={t('quizDescriptionPlaceholder')}
+              rows={4}
             />
-          </div>
 
-          <div className="mb-6">
-            <label
-              htmlFor="language"
-              className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2"
-            >
-              {t('language')}
-            </label>
-            <QuizLanguageSelector name="language" id="language" defaultValue="en" />
-          </div>
+            <div className="mb-6">
+              <label
+                htmlFor="language"
+                className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2"
+              >
+                {t('language')}
+              </label>
+              <QuizLanguageSelector name="language" id="language" defaultValue="en" />
+            </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
-            <button
-              type="submit"
-              className="flex-1 bg-gray-800 dark:bg-gray-800 text-white px-6 py-3 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-500 transition font-medium"
-            >
-              {t('createQuiz')}
-            </button>
-            <BackButton
-              className="flex-1 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 px-6 py-3 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition font-medium text-center"
-            >
-              {tCommon('cancel')}
-            </BackButton>
-          </div>
-        </form>
+            <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
+              <Button type="submit" variant="primary" size="lg" fullWidth className="flex-1">
+                {t('createQuiz')}
+              </Button>
+              <BackButton>
+                <Button type="button" variant="secondary" size="lg" fullWidth className="flex-1">
+                  {tCommon('cancel')}
+                </Button>
+              </BackButton>
+            </div>
+          </form>
+        </Card>
         <AdminFooter />
       </div>
     </div>
