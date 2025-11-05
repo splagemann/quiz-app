@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { NextIntlClientProvider, useTranslations } from "next-intl";
 import QuestionDisplay from "@/app/components/QuestionDisplay";
+import GameHeader from "@/app/components/GameHeader";
 
 type Answer = {
   id: number;
@@ -122,29 +123,12 @@ function QuizPlayerContent({ quiz }: { quiz: Quiz }) {
   return (
     <div className="h-screen bg-gradient-to-br from-purple-500 to-blue-600 flex flex-col p-3">
       {/* Header */}
-      <div className="bg-white rounded-lg shadow-lg p-3 mb-3 flex-shrink-0">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-base font-bold text-gray-900">{quiz.title}</h1>
-            <p className="text-xs text-gray-700">
-              {tMultiplayer('questionOf', { current: currentQuestionIndex + 1, total: quiz.questions.length })}
-            </p>
-          </div>
-          <div className="text-right">
-            <div className="text-xl font-bold text-blue-600">{score}</div>
-            <div className="text-xs text-gray-700">{tSolo('points')}</div>
-          </div>
-        </div>
-        {/* Progress Bar */}
-        <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-          <div
-            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-            style={{
-              width: `${((currentQuestionIndex + 1) / quiz.questions.length) * 100}%`,
-            }}
-          />
-        </div>
-      </div>
+      <GameHeader
+        quizTitle={quiz.title}
+        currentQuestionNumber={currentQuestionIndex + 1}
+        totalQuestions={quiz.questions.length}
+        score={score}
+      />
 
       {/* Question Card */}
       <div className="bg-white rounded-lg shadow-lg p-4 mb-3 flex-1 flex flex-col overflow-hidden">

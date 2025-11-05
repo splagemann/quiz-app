@@ -6,6 +6,7 @@ import { NextIntlClientProvider, useTranslations } from "next-intl";
 import toast from 'react-hot-toast';
 import type { GameEvent } from "@/lib/gameEvents";
 import QuestionDisplay from "@/app/components/QuestionDisplay";
+import GameHeader from "@/app/components/GameHeader";
 
 // Import translation files
 import enMessages from "@/locales/en.json";
@@ -55,6 +56,9 @@ function PlayerGameContent() {
 
   const [gameStatus, setGameStatus] = useState<"loading" | "waiting" | "playing" | "answered" | "finished">("loading");
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [totalQuestions, setTotalQuestions] = useState(0);
+  const [quizTitle, setQuizTitle] = useState("");
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [revealedAnswerId, setRevealedAnswerId] = useState<number | null>(null);
@@ -89,11 +93,14 @@ function PlayerGameContent() {
 
         setMyName(player.playerName);
         setMyScore(player.score);
+        setQuizTitle(session.quiz.title);
+        setTotalQuestions(session.quiz.questions.length);
 
         if (session.status === "waiting") {
           setGameStatus("waiting");
         } else if (session.status === "in_progress") {
           const questionIndex = session.currentQuestion ?? 0;
+          setCurrentQuestionIndex(questionIndex);
           setCurrentQuestion(session.quiz.questions[questionIndex]);
           setGameStatus("playing");
         } else if (session.status === "finished") {
@@ -133,6 +140,7 @@ function PlayerGameContent() {
             .then(r => r.json())
             .then(session => {
               const questionIndex = session.currentQuestion ?? 0;
+              setCurrentQuestionIndex(questionIndex);
               setCurrentQuestion(session.quiz.questions[questionIndex]);
               setGameStatus("playing");
               setSelectedAnswer(null);
@@ -335,22 +343,13 @@ function PlayerGameContent() {
   return (
     <div className="h-screen bg-gradient-to-br from-green-500 to-blue-600 flex flex-col p-3">
       {/* Header */}
-      <div className="bg-white rounded-lg shadow-lg p-3 mb-3 flex-shrink-0">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center">
-            <img
-              src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${playerId}`}
-              alt={myName}
-              className="w-10 h-10 rounded-full mr-2"
-            />
-            <div className="font-bold text-gray-900 text-sm">{myName}</div>
-          </div>
-          <div className="text-right">
-            <div className="text-xl font-bold text-green-600">{myScore}</div>
-            <div className="text-xs text-gray-700">{tMultiplayer('points')}</div>
-          </div>
-        </div>
-      </div>
+      <GameHeader
+        quizTitle={quizTitle}
+        currentQuestionNumber={currentQuestionIndex + 1}
+        totalQuestions={totalQuestions}
+        playerName={myName}
+        playerScore={myScore}
+      />
 
       {/* Question */}
       <div className="bg-white rounded-lg shadow-lg p-4 mb-3 flex-1 flex flex-col overflow-y-auto min-h-0">

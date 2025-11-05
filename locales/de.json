@@ -170,7 +170,8 @@
     "answered": "{answered} von {total} Spielern haben geantwortet",
     "point": "Punkt",
     "points": "Punkte",
-    "you": "Du"
+    "you": "Du",
+    "pressSpaceToReveal": "Drücke Leertaste, um die Antwort aufzudecken"
   },
   "join": {
     "title": "Spiel beitreten",

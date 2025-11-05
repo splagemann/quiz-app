@@ -170,7 +170,8 @@
     "answered": "{answered} of {total} players answered",
     "point": "Point",
     "points": "Points",
-    "you": "You"
+    "you": "You",
+    "pressSpaceToReveal": "Press Space to reveal the answer"
   },
   "join": {
     "title": "Join Game",
