@@ -205,17 +205,39 @@ jobs:
             const prNumber = ${{ steps.create_pr.outputs.result }};
 
             try {
-              await github.rest.pulls.merge({
+              // Get the PR to get its node ID
+              const { data: pr } = await github.rest.pulls.get({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                pull_number: prNumber,
-                merge_method: 'squash'
+                pull_number: prNumber
               });
-              console.log(`✅ PR #${prNumber} merged successfully`);
+
+              // Enable auto-merge using GraphQL
+              await github.graphql(`
+                mutation($pullRequestId: ID!) {
+                  enablePullRequestAutoMerge(input: {
+                    pullRequestId: $pullRequestId,
+                    mergeMethod: SQUASH
+                  }) {
+                    pullRequest {
+                      autoMergeRequest {
+                        enabledAt
+                      }
+                    }
+                  }
+                }
+              `, {
+                pullRequestId: pr.node_id
+              });
+
+              console.log(`✅ Auto-merge enabled for PR #${prNumber}`);
+              console.log(`   PR will merge automatically once all checks pass`);
+              console.log(`   PR URL: https://github.com/${context.repo.owner}/${context.repo.repo}/pull/${prNumber}`);
             } catch (error) {
-              console.log(`ℹ️ Could not auto-merge PR #${prNumber}`);
+              console.log(`ℹ️ Could not enable auto-merge for PR #${prNumber}`);
               console.log(`   This may require manual approval due to branch protection rules.`);
               console.log(`   PR URL: https://github.com/${context.repo.owner}/${context.repo.repo}/pull/${prNumber}`);
+              console.log(`   Error: ${error.message}`);
               throw error;
             }
 
