@@ -7,6 +7,7 @@ import QRCode from "qrcode";
 import toast from 'react-hot-toast';
 import  type { GameEvent } from "@/lib/gameEvents";
 import QuestionDisplay from "@/app/components/QuestionDisplay";
+import GameHeader from "@/app/components/GameHeader";
 
 // Import translation files
 import enMessages from "@/locales/en.json";
@@ -572,58 +573,37 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
   const allAnswered = answeredPlayers.size === players.length && players.length > 0;
 
   return (
-    <div className="h-screen bg-gradient-to-br from-purple-500 to-blue-600 flex flex-col p-4">
+    <div className="h-screen bg-gradient-to-br from-purple-500 to-blue-600 flex flex-col p-3">
       {/* Header */}
-      <div className="bg-white rounded-lg shadow-lg p-3 mb-3 flex-shrink-0">
-        <div className="flex flex-col gap-2">
-          <div className="flex justify-between items-start gap-2">
-            <div>
-              <h1 className="text-base sm:text-lg font-bold text-gray-900">{quiz.title}</h1>
-              <p className="text-xs sm:text-sm text-gray-700">
-                {tMultiplayer('questionOf', { current: currentQuestionIndex + 1, total: quiz.questions.length })}
-              </p>
-            </div>
-            <div className="text-right flex-shrink-0">
-              <div className="text-xs sm:text-sm text-gray-700">
-                {tMultiplayer('playersAnswered', { answered: answeredPlayers.size, total: players.length })}
-              </div>
-            </div>
-          </div>
-          <div className="flex justify-center">
-            {revealedAnswer !== null ? (
-              <button
-                onClick={nextQuestion}
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition font-bold shadow-lg whitespace-nowrap w-full sm:w-auto"
-              >
-                {currentQuestionIndex < quiz.questions.length - 1
-                  ? `${tMultiplayer('nextQuestionArrow')} →`
-                  : tMultiplayer('results')}
-              </button>
-            ) : (
-              <button
-                onClick={revealAnswer}
-                className={`px-6 py-2 rounded-lg transition font-bold shadow-lg whitespace-nowrap w-full sm:w-auto ${
-                  allAnswered
-                    ? "bg-green-600 text-white hover:bg-green-700"
-                    : answeredPlayers.size > 0
-                    ? "bg-orange-500 text-white hover:bg-orange-600"
-                    : "bg-gray-500 text-white hover:bg-gray-600"
-                }`}
-              >
-                {tMultiplayer('revealAnswer')}
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
+      <GameHeader
+        quizTitle={quiz.title}
+        currentQuestionNumber={currentQuestionIndex + 1}
+        totalQuestions={quiz.questions.length}
+        answeredPlayersCount={answeredPlayers.size}
+        totalPlayersCount={players.length}
+      />
 
       {/* Question */}
-      <div className="bg-white rounded-lg shadow-lg p-6 mb-3 flex-1 flex flex-col overflow-hidden">
+      <div className="bg-white rounded-lg shadow-lg p-4 mb-3 flex-1 flex flex-col overflow-hidden">
         <QuestionDisplay
           question={currentQuestion}
           mode="host"
           revealedAnswerId={revealedAnswer}
         />
+      </div>
+
+      {/* Next/Reveal Button */}
+      <div className="text-center flex-shrink-0">
+        {revealedAnswer !== null ? (
+          <button
+            onClick={nextQuestion}
+            className="bg-white text-blue-600 px-8 py-3 rounded-lg hover:bg-gray-100 transition font-bold text-base shadow-lg"
+          >
+            {currentQuestionIndex < quiz.questions.length - 1
+              ? `${tMultiplayer('nextQuestionArrow')} →`
+              : tMultiplayer('results')}
+          </button>
+        ) : null}
       </div>
     </div>
   );

@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **GameHeader component**: Unified header component for all game modes
+  - Single player mode: Shows quiz title, question progress, progress bar, and score
+  - Multiplayer host mode: Shows quiz title, question progress, progress bar, and answered players count
+  - Multiplayer player mode: Shows quiz title, question progress, progress bar, player name, and score
+
+### Changed
+- **Question images**: Unified image sizes across all game modes using viewport height (40vh) for responsive scaling
+- **Image styling**: Removed borders from question and answer images, added subtle shadows instead
+- **Host controls**: Removed "Reveal Answer" button - now only space key reveals answers (cleaner UI)
+- **Progress tracking**: All game modes now show consistent progress bar indicating current question
+
+### Fixed
+- **Mobile scrolling**: Question images no longer cause scrolling on mobile devices
+- **Image shadow padding**: Fixed padding between images and their box shadows
+
 ## [1.4.0] - 2025-11-04
 
 ### Added

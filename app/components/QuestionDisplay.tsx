@@ -60,7 +60,8 @@ export default function QuestionDisplay({
     ? "text-xl text-gray-700 text-center mb-4"
     : "text-base text-gray-700 text-center mb-3";
 
-  const imageMaxHeight = isHost ? "max-h-96" : "max-h-64";
+  // Responsive image size - same for all modes, optimized for no scrolling
+  const imageMaxHeight = "max-h-[40vh]";
 
   const answerTextClass = isHost ? "text-2xl" : "text-base";
   const iconSize = isHost ? "text-4xl" : "text-xl";
@@ -90,7 +91,7 @@ export default function QuestionDisplay({
     const padding = isHost ? "p-4" : "p-3";
     const gap = isHost ? "gap-4" : "";
 
-    let baseClass = `w-full text-left ${padding} rounded-lg border-4 transition font-bold relative flex flex-col ${
+    let baseClass = `w-full text-left ${padding} rounded-lg transition font-bold relative flex flex-col shadow-md ${
       hasImages ? "h-full" : ""
     } ${answerTextClass}`;
 
@@ -98,25 +99,25 @@ export default function QuestionDisplay({
     if (isRevealed || (hasAnswered && isSolo)) {
       // Answer has been revealed
       if (isCorrectAnswer) {
-        return `${baseClass} bg-green-100 border-green-500 text-green-900`;
+        return `${baseClass} bg-green-300 text-green-900`;
       } else if (isSelected) {
         // User selected this wrong answer
-        return `${baseClass} bg-red-100 border-red-500 text-red-900`;
+        return `${baseClass} bg-red-300 text-red-900`;
       } else {
         // Not selected, not correct
         return `${baseClass} ${
-          isHost ? "bg-gray-100 border-gray-300 text-gray-700" : "bg-gray-50 border-gray-300 text-gray-700"
+          isHost ? "bg-gray-300 text-gray-700" : "bg-gray-200 text-gray-700"
         }`;
       }
     } else if (isSelected && isMultiplayerPlayer) {
       // Multiplayer player has selected but not revealed yet (waiting state)
-      return `${baseClass} bg-blue-50 border-blue-500 text-blue-900`;
+      return `${baseClass} bg-blue-200 text-blue-900`;
     } else if (isHost) {
       // Host view - not revealed yet
-      return `${baseClass} bg-gray-50 border-gray-300 text-gray-900`;
+      return `${baseClass} bg-gray-200 text-gray-900`;
     } else {
       // Interactive - not yet answered (solo and multiplayer-player)
-      return `${baseClass} bg-white border-gray-300 text-gray-900 hover:border-blue-500 hover:bg-blue-50 cursor-pointer`;
+      return `${baseClass} bg-gray-100 text-gray-900 hover:shadow-lg hover:bg-blue-100 cursor-pointer`;
     }
   };
 
@@ -158,23 +159,30 @@ export default function QuestionDisplay({
   const tCurrent = isSolo ? tSolo : tMultiplayer;
 
   return (
-    <>
-      {/* Question Section */}
-      {question.title && <div className={titleClass}>{question.title}</div>}
-      <h2 className={questionClass}>{question.questionText}</h2>
-      {question.description && <p className={descriptionClass}>{question.description}</p>}
-      {question.imageUrl && (
-        <div className="flex justify-center mb-3 flex-1">
-          <img
-            src={question.imageUrl}
-            alt={tCurrent("questionImage")}
-            className={`${imageMaxHeight} object-contain rounded-lg border-2 border-gray-300`}
-          />
-        </div>
-      )}
+    <div className="flex flex-col h-full overflow-y-auto">
+      {/* Question Section - Scrollable content */}
+      <div className="flex-shrink-0">
+        {question.title && <div className={titleClass}>{question.title}</div>}
+        <h2 className={questionClass}>{question.questionText}</h2>
+        {question.description && <p className={descriptionClass}>{question.description}</p>}
+        {question.imageUrl && (
+          <div className="flex justify-center mb-3">
+            <div className="rounded-lg shadow-md inline-block">
+              <img
+                src={question.imageUrl}
+                alt={tCurrent("questionImage")}
+                className={`${imageMaxHeight} w-auto object-contain rounded-lg block`}
+              />
+            </div>
+          </div>
+        )}
+      </div>
 
-      {/* Answers Section */}
-      <div className={gridClass}>
+      {/* Spacer to push answers to bottom (only when no answer images) */}
+      {!hasImages && <div className="flex-1 min-h-4"></div>}
+
+      {/* Answers Section - Fixed at bottom */}
+      <div className={`flex-shrink-0 mb-2 ${gridClass}`}>
         {question.answers.map((answer) => {
           const AnswerElement = isInteractive ? "button" : "div";
           const answerProps = isInteractive
@@ -194,11 +202,11 @@ export default function QuestionDisplay({
                 <span className={isHost ? "mb-2" : "mb-1"}>{answer.answerText}</span>
               )}
               {answer.imageUrl && (
-                <div className={`flex-1 relative ${isHost ? "min-h-[200px]" : "min-h-[120px]"}`}>
+                <div className={`flex-1 relative ${hasImages ? 'min-h-0' : 'min-h-[150px]'}`}>
                   <img
                     src={answer.imageUrl}
                     alt={tCurrent("answerImage")}
-                    className="absolute inset-0 w-full h-full object-contain rounded"
+                    className="absolute inset-0 w-full h-full object-contain rounded shadow-sm"
                   />
                 </div>
               )}
@@ -207,6 +215,6 @@ export default function QuestionDisplay({
           );
         })}
       </div>
-    </>
+    </div>
   );
 }
