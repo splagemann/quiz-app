@@ -132,6 +132,19 @@ jobs:
         id: create_branch
         run: |
           BRANCH_NAME="release/v${{ steps.bump_version.outputs.new }}"
+
+          # Delete remote branch if it exists (from failed previous run)
+          if git ls-remote --heads origin "$BRANCH_NAME" | grep -q "$BRANCH_NAME"; then
+            echo "⚠️  Remote branch $BRANCH_NAME already exists, deleting it"
+            git push origin --delete "$BRANCH_NAME" || true
+          fi
+
+          # Delete local branch if it exists
+          if git show-ref --verify --quiet "refs/heads/$BRANCH_NAME"; then
+            echo "⚠️  Local branch $BRANCH_NAME already exists, deleting it"
+            git branch -D "$BRANCH_NAME"
+          fi
+
           git checkout -b "$BRANCH_NAME"
           git add package.json package-lock.json CHANGELOG.md
           git commit -m "chore: prepare release v${{ steps.bump_version.outputs.new }}" \
