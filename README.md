@@ -265,9 +265,38 @@ Versions follow the `MAJOR.MINOR.PATCH` format:
 
 ### Creating a Release
 
-**Note**: The main branch is protected and requires pull requests. The release script handles this automatically.
+**Note**: The main branch is protected and requires pull requests.
 
-Use the automated release script for creating new releases:
+There are two ways to create a release:
+
+#### Option 1: Automated GitHub Actions Workflow (Recommended)
+
+The easiest way to create a release is through the GitHub Actions workflow:
+
+1. Go to **Actions** tab in GitHub
+2. Select **"Automated Release"** workflow
+3. Click **"Run workflow"**
+4. Choose version type (patch/minor/major)
+5. Optionally enable dry run to test
+6. Click **"Run workflow"**
+
+The workflow will automatically:
+- Bump version in `package.json`
+- Validate CHANGELOG entry exists
+- Create release PR with extracted notes
+- Merge PR (or wait for approval)
+- Create and push git tag
+- Trigger Docker build and GitHub release
+
+**Documentation**: See [.github/workflows/RELEASE.md](.github/workflows/RELEASE.md) for detailed instructions
+
+**Requirements**:
+- CHANGELOG.md must be updated with release notes
+- All tests must pass
+
+#### Option 2: Manual Release Script
+
+Alternatively, use the command-line release script:
 
 ```bash
 # Patch release (bug fixes): 1.0.0 → 1.0.1
@@ -293,12 +322,12 @@ The release script will:
 7. Create and push an annotated git tag
 8. Trigger the CI/CD pipeline
 
-**Important**: Before creating a release, update `CHANGELOG.md` with your changes following the [Keep a Changelog](https://keepachangelog.com/) format.
-
 **Requirements**:
 - GitHub CLI (`gh`) must be installed and authenticated
 - Repository admin access (for merging protected branch)
 - All tests must pass
+
+**Important**: Before creating a release with either method, update `CHANGELOG.md` with your changes following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ### CI/CD Pipeline
 
