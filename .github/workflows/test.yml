@@ -32,6 +32,11 @@ jobs:
         env:
           DATABASE_URL: file:./prisma/test.db
 
+      - name: Run Prisma Migrations
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: file:./prisma/test.db
+
       - name: Run tests
         run: npm test
         env:

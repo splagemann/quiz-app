@@ -5,3 +5,6 @@ import '@testing-library/jest-dom'
 import { TextEncoder, TextDecoder } from 'util'
 global.TextEncoder = TextEncoder
 global.TextDecoder = TextDecoder
+
+// Disable Prisma query logging in tests to reduce noise
+process.env.DEBUG = undefined

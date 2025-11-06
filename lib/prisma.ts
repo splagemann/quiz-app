@@ -32,7 +32,7 @@ const databaseUrl = resolveDatabaseUrl(process.env.DATABASE_URL);
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
-    log: ["query"],
+    log: process.env.NODE_ENV === "test" ? [] : ["query"],
     datasources: {
       db: {
         url: databaseUrl,
