@@ -12,6 +12,9 @@ const customJestConfig = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!(next-intl|use-intl)/)',
+  ],
   collectCoverageFrom: [
     'app/**/*.{js,jsx,ts,tsx}',
     'lib/**/*.{js,jsx,ts,tsx}',
@@ -45,6 +48,8 @@ const customJestConfig = {
   testPathIgnorePatterns: [
     '/node_modules/',
     '/__tests__/__mocks__/',
+    '/__tests__/e2e/utils/',
+    '/__tests__/e2e/single-player/',
   ],
 }
 
