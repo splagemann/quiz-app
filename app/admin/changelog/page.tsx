@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { AdminHeader } from "@/app/components/AdminHeader";
+import { AdminFooter } from "@/app/components/AdminFooter";
 import { ReactNode } from 'react';
 import { isAuthenticated } from "@/lib/auth";
 import AuthForm from "@/app/components/AuthForm";
@@ -97,6 +98,7 @@ export default async function ChangelogPage() {
           </div>
         </div>
 
+        <AdminFooter />
       </div>
     </div>
   );
