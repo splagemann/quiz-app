@@ -171,7 +171,8 @@
     "point": "Punkt",
     "points": "Punkte",
     "you": "Du",
-    "pressSpaceToReveal": "Drücke Leertaste, um die Antwort aufzudecken"
+    "pressSpaceToReveal": "Drücke Leertaste, um die Antwort aufzudecken",
+    "viewAllSessions": "Sitzungen"
   },
   "join": {
     "title": "Spiel beitreten",
@@ -290,7 +291,9 @@
     "confirmUnmark": "Gewinnermarkierung von {name} entfernen?",
     "markFailed": "Fehler beim Aktualisieren der Spielermarkierung",
     "markSuccess": "Spieler erfolgreich als Gewinner markiert",
-    "unmarkSuccess": "Gewinnermarkierung erfolgreich entfernt"
+    "unmarkSuccess": "Gewinnermarkierung erfolgreich entfernt",
+    "hostPage": "Host-Seite",
+    "viewPlayerPage": "Spielerseite anzeigen"
   },
   "metadata": {
     "defaultTitle": "Quiz App",

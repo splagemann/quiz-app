@@ -171,7 +171,8 @@
     "point": "Point",
     "points": "Points",
     "you": "You",
-    "pressSpaceToReveal": "Press Space to reveal the answer"
+    "pressSpaceToReveal": "Press Space to reveal the answer",
+    "viewAllSessions": "Sessions"
   },
   "join": {
     "title": "Join Game",
@@ -290,7 +291,9 @@
     "confirmUnmark": "Remove winner marking from {name}?",
     "markFailed": "Failed to update player marking",
     "markSuccess": "Player marked as winner successfully",
-    "unmarkSuccess": "Winner marking removed successfully"
+    "unmarkSuccess": "Winner marking removed successfully",
+    "hostPage": "Host Page",
+    "viewPlayerPage": "View player page"
   },
   "metadata": {
     "defaultTitle": "Quiz App",

@@ -7,6 +7,7 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import { useConfirm } from "@/app/components/ConfirmDialog";
 import { AdminHeader } from "@/app/components/AdminHeader";
+import { AdminFooter } from "@/app/components/AdminFooter";
 
 type Player = {
   id: string;
@@ -407,6 +408,8 @@ export default function AdminSessionsPage() {
             )}
           </div>
         )}
+
+        <AdminFooter />
       </div>
     </div>
   );
@@ -486,29 +489,39 @@ export default function AdminSessionsPage() {
                         </h3>
                         <div className="flex flex-wrap gap-2">
                           {session.players.map((player) => (
-                            <button
-                              key={player.id}
-                              onClick={() =>
-                                handleToggleMarkedToWin(
-                                  session.id,
-                                  player.id,
-                                  player.playerName,
+                            <div key={player.id} className="relative group">
+                              <button
+                                onClick={() =>
+                                  handleToggleMarkedToWin(
+                                    session.id,
+                                    player.id,
+                                    player.playerName,
+                                    player.markedToWin
+                                  )
+                                }
+                                disabled={markingPlayerId === player.id}
+                                className={`px-2 py-1 rounded text-xs cursor-pointer hover:opacity-80 transition disabled:opacity-50 disabled:cursor-not-allowed ${
                                   player.markedToWin
-                                )
-                              }
-                              disabled={markingPlayerId === player.id}
-                              className={`px-2 py-1 rounded text-xs cursor-pointer hover:opacity-80 transition disabled:opacity-50 disabled:cursor-not-allowed ${
-                                player.markedToWin
-                                  ? "bg-yellow-100 text-yellow-900 dark:bg-yellow-900 dark:text-yellow-100"
-                                  : player.isConnected
-                                  ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                                  : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400"
-                              }`}
-                            >
-                              {player.markedToWin && "👑 "}
-                              {player.playerName} ({player.score}
-                              {player.isConnected ? " ✓" : " ✗"})
-                            </button>
+                                    ? "bg-yellow-100 text-yellow-900 dark:bg-yellow-900 dark:text-yellow-100"
+                                    : player.isConnected
+                                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                                    : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400"
+                                }`}
+                              >
+                                {player.markedToWin && "👑 "}
+                                {player.playerName} ({player.score}
+                                {player.isConnected ? " ✓" : " ✗"})
+                              </button>
+                              <a
+                                href={`/game/play/${session.id}?playerId=${player.id}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="absolute -top-1 -right-1 bg-blue-600 hover:bg-blue-700 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
+                                title={t("viewPlayerPage")}
+                              >
+                                🔗
+                              </a>
+                            </div>
                           ))}
                         </div>
                       </div>
@@ -517,6 +530,14 @@ export default function AdminSessionsPage() {
 
                   {/* Actions */}
                   <div className="flex sm:flex-col gap-2">
+                    <a
+                      href={`/game/${session.quiz.id}/host?sessionId=${session.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2 bg-gray-800 dark:bg-gray-800 text-white rounded-lg hover:bg-blue-600 dark:hover:bg-blue-500 transition text-sm whitespace-nowrap text-center"
+                    >
+                      {t("hostPage")}
+                    </a>
                     <button
                       onClick={() =>
                         handleDelete(session.id, session.sessionCode)
