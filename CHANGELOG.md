@@ -10,12 +10,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.4.1] - 2025-11-05
 
 ### Added
+- **Button component**: Reusable button component with consistent styling across the application
+  - Variants: primary, secondary, danger, success, outline
+  - Sizes: small (sm), medium (md), large (lg)
+  - Full TypeScript support with proper type definitions
+  - Automatic dark mode support
+  - Proper accessibility with focus states
+- **Card component**: Flexible container component for consistent card styling
+  - Variants: default, form, gradient
+  - Automatic dark mode support
+  - Responsive padding and styling
+- **FormInput component**: Unified form input wrapper with enhanced UX
+  - Integrated label, error message, and helper text support
+  - Consistent styling across all forms
+  - Full dark mode support
+  - Type-safe props with TypeScript
 - **GameHeader component**: Unified header component for all game modes
   - Single player mode: Shows quiz title, question progress, progress bar, and score
   - Multiplayer host mode: Shows quiz title, question progress, progress bar, and answered players count
   - Multiplayer player mode: Shows quiz title, question progress, progress bar, player name, and score
 
 ### Changed
+- **Component refactoring**: Major refactoring of admin and game pages for consistency
+  - QuestionManager: Replaced 9 buttons and 6 form inputs with new reusable components
+  - Admin create/edit pages: Migrated to new Button, Card, and FormInput components
+  - Game mode selection page: Now uses Card component
+  - DeleteButton: Migrated to new Button component
+  - Eliminated 150+ lines of duplicated styling code
 - **Question images**: Unified image sizes across all game modes using viewport height (40vh) for responsive scaling
 - **Image styling**: Removed borders from question and answer images, added subtle shadows instead
 - **Host controls**: Removed "Reveal Answer" button - now only space key reveals answers (cleaner UI)

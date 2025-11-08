@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { useConfirm } from '@/app/components/ConfirmDialog';
+import { Button } from '@/app/components/Button';
 
 export default function DeleteButton() {
   const t = useTranslations('admin');
@@ -29,12 +30,14 @@ export default function DeleteButton() {
   };
 
   return (
-    <button
+    <Button
       type="button"
-      className="w-full bg-red-600 dark:bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-700 dark:hover:bg-red-600 transition font-medium"
+      variant="danger"
+      size="lg"
+      fullWidth
       onClick={handleClick}
     >
       {t('deleteQuiz')}
-    </button>
+    </Button>
   );
 }
