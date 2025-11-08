@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import type { GameEvent } from "@/lib/gameEvents";
 import QuestionDisplay from "@/app/components/QuestionDisplay";
 import GameHeader from "@/app/components/GameHeader";
+import MarkdownPreview from "@/app/components/MarkdownPreview";
 
 // Import translation files
 import enMessages from "@/locales/en.json";
@@ -17,12 +18,20 @@ const messages = {
   de: deMessages,
 };
 
+type Page = {
+  id: number;
+  title: string;
+  body: string;
+  orderIndex: number;
+};
+
 type Question = {
   id: number;
   title?: string | null;
   questionText: string;
   description?: string | null;
   imageUrl?: string | null;
+  orderIndex: number;
   answers: Array<{
     id: number;
     answerText: string | null;
@@ -30,6 +39,10 @@ type Question = {
     isCorrect: boolean;
   }>;
 };
+
+type ContentItem =
+  | { type: 'question'; data: Question }
+  | { type: 'page'; data: Page };
 
 type Player = {
   id: string;
@@ -55,9 +68,11 @@ function PlayerGameContent() {
   const playerId = searchParams.get("playerId");
 
   const [gameStatus, setGameStatus] = useState<"loading" | "waiting" | "playing" | "answered" | "finished">("loading");
-  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [totalQuestions, setTotalQuestions] = useState(0);
+  const [currentContent, setCurrentContent] = useState<ContentItem | null>(null);
+  const [contentItems, setContentItems] = useState<ContentItem[]>([]);
+  const [currentContentIndex, setCurrentContentIndex] = useState(0);
+  const [currentContentType, setCurrentContentType] = useState<'question' | 'page'>('question');
+  const [totalContent, setTotalContent] = useState(0);
   const [quizTitle, setQuizTitle] = useState("");
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
@@ -94,14 +109,24 @@ function PlayerGameContent() {
         setMyName(player.playerName);
         setMyScore(player.score);
         setQuizTitle(session.quiz.title);
-        setTotalQuestions(session.quiz.questions.length);
+
+        // Create unified content array
+        const items: ContentItem[] = [
+          ...session.quiz.questions.map((q: Question) => ({ type: 'question' as const, data: q })),
+          ...(session.quiz.pages || []).map((p: Page) => ({ type: 'page' as const, data: p })),
+        ].sort((a, b) => a.data.orderIndex - b.data.orderIndex);
+        setContentItems(items);
+        setTotalContent(items.length);
 
         if (session.status === "waiting") {
           setGameStatus("waiting");
         } else if (session.status === "in_progress") {
-          const questionIndex = session.currentQuestion ?? 0;
-          setCurrentQuestionIndex(questionIndex);
-          setCurrentQuestion(session.quiz.questions[questionIndex]);
+          const contentIndex = session.currentQuestion ?? 0;
+          setCurrentContentIndex(contentIndex);
+          if (items[contentIndex]) {
+            setCurrentContent(items[contentIndex]);
+            setCurrentContentType(items[contentIndex].type);
+          }
           setGameStatus("playing");
         } else if (session.status === "finished") {
           setGameStatus("finished");
@@ -134,14 +159,22 @@ function PlayerGameContent() {
 
       switch (data.type) {
         case "game_started":
-        case "next_question":
-          // Load the new question
+        case "next_content":
+          // Load the new content
           fetch(`/api/game/session/${sessionId}`)
             .then(r => r.json())
             .then(session => {
-              const questionIndex = session.currentQuestion ?? 0;
-              setCurrentQuestionIndex(questionIndex);
-              setCurrentQuestion(session.quiz.questions[questionIndex]);
+              const items: ContentItem[] = [
+                ...session.quiz.questions.map((q: Question) => ({ type: 'question' as const, data: q })),
+                ...(session.quiz.pages || []).map((p: Page) => ({ type: 'page' as const, data: p })),
+              ].sort((a, b) => a.data.orderIndex - b.data.orderIndex);
+
+              const contentIndex = session.currentQuestion ?? 0;
+              setCurrentContentIndex(contentIndex);
+              if (items[contentIndex]) {
+                setCurrentContent(items[contentIndex]);
+                setCurrentContentType(items[contentIndex].type);
+              }
               setGameStatus("playing");
               setSelectedAnswer(null);
               setIsCorrect(null);
@@ -182,7 +215,7 @@ function PlayerGameContent() {
   }, [sessionId, playerId, myScore, router, tMultiplayer, tCommon, tQuiz]);
 
   const submitAnswer = async (answerId: number) => {
-    if (!playerId || !currentQuestion || selectedAnswer !== null) return;
+    if (!playerId || !currentContent || currentContent.type !== 'question' || selectedAnswer !== null) return;
 
     setSelectedAnswer(answerId);
 
@@ -191,7 +224,7 @@ function PlayerGameContent() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          questionId: currentQuestion.id,
+          questionId: currentContent.data.id,
           answerId,
         }),
       });
@@ -332,7 +365,7 @@ function PlayerGameContent() {
   }
 
   // Playing or answered
-  if (!currentQuestion) {
+  if (!currentContent) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center">
         <div className="text-white text-2xl">{tCommon('loading')}</div>
@@ -345,25 +378,42 @@ function PlayerGameContent() {
       {/* Header */}
       <GameHeader
         quizTitle={quizTitle}
-        currentQuestionNumber={currentQuestionIndex + 1}
-        totalQuestions={totalQuestions}
+        currentQuestionNumber={currentContentIndex + 1}
+        totalQuestions={totalContent}
         playerName={myName}
         playerScore={myScore}
       />
 
-      {/* Question */}
+      {/* Content - Question or Page */}
       <div className="bg-white rounded-lg shadow-lg p-4 mb-3 flex-1 flex flex-col overflow-y-auto min-h-0">
-        <QuestionDisplay
-          question={currentQuestion}
-          mode="multiplayer-player"
-          revealedAnswerId={revealedAnswerId}
-          selectedAnswerId={selectedAnswer}
-          onAnswerSelect={submitAnswer}
-        />
+        {currentContent.type === 'question' ? (
+          <QuestionDisplay
+            question={currentContent.data}
+            mode="multiplayer-player"
+            revealedAnswerId={revealedAnswerId}
+            selectedAnswerId={selectedAnswer}
+            onAnswerSelect={submitAnswer}
+          />
+        ) : (
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+              {currentContent.data.title}
+            </h2>
+            <MarkdownPreview content={currentContent.data.body} />
+          </div>
+        )}
       </div>
 
       {/* Status */}
-      {gameStatus === "answered" && revealedAnswerId === null && (
+      {currentContent.type === 'page' && (
+        <div className="bg-white rounded-lg shadow-lg p-3 text-center flex-shrink-0">
+          <div className="text-xl mb-1">📄</div>
+          <p className="text-gray-700 font-medium text-sm">
+            {tMultiplayer('waitingForHost')}
+          </p>
+        </div>
+      )}
+      {currentContent.type === 'question' && gameStatus === "answered" && revealedAnswerId === null && (
         <div className="bg-white rounded-lg shadow-lg p-3 text-center flex-shrink-0">
           <div className="text-xl mb-1">⏳</div>
           <p className="text-gray-700 font-medium text-sm">

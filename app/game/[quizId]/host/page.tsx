@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import  type { GameEvent } from "@/lib/gameEvents";
 import QuestionDisplay from "@/app/components/QuestionDisplay";
 import GameHeader from "@/app/components/GameHeader";
+import MarkdownPreview from "@/app/components/MarkdownPreview";
 
 // Import translation files
 import enMessages from "@/locales/en.json";
@@ -25,24 +26,39 @@ type Player = {
   isConnected: boolean;
 };
 
+type Page = {
+  id: number;
+  title: string;
+  body: string;
+  orderIndex: number;
+};
+
+type Question = {
+  id: number;
+  title?: string | null;
+  questionText: string;
+  description?: string | null;
+  imageUrl?: string | null;
+  orderIndex: number;
+  answers: Array<{
+    id: number;
+    answerText: string | null;
+    imageUrl: string | null;
+    isCorrect: boolean;
+  }>;
+};
+
 type Quiz = {
   id: number;
   title: string;
   language?: string | null;
-  questions: Array<{
-    id: number;
-    title?: string | null;
-    questionText: string;
-    description?: string | null;
-    imageUrl?: string | null;
-    answers: Array<{
-      id: number;
-      answerText: string | null;
-      imageUrl: string | null;
-      isCorrect: boolean;
-    }>;
-  }>;
+  questions: Question[];
+  pages?: Page[];
 };
+
+type ContentItem =
+  | { type: 'question'; data: Question }
+  | { type: 'page'; data: Page };
 
 function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) => void }) {
   const tMultiplayer = useTranslations('multiplayer');
@@ -56,9 +72,11 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
   const [sessionCode, setSessionCode] = useState<string>("");
   const [sessionId, setSessionId] = useState<string>("");
   const [quiz, setQuiz] = useState<Quiz | null>(null);
+  const [contentItems, setContentItems] = useState<ContentItem[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
   const [gameStatus, setGameStatus] = useState<"initializing" | "waiting" | "in_progress" | "finished">("initializing");
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
+  const [currentContentIndex, setCurrentContentIndex] = useState<number>(0);
+  const [currentContentType, setCurrentContentType] = useState<'question' | 'page'>('question');
   const [answeredPlayers, setAnsweredPlayers] = useState<Set<string>>(new Set());
   const [revealedAnswer, setRevealedAnswer] = useState<number | null>(null);
   const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
@@ -103,6 +121,13 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
         setQuiz(session.quiz);
         setPlayers(session.players);
 
+        // Create unified content array
+        const items: ContentItem[] = [
+          ...session.quiz.questions.map((q: Question) => ({ type: 'question' as const, data: q })),
+          ...(session.quiz.pages || []).map((p: Page) => ({ type: 'page' as const, data: p })),
+        ].sort((a, b) => a.data.orderIndex - b.data.orderIndex);
+        setContentItems(items);
+
         // Notify parent about quiz language
         if (onQuizLoaded && session.quiz?.language) {
           onQuizLoaded(session.quiz.language);
@@ -112,7 +137,11 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
           setGameStatus("waiting");
         } else if (session.status === "in_progress") {
           setGameStatus("in_progress");
-          setCurrentQuestionIndex(session.currentQuestion ?? 0);
+          const currentIndex = session.currentQuestion ?? 0;
+          setCurrentContentIndex(currentIndex);
+          if (items[currentIndex]) {
+            setCurrentContentType(items[currentIndex].type);
+          }
         } else if (session.status === "finished") {
           setGameStatus("finished");
           const sorted = [...session.players].sort((a: any, b: any) => b.score - a.score);
@@ -165,6 +194,13 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
         setSessionId(data.sessionId);
         setQuiz(data.quiz);
         setGameStatus("waiting");
+
+        // Create unified content array
+        const items: ContentItem[] = [
+          ...data.quiz.questions.map((q: Question) => ({ type: 'question' as const, data: q })),
+          ...(data.quiz.pages || []).map((p: Page) => ({ type: 'page' as const, data: p })),
+        ].sort((a, b) => a.data.orderIndex - b.data.orderIndex);
+        setContentItems(items);
 
         // Notify parent about quiz language
         if (onQuizLoaded && data.quiz?.language) {
@@ -230,6 +266,13 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
         case "player_left":
           setPlayers(prev => prev.filter(p => p.id !== data.playerId));
           break;
+        case "game_started":
+          setGameStatus("in_progress");
+          setCurrentContentIndex(data.contentIndex);
+          setCurrentContentType(data.contentType);
+          setAnsweredPlayers(new Set());
+          setRevealedAnswer(null);
+          break;
         case "player_answered":
           setAnsweredPlayers(prev => new Set(prev).add(data.playerId));
           break;
@@ -243,6 +286,12 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
             ...p,
             score: data.scores[p.id] ?? p.score
           })));
+          break;
+        case "next_content":
+          setCurrentContentIndex(data.contentIndex);
+          setCurrentContentType(data.contentType);
+          setAnsweredPlayers(new Set());
+          setRevealedAnswer(null);
           break;
         case "game_finished":
           setGameStatus("finished");
@@ -276,8 +325,10 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
         return;
       }
 
+      const data = await response.json();
       setGameStatus("in_progress");
-      setCurrentQuestionIndex(0);
+      setCurrentContentIndex(0);
+      setCurrentContentType(data.contentType);
       setAnsweredPlayers(new Set());
       setRevealedAnswer(null);
     } catch (err) {
@@ -304,7 +355,8 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
         setGameStatus("finished");
         setFinalScores(data.finalScores);
       } else {
-        setCurrentQuestionIndex(data.currentQuestion);
+        setCurrentContentIndex(data.currentQuestion);
+        setCurrentContentType(data.contentType);
         setAnsweredPlayers(new Set());
         setRevealedAnswer(null);
       }
@@ -336,11 +388,14 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
     if (gameStatus !== "in_progress") return;
 
     const handleKeyPress = (event: KeyboardEvent) => {
-      // Space bar or right arrow to reveal answer or go to next question
+      // Space bar or right arrow to reveal answer or go to next content
       if (event.code === "Space" || event.code === "ArrowRight") {
         event.preventDefault();
 
-        if (revealedAnswer !== null) {
+        // For pages, just go to next content
+        if (currentContentType === 'page') {
+          nextQuestion();
+        } else if (revealedAnswer !== null) {
           // Answer is revealed, go to next question
           nextQuestion();
         } else {
@@ -354,7 +409,7 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
     return () => {
       window.removeEventListener("keydown", handleKeyPress);
     };
-  }, [gameStatus, revealedAnswer, answeredPlayers.size, sessionId, currentQuestionIndex]);
+  }, [gameStatus, revealedAnswer, answeredPlayers.size, sessionId, currentContentIndex, currentContentType]);
 
   if (error) {
     return (
@@ -568,38 +623,55 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
     );
   }
 
-  // In progress - showing question
-  const currentQuestion = quiz.questions[currentQuestionIndex];
+  // In progress - showing content
+  const currentContent = contentItems[currentContentIndex];
   const allAnswered = answeredPlayers.size === players.length && players.length > 0;
+
+  if (!currentContent) {
+    return (
+      <div className="h-screen bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
+        <div className="text-white text-2xl">{tCommon('loading')}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen bg-gradient-to-br from-purple-500 to-blue-600 flex flex-col p-3">
       {/* Header */}
       <GameHeader
         quizTitle={quiz.title}
-        currentQuestionNumber={currentQuestionIndex + 1}
-        totalQuestions={quiz.questions.length}
-        answeredPlayersCount={answeredPlayers.size}
-        totalPlayersCount={players.length}
+        currentQuestionNumber={currentContentIndex + 1}
+        totalQuestions={contentItems.length}
+        answeredPlayersCount={currentContentType === 'question' ? answeredPlayers.size : undefined}
+        totalPlayersCount={currentContentType === 'question' ? players.length : undefined}
       />
 
-      {/* Question */}
+      {/* Content - Question or Page */}
       <div className="bg-white rounded-lg shadow-lg p-4 mb-3 flex-1 flex flex-col overflow-hidden">
-        <QuestionDisplay
-          question={currentQuestion}
-          mode="host"
-          revealedAnswerId={revealedAnswer}
-        />
+        {currentContent.type === 'question' ? (
+          <QuestionDisplay
+            question={currentContent.data}
+            mode="host"
+            revealedAnswerId={revealedAnswer}
+          />
+        ) : (
+          <div className="overflow-y-auto">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+              {currentContent.data.title}
+            </h2>
+            <MarkdownPreview content={currentContent.data.body} />
+          </div>
+        )}
       </div>
 
       {/* Next/Reveal Button */}
       <div className="text-center flex-shrink-0">
-        {revealedAnswer !== null ? (
+        {currentContent.type === 'page' || revealedAnswer !== null ? (
           <button
             onClick={nextQuestion}
             className="bg-white text-blue-600 px-8 py-3 rounded-lg hover:bg-gray-100 transition font-bold text-base shadow-lg"
           >
-            {currentQuestionIndex < quiz.questions.length - 1
+            {currentContentIndex < contentItems.length - 1
               ? `${tMultiplayer('nextQuestionArrow')} →`
               : tMultiplayer('results')}
           </button>
