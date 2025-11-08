@@ -89,6 +89,7 @@
     "backToHome": "Zurück zur Startseite"
   },
   "question": {
+    "question": "Frage",
     "title": "Fragen-Titel (optional)",
     "text": "Fragetext",
     "description": "Beschreibung (optional)",

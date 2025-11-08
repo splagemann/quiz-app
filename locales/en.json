@@ -89,6 +89,7 @@
     "backToHome": "Back to home"
   },
   "question": {
+    "question": "Question",
     "title": "Question Title (optional)",
     "text": "Question Text",
     "description": "Description (optional)",
