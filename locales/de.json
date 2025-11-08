@@ -14,7 +14,9 @@
     "close": "Schließen",
     "confirm": "Bestätigen",
     "yes": "Ja",
-    "no": "Nein"
+    "no": "Nein",
+    "reordered": "Inhalt erfolgreich neu geordnet",
+    "errorReordering": "Fehler beim Neuordnen des Inhalts"
   },
   "auth": {
     "title": "Authentifizierung erforderlich",
@@ -221,6 +223,7 @@
   },
   "questionManager": {
     "questionsCount": "Fragen ({count})",
+    "contentCount": "Inhaltselemente ({count})",
     "newQuestion": "Neue Frage",
     "titleOptional": "Titel (optional)",
     "titlePlaceholder": "z.B. Frage 1",
@@ -237,6 +240,7 @@
     "questionImageAlt": "Fragenbild",
     "saveQuestion": "Frage speichern",
     "noQuestions": "Noch keine Fragen. Füge deine erste Frage hinzu!",
+    "noContent": "Noch kein Inhalt. Füge deine erste Frage oder Seite hinzu!",
     "networkErrorUploading": "Netzwerkfehler beim Hochladen",
     "errorCreatingQuestion": "Fehler beim Erstellen der Frage",
     "errorUpdatingQuestion": "Fehler beim Aktualisieren der Frage",
@@ -247,6 +251,31 @@
     "minAnswersValidation": "Bitte füge mindestens 2 Antworten hinzu (mit Text oder Bild)",
     "minAnswersEditValidation": "Bitte behalte mindestens 2 Antworten (mit Text oder Bild)",
     "correctMark": "✓ Richtig"
+  },
+  "pageManager": {
+    "page": "Seite",
+    "question": "Frage",
+    "newPage": "Neue Seite",
+    "addPage": "Seite hinzufügen",
+    "editPage": "Seite bearbeiten",
+    "deletePage": "Seite löschen",
+    "savePage": "Seite speichern",
+    "pageTitle": "Seitentitel *",
+    "pageBody": "Seiteninhalt (Markdown) *",
+    "markdownPlaceholder": "# Überschrift\n\nDein Markdown-Inhalt hier...\n\n![Bild](/uploads/bild.jpg)",
+    "uploadImage": "Bild hochladen",
+    "preview": "Vorschau",
+    "editMode": "Bearbeiten",
+    "titleAndBodyRequired": "Seitentitel und -inhalt sind erforderlich",
+    "pageCreated": "Seite erfolgreich erstellt",
+    "pageUpdated": "Seite erfolgreich aktualisiert",
+    "pageDeleted": "Seite erfolgreich gelöscht",
+    "deleteConfirm": "Bist du sicher, dass du diese Seite löschen möchtest?",
+    "errorCreatingPage": "Fehler beim Erstellen der Seite",
+    "errorUpdatingPage": "Fehler beim Aktualisieren der Seite",
+    "errorDeletingPage": "Fehler beim Löschen der Seite",
+    "imageUploadError": "Fehler beim Hochladen des Bildes",
+    "networkErrorUploading": "Netzwerkfehler beim Hochladen"
   },
   "sessions": {
     "title": "Aktive Spielsitzungen",

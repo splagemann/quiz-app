@@ -19,6 +19,7 @@ model Quiz {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   questions    Question[]
+  pages        Page[]
   gameSessions GameSession[]
 }
 
@@ -99,4 +100,17 @@ model PlayerAnswer {
   @@index([sessionId])
   @@index([playerId])
   @@index([questionId])
+}
+
+model Page {
+  id         Int      @id @default(autoincrement())
+  quizId     Int
+  title      String
+  content    String   // Markdown content (using 'content' to match existing DB)
+  pageType   String   @default("custom") // Matching existing DB field
+  orderIndex Int
+  createdAt  DateTime @default(now())
+  quiz       Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  @@index([quizId])
 }
