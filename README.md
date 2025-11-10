@@ -52,7 +52,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Flexible Control**: Host can manually reveal answers at any time, even if not all players have answered
 - **Live Scoreboard**: Real-time leaderboard during gameplay
 - **Final Rankings**: Final leaderboard with avatars and scores
-- **Avatar System**: Consistent avatars for each player using DiceBear API
+- **Avatar System**: Customizable avatars with "Switch Avatar" button - players can change their avatar in the waiting room and it persists throughout the game
 
 ## Tech Stack
 
@@ -63,7 +63,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Styling**: Tailwind CSS
 - **Internationalization**: next-intl
 - **QR Codes**: qrcode library
-- **Avatars**: DiceBear Avataaars API
+- **Avatars**: Multiavatar library
 - **Deployment**: Docker & Docker Compose
 
 ## Getting Started
