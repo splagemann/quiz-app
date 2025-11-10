@@ -21,6 +21,9 @@ export async function POST(
             questions: {
               orderBy: { orderIndex: 'asc' },
             },
+            pages: {
+              orderBy: { orderIndex: 'asc' },
+            },
           },
         },
         players: {
@@ -43,11 +46,17 @@ export async function POST(
       );
     }
 
+    // Create unified content array
+    const contentItems = [
+      ...session.quiz.questions.map(q => ({ type: 'question' as const, data: q })),
+      ...(session.quiz.pages || []).map(p => ({ type: 'page' as const, data: p })),
+    ].sort((a, b) => a.data.orderIndex - b.data.orderIndex);
+
     const currentIndex = session.currentQuestion ?? 0;
     const nextIndex = currentIndex + 1;
 
-    // Check if there are more questions
-    if (nextIndex >= session.quiz.questions.length) {
+    // Check if there is more content
+    if (nextIndex >= contentItems.length) {
       // Game is finished - award bonus point to marked player
       const markedPlayer = session.players.find(p => p.markedToWin);
       if (markedPlayer) {
@@ -90,31 +99,35 @@ export async function POST(
       });
     }
 
-    // Move to next question
-    const nextQuestion = session.quiz.questions[nextIndex];
+    // Move to next content
+    const nextContent = contentItems[nextIndex];
 
     await prisma.gameSession.update({
       where: { id: sessionId },
       data: {
-        currentQuestion: nextIndex,
+        currentQuestion: nextIndex, // Stores current content index
       },
     });
 
-    // Reset answered players for the next question
+    // Reset answered players for the next content (only matters for questions)
     gameStateManager.resetAnswers(sessionId);
 
-    // Broadcast next question event
+    // Broadcast next content event
     await gameStateManager.broadcast(sessionId, {
-      type: 'next_question',
-      questionId: nextQuestion.id,
-      questionIndex: nextIndex,
+      type: 'next_content',
+      contentType: nextContent.type,
+      contentId: nextContent.data.id,
+      contentIndex: nextIndex,
     });
 
     return NextResponse.json({
       success: true,
       currentQuestion: nextIndex,
-      questionId: nextQuestion.id,
+      contentType: nextContent.type,
+      contentId: nextContent.data.id,
       gameFinished: false,
+      // Backward compatibility
+      questionId: nextContent.type === 'question' ? nextContent.data.id : undefined,
     });
   } catch (error) {
     console.error("Error moving to next question:", error);

@@ -14,7 +14,9 @@
     "close": "Close",
     "confirm": "Confirm",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "reordered": "Content reordered successfully",
+    "errorReordering": "Error reordering content"
   },
   "auth": {
     "title": "Authentication Required",
@@ -87,6 +89,7 @@
     "backToHome": "Back to home"
   },
   "question": {
+    "question": "Question",
     "title": "Question Title (optional)",
     "text": "Question Text",
     "description": "Description (optional)",
@@ -158,7 +161,7 @@
     "place": "Place",
     "finalResults": "Final Results",
     "waitingForHost": "Waiting for host to start the game...",
-    "questionOf": "Question {current} of {total}",
+    "questionOf": "Page {current} of {total}",
     "playersAnswered": "{answered} of {total} answered",
     "allPlayersAnswered": "All players have answered",
     "backToLobby": "Back to Lobby",
@@ -221,6 +224,7 @@
   },
   "questionManager": {
     "questionsCount": "Questions ({count})",
+    "contentCount": "Content Items ({count})",
     "newQuestion": "New Question",
     "titleOptional": "Title (optional)",
     "titlePlaceholder": "e.g. Question 1",
@@ -237,6 +241,7 @@
     "questionImageAlt": "Question image",
     "saveQuestion": "Save Question",
     "noQuestions": "No questions yet. Add your first question!",
+    "noContent": "No content yet. Add your first question or page!",
     "networkErrorUploading": "Network error while uploading",
     "errorCreatingQuestion": "Error creating question",
     "errorUpdatingQuestion": "Error updating question",
@@ -247,6 +252,31 @@
     "minAnswersValidation": "Please add at least 2 answers (with text or image)",
     "minAnswersEditValidation": "Please keep at least 2 answers (with text or image)",
     "correctMark": "✓ Correct"
+  },
+  "pageManager": {
+    "page": "Page",
+    "question": "Question",
+    "newPage": "New Page",
+    "addPage": "Add Page",
+    "editPage": "Edit Page",
+    "deletePage": "Delete Page",
+    "savePage": "Save Page",
+    "pageTitle": "Page Title *",
+    "pageBody": "Page Body (Markdown) *",
+    "markdownPlaceholder": "# Heading\n\nYour markdown content here...\n\n![Image](/uploads/image.jpg)",
+    "uploadImage": "Upload Image",
+    "preview": "Preview",
+    "editMode": "Edit",
+    "titleAndBodyRequired": "Page title and body are required",
+    "pageCreated": "Page created successfully",
+    "pageUpdated": "Page updated successfully",
+    "pageDeleted": "Page deleted successfully",
+    "deleteConfirm": "Are you sure you want to delete this page?",
+    "errorCreatingPage": "Error creating page",
+    "errorUpdatingPage": "Error updating page",
+    "errorDeletingPage": "Error deleting page",
+    "imageUploadError": "Error uploading image",
+    "networkErrorUploading": "Network error while uploading"
   },
   "sessions": {
     "title": "Active Game Sessions",

@@ -22,6 +22,9 @@ export async function POST(
             questions: {
               orderBy: { orderIndex: 'asc' },
             },
+            pages: {
+              orderBy: { orderIndex: 'asc' },
+            },
           },
         },
       },
@@ -48,13 +51,20 @@ export async function POST(
       );
     }
 
-    const firstQuestion = session.quiz.questions[0];
-    if (!firstQuestion) {
+    // Create unified content array
+    const contentItems = [
+      ...session.quiz.questions.map(q => ({ type: 'question' as const, data: q })),
+      ...(session.quiz.pages || []).map(p => ({ type: 'page' as const, data: p })),
+    ].sort((a, b) => a.data.orderIndex - b.data.orderIndex);
+
+    if (contentItems.length === 0) {
       return NextResponse.json(
-        { error: "Quiz hat keine Fragen" },
+        { error: "Quiz hat keine Fragen" }, // Keeping original message for backward compatibility
         { status: 400 }
       );
     }
+
+    const firstContent = contentItems[0];
 
     // Update session to in_progress
     const updatedSession = await prisma.gameSession.update({
@@ -62,24 +72,28 @@ export async function POST(
       data: {
         status: 'in_progress',
         startedAt: new Date(),
-        currentQuestion: 0,
+        currentQuestion: 0, // Stores current content index
       },
     });
 
-    // Reset answered players for the first question
+    // Reset answered players for the first content (only matters for questions)
     gameStateManager.resetAnswers(sessionId);
 
     // Broadcast game started event
     await gameStateManager.broadcast(sessionId, {
       type: 'game_started',
-      questionId: firstQuestion.id,
-      questionIndex: 0,
+      contentType: firstContent.type,
+      contentId: firstContent.data.id,
+      contentIndex: 0,
     });
 
     return NextResponse.json({
       success: true,
       currentQuestion: 0,
-      questionId: firstQuestion.id,
+      contentType: firstContent.type,
+      contentId: firstContent.data.id,
+      // Backward compatibility
+      questionId: firstContent.type === 'question' ? firstContent.data.id : undefined,
     });
   } catch (error) {
     console.error("Error starting game:", error);

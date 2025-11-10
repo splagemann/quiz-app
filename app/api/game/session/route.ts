@@ -78,6 +78,9 @@ export async function POST(request: NextRequest) {
               },
               orderBy: { orderIndex: 'asc' },
             },
+            pages: {
+              orderBy: { orderIndex: 'asc' },
+            },
           },
         },
       },

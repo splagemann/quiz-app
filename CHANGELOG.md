@@ -7,6 +7,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2025-11-10
+
+### Added
+- **Static Pages Feature**: Quizzes can now include informational pages alongside questions
+  - Create custom markdown pages with rich content (headings, lists, links, images, code blocks, blockquotes)
+  - Pages support full markdown formatting via react-markdown
+  - Each page has a title and markdown content field
+  - Pages are stored in new `Page` table with database migration
+  - Pages can be inserted at any position in the quiz flow
+  - MarkdownPreview component for consistent markdown rendering
+
+### Changed
+- **Admin Content Manager**: Completely redesigned content management interface
+  - Unified question and page management in single sortable list
+  - Separate "Add Question" (blue) and "Add Page" (purple) buttons for clear distinction
+  - Color-coded content items: blue for questions, purple for pages
+  - Inline editing for both questions and pages
+  - Real-time list updates after add/edit/delete operations
+  - Drag-and-drop reordering for questions and pages together
+  - Content type badges show "Question" or "Page" with appropriate colors
+
+- **Game Flow**: Enhanced to support mixed question and page content
+  - Single player mode: Navigate through questions and pages seamlessly
+  - Multiplayer host: Present pages to all players simultaneously
+  - Multiplayer player: View pages in sync with other players
+  - Pages don't require answers and can be advanced immediately
+  - Progress bar shows total content items (questions + pages)
+
+- **API Updates**: Multiplayer endpoints support new content structure
+  - `/api/game/session/[sessionId]/start`: Returns contentType and contentId
+  - `/api/game/session/[sessionId]/next`: Handles both questions and pages
+  - SSE events include contentType field ('question' or 'page')
+  - Backward compatibility maintained with questionId field
+
+- **Dark Mode**: Removed from game pages for cleaner, more focused experience
+  - Admin pages retain full dark mode support
+  - Game pages use light mode only for better readability
+  - MarkdownPreview uses standard light colors
+
+### Fixed
+- **Quiz Deletion**: Fixed delete button not working in admin panel
+  - Changed from form.submit() to form.requestSubmit() for proper server action triggering
+  - Store form reference before async confirm dialog to prevent null reference errors
+- **TypeScript Build**: Fixed imageUrl optional type error in ContentManager
+- **Database Migration**: Added missing Page table migration for CI/CD
+- **Hydration Warnings**: Added suppressHydrationWarning to root HTML element
+
+### Technical Details
+- New database table: `Page` with quizId, title, content, pageType, orderIndex, createdAt
+- Prisma schema updated with Page model and Quiz-Page relation
+- Content ordering uses unified orderIndex across questions and pages
+- React Server Actions for content CRUD operations
+- Local state management for optimistic UI updates
+- Discriminated TypeScript unions for type-safe content handling
+
 ## [1.4.1] - 2025-11-05
 
 ### Added

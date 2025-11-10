@@ -51,10 +51,13 @@ export default async function PlayQuizPage({
         },
         orderBy: { orderIndex: "asc" },
       },
+      pages: {
+        orderBy: { orderIndex: "asc" },
+      },
     },
   });
 
-  if (!quiz || quiz.questions.length === 0) {
+  if (!quiz || (quiz.questions.length === 0 && quiz.pages.length === 0)) {
     notFound();
   }
 

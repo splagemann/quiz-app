@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { NextIntlClientProvider, useTranslations } from "next-intl";
 import QuestionDisplay from "@/app/components/QuestionDisplay";
 import GameHeader from "@/app/components/GameHeader";
+import MarkdownPreview from "@/app/components/MarkdownPreview";
 
 type Answer = {
   id: number;
@@ -24,11 +25,23 @@ type Question = {
   answers: Answer[];
 };
 
+type Page = {
+  id: number;
+  title: string;
+  content: string;
+  orderIndex: number;
+};
+
+type ContentItem =
+  | { type: 'question'; data: Question }
+  | { type: 'page'; data: Page };
+
 type Quiz = {
   id: number;
   title: string;
   description: string | null;
   questions: Question[];
+  pages: Page[];
 };
 
 type QuizPlayerProps = {
@@ -41,40 +54,55 @@ function QuizPlayerContent({ quiz }: { quiz: Quiz }) {
   const tSolo = useTranslations('solo');
   const tMultiplayer = useTranslations('multiplayer');
   const tQuiz = useTranslations('quiz');
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const tPage = useTranslations('pageManager');
+
+  // Create unified content array sorted by orderIndex
+  const contentItems = useMemo<ContentItem[]>(() => {
+    const items: ContentItem[] = [
+      ...quiz.questions.map(q => ({ type: 'question' as const, data: q })),
+      ...quiz.pages.map(p => ({ type: 'page' as const, data: p })),
+    ];
+    return items.sort((a, b) => a.data.orderIndex - b.data.orderIndex);
+  }, [quiz.questions, quiz.pages]);
+
+  const questionCount = quiz.questions.length;
+
+  const [currentContentIndex, setCurrentContentIndex] = useState(0);
   const [selectedAnswerId, setSelectedAnswerId] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [answeredQuestions, setAnsweredQuestions] = useState<number[]>([]);
   const [isFinished, setIsFinished] = useState(false);
 
-  const currentQuestion = quiz.questions[currentQuestionIndex];
-  const isLastQuestion = currentQuestionIndex === quiz.questions.length - 1;
-  const hasAnswered = answeredQuestions.includes(currentQuestion.id);
+  const currentContent = contentItems[currentContentIndex];
+  const isLastContent = currentContentIndex === contentItems.length - 1;
+  const hasAnswered = currentContent.type === 'question'
+    ? answeredQuestions.includes(currentContent.data.id)
+    : true; // Pages are always "answered" (can proceed immediately)
 
   const handleAnswerSelect = (answerId: number) => {
-    if (hasAnswered) return;
+    if (hasAnswered || currentContent.type !== 'question') return;
 
     setSelectedAnswerId(answerId);
-    const selectedAnswer = currentQuestion.answers.find((a) => a.id === answerId);
+    const selectedAnswer = currentContent.data.answers.find((a: Answer) => a.id === answerId);
 
     if (selectedAnswer?.isCorrect) {
       setScore(score + 1);
     }
 
-    setAnsweredQuestions([...answeredQuestions, currentQuestion.id]);
+    setAnsweredQuestions([...answeredQuestions, currentContent.data.id]);
   };
 
   const handleNext = () => {
-    if (isLastQuestion) {
+    if (isLastContent) {
       setIsFinished(true);
     } else {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
+      setCurrentContentIndex(currentContentIndex + 1);
       setSelectedAnswerId(null);
     }
   };
 
   const handleRestart = () => {
-    setCurrentQuestionIndex(0);
+    setCurrentContentIndex(0);
     setSelectedAnswerId(null);
     setScore(0);
     setAnsweredQuestions([]);
@@ -82,14 +110,14 @@ function QuizPlayerContent({ quiz }: { quiz: Quiz }) {
   };
 
   if (isFinished) {
-    const percentage = Math.round((score / quiz.questions.length) * 100);
+    const percentage = questionCount > 0 ? Math.round((score / questionCount) * 100) : 0;
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center px-4">
         <div className="bg-white rounded-lg shadow-2xl p-8 max-w-md w-full text-center">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">{tSolo('quizCompleted')}</h1>
           <div className="my-8">
             <div className="text-6xl font-bold text-blue-600 mb-2">
-              {score}/{quiz.questions.length}
+              {score}/{questionCount}
             </div>
             <div className="text-xl text-gray-800 font-medium">
               {percentage}% {tSolo('correctPercentage')}
@@ -125,20 +153,31 @@ function QuizPlayerContent({ quiz }: { quiz: Quiz }) {
       {/* Header */}
       <GameHeader
         quizTitle={quiz.title}
-        currentQuestionNumber={currentQuestionIndex + 1}
-        totalQuestions={quiz.questions.length}
+        currentQuestionNumber={currentContentIndex + 1}
+        totalQuestions={contentItems.length}
         score={score}
       />
 
-      {/* Question Card */}
+      {/* Content Card */}
       <div className="bg-white rounded-lg shadow-lg p-4 mb-3 flex-1 flex flex-col overflow-hidden">
-        <QuestionDisplay
-          question={currentQuestion}
-          mode="solo"
-          selectedAnswerId={selectedAnswerId}
-          hasAnswered={hasAnswered}
-          onAnswerSelect={handleAnswerSelect}
-        />
+        {currentContent.type === 'question' ? (
+          <QuestionDisplay
+            question={currentContent.data as Question}
+            mode="solo"
+            selectedAnswerId={selectedAnswerId}
+            hasAnswered={hasAnswered}
+            onAnswerSelect={handleAnswerSelect}
+          />
+        ) : (
+          <div className="flex-1 flex flex-col">
+            <h2 className="text-xl font-bold text-gray-900 mb-3 flex-shrink-0">
+              {currentContent.data.title}
+            </h2>
+            <div className="flex-1">
+              <MarkdownPreview content={currentContent.data.content} />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Next Button */}
@@ -148,7 +187,7 @@ function QuizPlayerContent({ quiz }: { quiz: Quiz }) {
             onClick={handleNext}
             className="bg-white text-blue-600 px-8 py-3 rounded-lg hover:bg-gray-100 transition font-bold text-base shadow-lg"
           >
-            {isLastQuestion ? tMultiplayer('results') : `${tMultiplayer('nextQuestionArrow')} →`}
+            {isLastContent ? tMultiplayer('results') : `${tMultiplayer('nextQuestionArrow')} →`}
           </button>
         </div>
       )}

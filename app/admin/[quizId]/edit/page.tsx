@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
-import QuestionManager from "./QuestionManager";
+import ContentManager from "./ContentManager";
 import DeleteButton from "./DeleteButton";
 import { AdminHeader } from "@/app/components/AdminHeader";
 import { QuizLanguageSelector } from "@/app/components/QuizLanguageSelector";
@@ -108,6 +108,9 @@ export default async function EditQuizPage({
         },
         orderBy: { orderIndex: "asc" },
       },
+      pages: {
+        orderBy: { orderIndex: "asc" },
+      },
     },
   });
 
@@ -176,8 +179,8 @@ export default async function EditQuizPage({
           </div>
         </Card>
 
-        {/* Question Manager */}
-        <QuestionManager quizId={quizIdNum} questions={quiz.questions} />
+        {/* Content Manager */}
+        <ContentManager quizId={quizIdNum} questions={quiz.questions} pages={quiz.pages} />
 
         <AdminFooter />
       </div>

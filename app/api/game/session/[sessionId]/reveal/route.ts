@@ -25,6 +25,9 @@ export async function POST(
               },
               orderBy: { orderIndex: "asc" },
             },
+            pages: {
+              orderBy: { orderIndex: "asc" },
+            },
           },
         },
         players: true,
@@ -45,15 +48,23 @@ export async function POST(
       );
     }
 
-    const currentQuestionIndex = session.currentQuestion ?? 0;
-    const currentQuestion = session.quiz.questions[currentQuestionIndex];
+    // Create unified content array to find current question
+    const contentItems = [
+      ...session.quiz.questions.map(q => ({ type: 'question' as const, data: q })),
+      ...(session.quiz.pages || []).map(p => ({ type: 'page' as const, data: p })),
+    ].sort((a, b) => a.data.orderIndex - b.data.orderIndex);
 
-    if (!currentQuestion) {
+    const currentContentIndex = session.currentQuestion ?? 0;
+    const currentContent = contentItems[currentContentIndex];
+
+    if (!currentContent || currentContent.type !== 'question') {
       return NextResponse.json(
         { error: "Keine aktuelle Frage gefunden" },
         { status: 400 }
       );
     }
+
+    const currentQuestion = currentContent.data;
 
     // Get updated scores
     const updatedPlayers = await prisma.player.findMany({

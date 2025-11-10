@@ -71,9 +71,10 @@ describe('/api/game/session/[sessionId]/next', () => {
       expect(data.gameFinished).toBe(false);
       expect(mockGameStateManager.resetAnswers).toHaveBeenCalledWith(sessionId);
       expect(mockGameStateManager.broadcast).toHaveBeenCalledWith(sessionId, {
-        type: 'next_question',
-        questionId: 11,
-        questionIndex: 1,
+        type: 'next_content',
+        contentType: 'question',
+        contentId: 11,
+        contentIndex: 1,
       });
     });
 
