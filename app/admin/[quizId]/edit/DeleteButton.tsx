@@ -12,6 +12,10 @@ export default function DeleteButton() {
   const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
+    // Store form reference before async operation
+    const form = e.currentTarget.closest('form');
+    if (!form) return;
+
     const confirmed = await confirm({
       title: t('deleteQuiz'),
       message: t('deleteConfirm'),
@@ -21,11 +25,8 @@ export default function DeleteButton() {
     });
 
     if (confirmed) {
-      // Submit the form
-      const form = e.currentTarget.closest('form');
-      if (form) {
-        form.submit();
-      }
+      // Submit the form using requestSubmit to properly trigger server action
+      form.requestSubmit();
     }
   };
 
