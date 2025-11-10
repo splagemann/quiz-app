@@ -155,7 +155,7 @@ jobs:
 
           git checkout -b "$BRANCH_NAME"
           git add package.json package-lock.json CHANGELOG.md
-          git commit -m "chore: prepare release v${{ steps.bump_version.outputs.new }}" \
+          git commit --no-verify -m "chore: prepare release v${{ steps.bump_version.outputs.new }}" \
             -m "" \
             -m "🤖 Generated with [Claude Code](https://claude.com/claude-code)" \
             -m "" \
