@@ -36,6 +36,9 @@ export async function POST(
                   },
                   orderBy: { orderIndex: 'asc' },
                 },
+                pages: {
+                  orderBy: { orderIndex: 'asc' },
+                },
               },
             },
             players: true,
@@ -58,16 +61,24 @@ export async function POST(
       );
     }
 
-    // Verify this is the current question
-    const currentQuestionIndex = player.session.currentQuestion ?? 0;
-    const currentQuestion = player.session.quiz.questions[currentQuestionIndex];
+    // Create unified content array to find current question
+    const contentItems = [
+      ...player.session.quiz.questions.map(q => ({ type: 'question' as const, data: q })),
+      ...(player.session.quiz.pages || []).map(p => ({ type: 'page' as const, data: p })),
+    ].sort((a, b) => a.data.orderIndex - b.data.orderIndex);
 
-    if (!currentQuestion || currentQuestion.id !== questionId) {
+    const currentContentIndex = player.session.currentQuestion ?? 0;
+    const currentContent = contentItems[currentContentIndex];
+
+    // Verify current content is a question and matches the submitted questionId
+    if (!currentContent || currentContent.type !== 'question' || currentContent.data.id !== questionId) {
       return NextResponse.json(
         { error: "Diese Frage ist nicht mehr aktiv" },
         { status: 400 }
       );
     }
+
+    const currentQuestion = currentContent.data;
 
     // Check if player already answered this question
     const existingAnswer = await prisma.playerAnswer.findFirst({

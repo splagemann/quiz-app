@@ -169,11 +169,13 @@ function QuizPlayerContent({ quiz }: { quiz: Quiz }) {
             onAnswerSelect={handleAnswerSelect}
           />
         ) : (
-          <div className="flex-1 overflow-y-auto">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          <div className="flex-1 flex flex-col">
+            <h2 className="text-xl font-bold text-gray-900 mb-3 flex-shrink-0">
               {currentContent.data.title}
             </h2>
-            <MarkdownPreview content={currentContent.data.content} />
+            <div className="flex-1">
+              <MarkdownPreview content={currentContent.data.content} />
+            </div>
           </div>
         )}
       </div>

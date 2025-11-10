@@ -26,6 +26,9 @@ export async function GET(
               },
               orderBy: { orderIndex: 'asc' },
             },
+            pages: {
+              orderBy: { orderIndex: 'asc' },
+            },
           },
         },
         players: {

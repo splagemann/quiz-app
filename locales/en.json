@@ -161,7 +161,7 @@
     "place": "Place",
     "finalResults": "Final Results",
     "waitingForHost": "Waiting for host to start the game...",
-    "questionOf": "Question {current} of {total}",
+    "questionOf": "Page {current} of {total}",
     "playersAnswered": "{answered} of {total} answered",
     "allPlayersAnswered": "All players have answered",
     "backToLobby": "Back to Lobby",

@@ -21,7 +21,7 @@ const messages = {
 type Page = {
   id: number;
   title: string;
-  body: string;
+  content: string;
   orderIndex: number;
 };
 
@@ -385,7 +385,7 @@ function PlayerGameContent() {
       />
 
       {/* Content - Question or Page */}
-      <div className="bg-white rounded-lg shadow-lg p-4 mb-3 flex-1 flex flex-col overflow-y-auto min-h-0">
+      <div className="bg-white rounded-lg shadow-lg p-4 mb-3 flex-1 flex flex-col min-h-0">
         {currentContent.type === 'question' ? (
           <QuestionDisplay
             question={currentContent.data}
@@ -395,24 +395,18 @@ function PlayerGameContent() {
             onAnswerSelect={submitAnswer}
           />
         ) : (
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+          <div className="flex-1 flex flex-col">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 flex-shrink-0">
               {currentContent.data.title}
             </h2>
-            <MarkdownPreview content={currentContent.data.body} />
+            <div className="flex-1">
+              <MarkdownPreview content={currentContent.data.content} />
+            </div>
           </div>
         )}
       </div>
 
       {/* Status */}
-      {currentContent.type === 'page' && (
-        <div className="bg-white rounded-lg shadow-lg p-3 text-center flex-shrink-0">
-          <div className="text-xl mb-1">📄</div>
-          <p className="text-gray-700 font-medium text-sm">
-            {tMultiplayer('waitingForHost')}
-          </p>
-        </div>
-      )}
       {currentContent.type === 'question' && gameStatus === "answered" && revealedAnswerId === null && (
         <div className="bg-white rounded-lg shadow-lg p-3 text-center flex-shrink-0">
           <div className="text-xl mb-1">⏳</div>

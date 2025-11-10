@@ -29,7 +29,7 @@ type Player = {
 type Page = {
   id: number;
   title: string;
-  body: string;
+  content: string;
   orderIndex: number;
 };
 
@@ -655,11 +655,13 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
             revealedAnswerId={revealedAnswer}
           />
         ) : (
-          <div className="overflow-y-auto">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+          <div className="flex-1 flex flex-col">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 flex-shrink-0">
               {currentContent.data.title}
             </h2>
-            <MarkdownPreview content={currentContent.data.body} />
+            <div className="flex-1">
+              <MarkdownPreview content={currentContent.data.content} />
+            </div>
           </div>
         )}
       </div>

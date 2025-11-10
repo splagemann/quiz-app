@@ -619,8 +619,8 @@ export default function ContentManager({
               )}
             </div>
             {newAnswers.map((answer, i) => (
-              <div key={i} className="mb-3 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700">
-                <div className="flex items-center gap-2 mb-2">
+              <div key={i} className="mb-3 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 w-full max-w-full overflow-hidden">
+                <div className="flex items-center gap-2 mb-2 w-full max-w-full">
                   <input
                     type="radio"
                     checked={answer.isCorrect}
@@ -630,7 +630,7 @@ export default function ContentManager({
                         isCorrect: idx === i
                       })));
                     }}
-                    className="w-4 h-4 text-green-600"
+                    className="w-4 h-4 text-green-600 flex-shrink-0"
                   />
                   <input
                     type="text"
@@ -641,7 +641,7 @@ export default function ContentManager({
                       setNewAnswers(updated);
                     }}
                     placeholder={t('answerPlaceholder', { number: i + 1 })}
-                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white text-gray-900 dark:bg-gray-600 dark:text-gray-100"
+                    className="flex-1 min-w-0 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white text-gray-900 dark:bg-gray-600 dark:text-gray-100"
                   />
                   {newAnswers.length > 2 && (
                     <button
@@ -653,11 +653,41 @@ export default function ContentManager({
                         }
                         setNewAnswers(updated);
                       }}
-                      className="text-red-600 dark:text-red-400 px-2"
+                      className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 px-2 flex-shrink-0"
                     >
                       ✕
                     </button>
                   )}
+                  {newAnswers.length <= 2 && (
+                    <div className="w-6 flex-shrink-0"></div>
+                  )}
+                </div>
+                <div className="flex items-start gap-2 w-full max-w-full">
+                  <div className="w-4 flex-shrink-0"></div>
+                  <div className="flex-1 min-w-0 w-full max-w-full overflow-hidden">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const url = await handleAnswerImageUpload(file);
+                          if (url) {
+                            const updated = [...newAnswers];
+                            updated[i].imageUrl = url;
+                            setNewAnswers(updated);
+                          }
+                        }
+                      }}
+                      className="w-full max-w-full text-sm px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white text-gray-900 dark:bg-gray-600 dark:text-gray-100"
+                    />
+                    {answer.imageUrl && (
+                      <div className="mt-2">
+                        <img src={answer.imageUrl} alt={t('answerImageAlt')} className="w-full max-w-xs rounded border border-gray-300 dark:border-gray-600" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="w-6 flex-shrink-0"></div>
                 </div>
               </div>
             ))}
@@ -860,8 +890,8 @@ export default function ContentManager({
                                 )}
                               </div>
                               {editAnswers.map((answer, i) => (
-                                <div key={answer.id} className="mb-3 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700">
-                                  <div className="flex items-center gap-2 mb-2">
+                                <div key={answer.id} className="mb-3 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 w-full max-w-full overflow-hidden">
+                                  <div className="flex items-center gap-2 mb-2 w-full max-w-full">
                                     <input
                                       type="radio"
                                       checked={answer.isCorrect}
@@ -871,7 +901,7 @@ export default function ContentManager({
                                           isCorrect: idx === i
                                         })));
                                       }}
-                                      className="w-4 h-4 text-green-600"
+                                      className="w-4 h-4 text-green-600 flex-shrink-0"
                                     />
                                     <input
                                       type="text"
@@ -882,7 +912,7 @@ export default function ContentManager({
                                         setEditAnswers(updated);
                                       }}
                                       placeholder={t('answerPlaceholder', { number: i + 1 })}
-                                      className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white text-gray-900 dark:bg-gray-600 dark:text-gray-100"
+                                      className="flex-1 min-w-0 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white text-gray-900 dark:bg-gray-600 dark:text-gray-100"
                                     />
                                     {editAnswers.length > 2 && (
                                       <button
@@ -894,11 +924,41 @@ export default function ContentManager({
                                           }
                                           setEditAnswers(updated);
                                         }}
-                                        className="text-red-600 dark:text-red-400 px-2"
+                                        className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 px-2 flex-shrink-0"
                                       >
                                         ✕
                                       </button>
                                     )}
+                                    {editAnswers.length <= 2 && (
+                                      <div className="w-6 flex-shrink-0"></div>
+                                    )}
+                                  </div>
+                                  <div className="flex items-start gap-2 w-full max-w-full">
+                                    <div className="w-4 flex-shrink-0"></div>
+                                    <div className="flex-1 min-w-0 w-full max-w-full overflow-hidden">
+                                      <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={async (e) => {
+                                          const file = e.target.files?.[0];
+                                          if (file) {
+                                            const url = await handleAnswerImageUpload(file);
+                                            if (url) {
+                                              const updated = [...editAnswers];
+                                              updated[i].imageUrl = url;
+                                              setEditAnswers(updated);
+                                            }
+                                          }
+                                        }}
+                                        className="w-full max-w-full text-sm px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white text-gray-900 dark:bg-gray-600 dark:text-gray-100"
+                                      />
+                                      {answer.imageUrl && (
+                                        <div className="mt-2">
+                                          <img src={answer.imageUrl} alt={t('answerImageAlt')} className="w-full max-w-xs rounded border border-gray-300 dark:border-gray-600" />
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div className="w-6 flex-shrink-0"></div>
                                   </div>
                                 </div>
                               ))}

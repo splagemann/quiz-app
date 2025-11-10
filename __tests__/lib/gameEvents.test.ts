@@ -78,16 +78,17 @@ describe('gameEvents', () => {
       expect(result).toContain('reveal_answer');
     });
 
-    it('should format next_question event', () => {
+    it('should format next_content event', () => {
       const event: GameEvent = {
-        type: 'next_question',
-        questionId: 2,
-        questionIndex: 1,
+        type: 'next_content',
+        contentType: 'question',
+        contentId: 2,
+        contentIndex: 1,
       };
 
       const result = formatSSEMessage(event);
       expect(result).toBe(`data: ${JSON.stringify(event)}\n\n`);
-      expect(result).toContain('next_question');
+      expect(result).toContain('next_content');
     });
 
     it('should format game_finished event', () => {

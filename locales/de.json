@@ -161,7 +161,7 @@
     "place": "Platz",
     "finalResults": "Endergebnis",
     "waitingForHost": "Warte auf Spielstart durch den Spielleiter...",
-    "questionOf": "Frage {current} von {total}",
+    "questionOf": "Seite {current} von {total}",
     "playersAnswered": "{answered} von {total} geantwortet",
     "allPlayersAnswered": "Alle Spieler haben geantwortet",
     "backToLobby": "Zurück zur Lobby",
