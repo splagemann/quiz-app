@@ -50,6 +50,28 @@ type Question = {
   }>;
 };
 
+type Page = {
+  id: number;
+  title: string;
+  content: string;
+  orderIndex: number;
+};
+
+type Question = {
+  id: number;
+  title?: string | null;
+  questionText: string;
+  description?: string | null;
+  imageUrl?: string | null;
+  orderIndex: number;
+  answers: Array<{
+    id: number;
+    answerText: string | null;
+    imageUrl: string | null;
+    isCorrect: boolean;
+  }>;
+};
+
 type Quiz = {
   id: number;
   title: string;
