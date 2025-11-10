@@ -170,7 +170,7 @@ function QuizPlayerContent({ quiz }: { quiz: Quiz }) {
           />
         ) : (
           <div className="flex-1 overflow-y-auto">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
               {currentContent.data.title}
             </h2>
             <MarkdownPreview content={currentContent.data.content} />

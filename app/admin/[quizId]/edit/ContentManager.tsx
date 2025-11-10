@@ -838,7 +838,7 @@ export default function ContentManager({
                               />
                               {(editQuestionImageUrl || (item.data as Question).imageUrl) && (
                                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                                  {t('imageUploaded', { url: editQuestionImageUrl || (item.data as Question).imageUrl })}
+                                  {t('imageUploaded', { url: editQuestionImageUrl || (item.data as Question).imageUrl || '' })}
                                 </p>
                               )}
                             </div>
