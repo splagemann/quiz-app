@@ -73,6 +73,7 @@ export async function POST(request: NextRequest) {
         playerName: player.playerName,
         score: player.score,
         isConnected: player.isConnected,
+        avatarSeed: player.avatarSeed,
       },
     });
 

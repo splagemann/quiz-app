@@ -85,6 +85,7 @@ export async function POST(
         playerId: p.id,
         playerName: p.playerName,
         score: p.score,
+        avatarSeed: p.avatarSeed,
       }));
 
       await gameStateManager.broadcast(sessionId, {

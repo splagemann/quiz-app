@@ -166,6 +166,7 @@
     "allPlayersAnswered": "All players have answered",
     "backToLobby": "Back to Lobby",
     "welcome": "Welcome, {name}!",
+    "switchAvatar": "Switch Avatar",
     "playersCanScanQR": "Players can scan the QR code with their phone",
     "goToUrl": "Go to",
     "questionImage": "Question image",
