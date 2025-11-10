@@ -76,8 +76,9 @@ describe('/api/game/session/[sessionId]/start', () => {
       expect(mockGameStateManager.resetAnswers).toHaveBeenCalledWith(sessionId);
       expect(mockGameStateManager.broadcast).toHaveBeenCalledWith(sessionId, {
         type: 'game_started',
-        questionId: 10,
-        questionIndex: 0,
+        contentType: 'question',
+        contentId: 10,
+        contentIndex: 0,
       });
     });
 

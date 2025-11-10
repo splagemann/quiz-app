@@ -293,6 +293,8 @@ export default function ContentManager({
     });
 
     if (response.ok) {
+      const newQuestion = await response.json();
+      setContentItems(prev => [...prev, { type: 'question', data: newQuestion }]);
       setIsAddingContent(false);
       setAddQuestionImageUrl("");
       setNewAnswers([
@@ -327,6 +329,8 @@ export default function ContentManager({
     });
 
     if (response.ok) {
+      const newPage = await response.json();
+      setContentItems(prev => [...prev, { type: 'page', data: newPage }]);
       setIsAddingContent(false);
       setPageBody("");
       setMarkdownPreview(false);
@@ -380,6 +384,12 @@ export default function ContentManager({
     });
 
     if (response.ok) {
+      const updatedQuestion = await response.json();
+      setContentItems(prev => prev.map(item =>
+        item.type === 'question' && item.data.id === questionId
+          ? { type: 'question', data: updatedQuestion }
+          : item
+      ));
       setEditingQuestionId(null);
       setEditQuestionImageUrl("");
       setEditAnswers([]);
@@ -409,6 +419,12 @@ export default function ContentManager({
     });
 
     if (response.ok) {
+      const updatedPage = await response.json();
+      setContentItems(prev => prev.map(item =>
+        item.type === 'page' && item.data.id === pageId
+          ? { type: 'page', data: updatedPage }
+          : item
+      ));
       setEditingPageId(null);
       setEditPageBody("");
       toast.success(tPage('pageUpdated'));
@@ -435,6 +451,9 @@ export default function ContentManager({
     });
 
     if (response.ok) {
+      setContentItems(prev => prev.filter(item =>
+        !(item.type === 'question' && item.data.id === questionId)
+      ));
       toast.success(t('questionDeleted'));
       router.refresh();
     } else {
@@ -458,6 +477,9 @@ export default function ContentManager({
     });
 
     if (response.ok) {
+      setContentItems(prev => prev.filter(item =>
+        !(item.type === 'page' && item.data.id === pageId)
+      ));
       toast.success(tPage('pageDeleted'));
       router.refresh();
     } else {
@@ -507,22 +529,26 @@ export default function ContentManager({
           {t('contentCount', { count: contentItems.length })}
         </h2>
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-          <select
-            value={contentType}
-            onChange={(e) => setContentType(e.target.value as 'question' | 'page')}
-            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-700"
-          >
-            <option value="question">{tQuestion('question')}</option>
-            <option value="page">{tPage('page')}</option>
-          </select>
           <Button
-            onClick={() => setIsAddingContent(true)}
-            variant="success"
+            onClick={() => {
+              setContentType('question');
+              setIsAddingContent(true);
+            }}
+            variant="primary"
             size="md"
             className="w-full sm:w-auto"
           >
-            {contentType === 'question' ? tQuestion('addQuestion') : tPage('addPage')}
+            {tQuestion('addQuestion')}
           </Button>
+          <button
+            onClick={() => {
+              setContentType('page');
+              setIsAddingContent(true);
+            }}
+            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition w-full sm:w-auto"
+          >
+            {tPage('addPage')}
+          </button>
         </div>
       </div>
 
@@ -763,7 +789,139 @@ export default function ContentManager({
                     {item.type === 'question' ? (
                       <div>
                         {editingQuestionId === item.data.id ? (
-                          <p className="text-sm text-gray-600 dark:text-gray-400">Editing question...</p>
+                          <form
+                            action={(formData) => handleUpdateQuestion(item.data.id, formData)}
+                            className="p-4 border-2 border-blue-200 dark:border-blue-700 rounded-lg bg-blue-50 dark:bg-blue-900/20"
+                          >
+                            <h3 className="font-semibold mb-4 text-gray-900 dark:text-gray-100">{t('editQuestion')}</h3>
+                            <FormInput
+                              type="text"
+                              name="title"
+                              label={t('titleOptional')}
+                              placeholder={t('titlePlaceholder')}
+                              defaultValue={(item.data as Question).title || ''}
+                              className="mb-4"
+                            />
+                            <FormInput
+                              type="text"
+                              name="questionText"
+                              label={t('questionTextRequired')}
+                              required
+                              defaultValue={(item.data as Question).questionText}
+                              className="mb-4"
+                            />
+                            <FormInput
+                              as="textarea"
+                              name="description"
+                              label={tQuestion('description')}
+                              placeholder={t('descriptionPlaceholder')}
+                              defaultValue={(item.data as Question).description || ''}
+                              rows={3}
+                              className="mb-4"
+                            />
+                            <div className="mb-4">
+                              <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
+                                {t('imageOptional')}
+                              </label>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={async (e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    const url = await handleImageUpload(file, true);
+                                    if (url) setEditQuestionImageUrl(url);
+                                  }
+                                }}
+                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white text-gray-900 dark:bg-gray-700 dark:text-gray-100"
+                                disabled={uploadingImage}
+                              />
+                              {(editQuestionImageUrl || (item.data as Question).imageUrl) && (
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                                  {t('imageUploaded', { url: editQuestionImageUrl || (item.data as Question).imageUrl })}
+                                </p>
+                              )}
+                            </div>
+
+                            <div className="mb-4">
+                              <div className="flex justify-between items-center mb-2">
+                                <label className="block text-sm font-medium text-gray-800 dark:text-gray-200">
+                                  {t('answersRequired')}
+                                </label>
+                                {editAnswers.length < 4 && (
+                                  <Button
+                                    type="button"
+                                    onClick={() => setEditAnswers([...editAnswers, { id: Date.now(), answerText: "", imageUrl: "", isCorrect: false, orderIndex: editAnswers.length }])}
+                                    variant="success"
+                                    size="sm"
+                                  >
+                                    {t('addAnswerButton')}
+                                  </Button>
+                                )}
+                              </div>
+                              {editAnswers.map((answer, i) => (
+                                <div key={answer.id} className="mb-3 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <input
+                                      type="radio"
+                                      checked={answer.isCorrect}
+                                      onChange={() => {
+                                        setEditAnswers(editAnswers.map((a, idx) => ({
+                                          ...a,
+                                          isCorrect: idx === i
+                                        })));
+                                      }}
+                                      className="w-4 h-4 text-green-600"
+                                    />
+                                    <input
+                                      type="text"
+                                      value={answer.answerText || ''}
+                                      onChange={(e) => {
+                                        const updated = [...editAnswers];
+                                        updated[i].answerText = e.target.value;
+                                        setEditAnswers(updated);
+                                      }}
+                                      placeholder={t('answerPlaceholder', { number: i + 1 })}
+                                      className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white text-gray-900 dark:bg-gray-600 dark:text-gray-100"
+                                    />
+                                    {editAnswers.length > 2 && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const updated = editAnswers.filter((_, idx) => idx !== i);
+                                          if (answer.isCorrect && updated.length > 0) {
+                                            updated[0].isCorrect = true;
+                                          }
+                                          setEditAnswers(updated);
+                                        }}
+                                        className="text-red-600 dark:text-red-400 px-2"
+                                      >
+                                        ✕
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+
+                            <div className="flex gap-2">
+                              <Button type="submit" variant="success" size="md">
+                                {t('saveQuestion')}
+                              </Button>
+                              <Button
+                                type="button"
+                                onClick={() => {
+                                  setEditingQuestionId(null);
+                                  setEditQuestionImageUrl("");
+                                  setEditAnswers([]);
+                                }}
+                                variant="secondary"
+                                size="md"
+                              >
+                                {tCommon('cancel')}
+                              </Button>
+                            </div>
+                          </form>
                         ) : (
                           <>
                             <div className="flex justify-between items-start gap-3 mb-3">
@@ -785,8 +943,10 @@ export default function ContentManager({
                               <div className="flex gap-2">
                                 <button
                                   onClick={() => {
+                                    const question = item.data as Question;
                                     setEditingQuestionId(item.data.id);
-                                    setEditAnswers((item.data as Question).answers);
+                                    setEditAnswers(question.answers);
+                                    setEditQuestionImageUrl(question.imageUrl || "");
                                   }}
                                   className="text-blue-600 dark:text-blue-400 text-sm"
                                 >
@@ -806,7 +966,85 @@ export default function ContentManager({
                     ) : (
                       <div>
                         {editingPageId === item.data.id ? (
-                          <p className="text-sm text-gray-600 dark:text-gray-400">Editing page...</p>
+                          <form
+                            action={(formData) => handleUpdatePage(item.data.id, formData)}
+                            className="p-4 border-2 border-purple-200 dark:border-purple-700 rounded-lg bg-purple-50 dark:bg-purple-900/20"
+                          >
+                            <h3 className="font-semibold mb-4 text-gray-900 dark:text-gray-100">{tPage('editPage')}</h3>
+                            <FormInput
+                              type="text"
+                              name="pageTitle"
+                              label={tPage('pageTitle')}
+                              required
+                              defaultValue={(item.data as Page).title}
+                              className="mb-4"
+                            />
+
+                            <div className="mb-4">
+                              <div className="flex justify-between items-center mb-2">
+                                <label className="block text-sm font-medium text-gray-800 dark:text-gray-200">
+                                  {tPage('pageBody')}
+                                </label>
+                                <div className="flex gap-2">
+                                  <label className="cursor-pointer">
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      className="hidden"
+                                      onChange={async (e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                          const url = await handleMarkdownImageUpload(file);
+                                          if (url) insertMarkdownImage(url, true);
+                                        }
+                                      }}
+                                    />
+                                    <span className="text-sm text-blue-600 dark:text-blue-400 hover:underline">
+                                      {tPage('uploadImage')}
+                                    </span>
+                                  </label>
+                                  <button
+                                    type="button"
+                                    onClick={() => setMarkdownPreview(!markdownPreview)}
+                                    className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                                  >
+                                    {markdownPreview ? tPage('editMode') : tPage('preview')}
+                                  </button>
+                                </div>
+                              </div>
+                              {!markdownPreview ? (
+                                <textarea
+                                  value={editPageBody}
+                                  onChange={(e) => setEditPageBody(e.target.value)}
+                                  rows={10}
+                                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 bg-white text-gray-900 dark:bg-gray-700 dark:text-gray-100 font-mono text-sm"
+                                  placeholder={tPage('markdownPlaceholder')}
+                                />
+                              ) : (
+                                <div className="border border-gray-300 dark:border-gray-600 rounded-lg p-4 bg-white dark:bg-gray-700 min-h-[200px]">
+                                  <MarkdownPreview content={editPageBody} />
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="flex gap-2">
+                              <Button type="submit" variant="success" size="md">
+                                {tPage('savePage')}
+                              </Button>
+                              <Button
+                                type="button"
+                                onClick={() => {
+                                  setEditingPageId(null);
+                                  setEditPageBody("");
+                                  setMarkdownPreview(false);
+                                }}
+                                variant="secondary"
+                                size="md"
+                              >
+                                {tCommon('cancel')}
+                              </Button>
+                            </div>
+                          </form>
                         ) : (
                           <>
                             <div className="flex justify-between items-start gap-3 mb-3">
