@@ -115,6 +115,9 @@ describe("PUT /api/game/players/[playerId]/avatar", () => {
   });
 
   it("should handle database errors gracefully", async () => {
+    // Suppress expected console.error
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
     mockPrisma.player.findUnique.mockRejectedValue(new Error("Database error"));
 
     const request = new NextRequest("http://localhost:3000/api/game/players/player-123/avatar", {
@@ -128,6 +131,9 @@ describe("PUT /api/game/players/[playerId]/avatar", () => {
 
     expect(response.status).toBe(500);
     expect(data.error).toBe("Failed to update avatar");
+
+    // Restore console.error
+    consoleSpy.mockRestore();
   });
 
   it("should update avatar seed to different values multiple times", async () => {
