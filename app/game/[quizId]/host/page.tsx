@@ -5,6 +5,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { NextIntlClientProvider, useTranslations } from "next-intl";
 import QRCode from "qrcode";
 import toast from 'react-hot-toast';
+import multiavatar from '@multiavatar/multiavatar';
 import  type { GameEvent } from "@/lib/gameEvents";
 import QuestionDisplay from "@/app/components/QuestionDisplay";
 import GameHeader from "@/app/components/GameHeader";
@@ -24,6 +25,7 @@ type Player = {
   playerName: string;
   score: number;
   isConnected: boolean;
+  avatarSeed?: string | null;
 };
 
 type Page = {
@@ -266,6 +268,13 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
         case "player_left":
           setPlayers(prev => prev.filter(p => p.id !== data.playerId));
           break;
+        case "avatar_changed":
+          setPlayers(prev => prev.map(p =>
+            p.id === data.playerId
+              ? { ...p, avatarSeed: data.avatarSeed }
+              : p
+          ));
+          break;
         case "game_started":
           setGameStatus("in_progress");
           setCurrentContentIndex(data.contentIndex);
@@ -447,39 +456,44 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
 
             <div className="flex-1 overflow-y-auto mb-4 sm:mb-8 min-h-0">
               <div className="space-y-3 sm:space-y-4">
-                {finalScores.map((player, index) => (
-                  <div
-                    key={player.playerId}
-                    className={`p-3 sm:p-6 rounded-lg flex items-center justify-between gap-2 ${
-                      index === 0
-                        ? "bg-yellow-100 border-4 border-yellow-400"
-                        : index === 1
-                        ? "bg-gray-100 border-4 border-gray-400"
-                        : index === 2
-                        ? "bg-orange-100 border-4 border-orange-400"
-                        : "bg-gray-50 border-2 border-gray-300"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 sm:gap-0 flex-1 min-w-0">
-                      <div className="text-2xl sm:text-4xl font-bold sm:mr-4 w-8 sm:w-12 flex-shrink-0">
-                        {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `${index + 1}.`}
-                      </div>
-                      <img
-                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${player.playerId}`}
-                        alt={player.playerName}
-                        className="w-12 h-12 sm:w-16 sm:h-16 rounded-full sm:mr-4 flex-shrink-0"
-                      />
-                      <div className="min-w-0 flex-1">
-                        <div className="text-base sm:text-2xl font-bold text-gray-900 truncate">
-                          {player.playerName}
+                {finalScores.map((player, index) => {
+                  // Find the player object to get their avatarSeed
+                  const playerData = players.find(p => p.id === player.playerId);
+                  const avatarSeedToUse = playerData?.avatarSeed || player.playerId;
+                  const playerAvatarSvg = multiavatar(avatarSeedToUse);
+                  return (
+                    <div
+                      key={player.playerId}
+                      className={`p-3 sm:p-6 rounded-lg flex items-center justify-between gap-2 ${
+                        index === 0
+                          ? "bg-yellow-100 border-4 border-yellow-400"
+                          : index === 1
+                          ? "bg-gray-100 border-4 border-gray-400"
+                          : index === 2
+                          ? "bg-orange-100 border-4 border-orange-400"
+                          : "bg-gray-50 border-2 border-gray-300"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 sm:gap-0 flex-1 min-w-0">
+                        <div className="text-2xl sm:text-4xl font-bold sm:mr-4 w-8 sm:w-12 flex-shrink-0">
+                          {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `${index + 1}.`}
+                        </div>
+                        <div
+                          className="w-12 h-12 sm:w-16 sm:h-16 rounded-full sm:mr-4 flex-shrink-0 overflow-hidden bg-white"
+                          dangerouslySetInnerHTML={{ __html: playerAvatarSvg }}
+                        />
+                        <div className="min-w-0 flex-1">
+                          <div className="text-base sm:text-2xl font-bold text-gray-900 truncate">
+                            {player.playerName}
+                          </div>
                         </div>
                       </div>
+                      <div className="text-lg sm:text-3xl font-bold text-gray-900 flex-shrink-0">
+                        {player.score} {player.score === 1 ? tMultiplayer('point') : tMultiplayer('points')}
+                      </div>
                     </div>
-                    <div className="text-lg sm:text-3xl font-bold text-gray-900 flex-shrink-0">
-                      {player.score} {player.score === 1 ? tMultiplayer('point') : tMultiplayer('points')}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
@@ -583,15 +597,16 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
                   <div className="flex flex-row gap-2 sm:gap-4 h-full items-center pl-2">
                     {[...players].reverse().map((player) => {
                       const isNew = newPlayerIds.has(player.id);
+                      const avatarSeedToUse = player.avatarSeed || player.id;
+                      const playerAvatarSvg = multiavatar(avatarSeedToUse);
                       return (
                         <div
                           key={player.id}
                           className={`bg-blue-100 border-2 border-blue-300 rounded-lg p-2 sm:p-4 text-center flex-shrink-0 w-20 sm:w-32 ${isNew ? 'player-pop' : ''}`}
                         >
-                          <img
-                            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${player.id}`}
-                            alt={player.playerName}
-                            className="w-12 h-12 sm:w-20 sm:h-20 mx-auto mb-1 sm:mb-2 rounded-full"
+                          <div
+                            className="w-12 h-12 sm:w-20 sm:h-20 mx-auto mb-1 sm:mb-2 rounded-full overflow-hidden bg-white"
+                            dangerouslySetInnerHTML={{ __html: playerAvatarSvg }}
                           />
                           <div className="font-bold text-gray-900 text-xs sm:text-sm truncate">
                             {player.playerName}

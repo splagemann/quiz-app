@@ -73,6 +73,7 @@ model Player {
   id          String         @id @default(cuid())
   sessionId   String
   playerName  String
+  avatarSeed  String?        // Custom avatar seed chosen by player
   score       Int            @default(0)
   joinedAt    DateTime       @default(now())
   isConnected Boolean        @default(true)

@@ -319,9 +319,14 @@ The `docker-compose.yml` supports the following environment variables:
 - Button appears for host when not all players have answered
 
 ### Avatar System
-- DiceBear Avataaars API for player avatars
-- Avatars are generated based on player ID
-- Consistent avatars for each player during the game
+- Multiavatar library for player avatars (replaced DiceBear)
+- Players can switch avatars using "Switch Avatar" button in waiting room
+- Avatar choices persist throughout the game session
+- `avatarSeed` field in Player model stores custom avatar selection
+- Default avatar seed is player ID for consistency
+- Real-time synchronization via SSE (`avatar_changed` event)
+- Avatar appears in player list, leaderboard, and final scores
+- API endpoint: `/api/game/players/[playerId]/avatar` (PUT)
 
 ### Environment Variables
 - `NEXT_PUBLIC_APP_URL`: Public URL for QR code and join links

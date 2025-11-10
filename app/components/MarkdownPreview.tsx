@@ -13,7 +13,7 @@ export default function MarkdownPreview({
 }: MarkdownPreviewProps) {
   return (
     <div
-      className={`prose prose-sm max-w-none bg-white ${className}`}
+      className={`prose prose-sm max-w-none bg-white overflow-x-hidden ${className}`}
       style={{ fontSize: '0.8rem', lineHeight: '1.4' }}
     >
       <ReactMarkdown
@@ -54,7 +54,7 @@ export default function MarkdownPreview({
           // Customize image styles
           img: ({ node, ...props }) => (
             <img
-              className="max-w-sm md:max-w-2xl h-auto rounded-lg shadow-md my-2 mx-auto"
+              className="max-w-full md:max-w-2xl h-auto rounded-lg shadow-md my-2 mx-auto"
               {...props}
             />
           ),

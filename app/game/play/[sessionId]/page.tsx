@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { NextIntlClientProvider, useTranslations } from "next-intl";
 import toast from 'react-hot-toast';
+import multiavatar from '@multiavatar/multiavatar';
 import type { GameEvent } from "@/lib/gameEvents";
 import QuestionDisplay from "@/app/components/QuestionDisplay";
 import GameHeader from "@/app/components/GameHeader";
@@ -54,6 +55,7 @@ type FinalScore = {
   playerId: string;
   playerName: string;
   score: number;
+  avatarSeed?: string | null;
 };
 
 function PlayerGameContent() {
@@ -82,6 +84,32 @@ function PlayerGameContent() {
   const [finalScores, setFinalScores] = useState<FinalScore[]>([]);
   const [myRank, setMyRank] = useState(0);
   const [error, setError] = useState("");
+  const [avatarSeed, setAvatarSeed] = useState<string>(playerId || "");
+
+  // Function to switch avatar
+  const switchAvatar = async () => {
+    if (!playerId) return;
+
+    const randomSeed = Math.random().toString(36).substring(7);
+    setAvatarSeed(randomSeed);
+
+    // Persist avatar seed to server and broadcast to all clients
+    try {
+      const response = await fetch(`/api/game/players/${playerId}/avatar`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatarSeed: randomSeed }),
+      });
+
+      if (!response.ok) {
+        console.error("Failed to update avatar");
+        // Avatar is already updated locally, so we don't need to revert
+      }
+    } catch (err) {
+      console.error("Error updating avatar:", err);
+      // Avatar is already updated locally, so we don't need to revert
+    }
+  };
 
   // Load initial session data
   useEffect(() => {
@@ -110,6 +138,11 @@ function PlayerGameContent() {
         setMyScore(player.score);
         setQuizTitle(session.quiz.title);
 
+        // Initialize avatar seed from player data if available
+        if (player.avatarSeed) {
+          setAvatarSeed(player.avatarSeed);
+        }
+
         // Create unified content array
         const items: ContentItem[] = [
           ...session.quiz.questions.map((q: Question) => ({ type: 'question' as const, data: q })),
@@ -134,7 +167,8 @@ function PlayerGameContent() {
           const transformedScores = sorted.map((p: any) => ({
             playerId: p.id,
             playerName: p.playerName,
-            score: p.score
+            score: p.score,
+            avatarSeed: p.avatarSeed
           }));
           setFinalScores(transformedScores);
           setMyRank(transformedScores.findIndex((p) => p.playerId === playerId) + 1);
@@ -272,14 +306,21 @@ function PlayerGameContent() {
   }
 
   if (gameStatus === "waiting") {
+    const avatarSvg = multiavatar(avatarSeed);
+
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center px-4">
         <div className="bg-white rounded-lg shadow-2xl p-8 max-w-md text-center">
-          <img
-            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${playerId}`}
-            alt={myName}
-            className="w-24 h-24 rounded-full mx-auto mb-4"
+          <div
+            className="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden bg-white"
+            dangerouslySetInnerHTML={{ __html: avatarSvg }}
           />
+          <button
+            onClick={switchAvatar}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm mb-4"
+          >
+            {tMultiplayer('switchAvatar')}
+          </button>
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
             {tMultiplayer('welcome', { name: myName })}
           </h1>
@@ -292,6 +333,8 @@ function PlayerGameContent() {
   }
 
   if (gameStatus === "finished") {
+    const avatarSvg = multiavatar(avatarSeed);
+
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-500 to-blue-600 py-8 px-4">
         <div className="max-w-2xl mx-auto">
@@ -300,10 +343,9 @@ function PlayerGameContent() {
               {tMultiplayer('gameFinished')}
             </h1>
             <div className="text-center mb-8">
-              <img
-                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${playerId}`}
-                alt={myName}
-                className="w-24 h-24 rounded-full mx-auto mb-4"
+              <div
+                className="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden bg-white"
+                dangerouslySetInnerHTML={{ __html: avatarSvg }}
               />
               <div className="text-6xl mb-4">
                 {myRank === 1 ? "🏆" : myRank === 2 ? "🥈" : myRank === 3 ? "🥉" : "👏"}
@@ -320,34 +362,38 @@ function PlayerGameContent() {
               <h2 className="text-xl font-bold text-gray-900 text-center mb-4">
                 {tMultiplayer('leaderboard')}
               </h2>
-              {finalScores.map((player, index) => (
-                <div
-                  key={player.playerId}
-                  className={`p-4 rounded-lg flex items-center justify-between ${
-                    player.playerId === playerId
-                      ? "bg-blue-100 border-2 border-blue-500"
-                      : "bg-gray-50 border border-gray-300"
-                  }`}
-                >
-                  <div className="flex items-center">
-                    <div className="text-2xl font-bold mr-3 w-8 text-gray-900">
-                      {index + 1}.
+              {finalScores.map((player, index) => {
+                // Use the player's avatarSeed if available, otherwise fall back to playerId
+                const avatarSeedToUse = player.playerId === playerId ? avatarSeed : (player.avatarSeed || player.playerId);
+                const playerAvatarSvg = multiavatar(avatarSeedToUse);
+                return (
+                  <div
+                    key={player.playerId}
+                    className={`p-4 rounded-lg flex items-center justify-between ${
+                      player.playerId === playerId
+                        ? "bg-blue-100 border-2 border-blue-500"
+                        : "bg-gray-50 border border-gray-300"
+                    }`}
+                  >
+                    <div className="flex items-center">
+                      <div className="text-2xl font-bold mr-3 w-8 text-gray-900">
+                        {index + 1}.
+                      </div>
+                      <div
+                        className="w-12 h-12 rounded-full mr-3 overflow-hidden bg-white"
+                        dangerouslySetInnerHTML={{ __html: playerAvatarSvg }}
+                      />
+                      <div className="font-bold text-gray-900">
+                        {player.playerName}
+                        {player.playerId === playerId && ` (${tMultiplayer('you')})`}
+                      </div>
                     </div>
-                    <img
-                      src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${player.playerId}`}
-                      alt={player.playerName}
-                      className="w-12 h-12 rounded-full mr-3"
-                    />
-                    <div className="font-bold text-gray-900">
-                      {player.playerName}
-                      {player.playerId === playerId && ` (${tMultiplayer('you')})`}
+                    <div className="text-xl font-bold text-gray-900">
+                      {player.score}
                     </div>
                   </div>
-                  <div className="text-xl font-bold text-gray-900">
-                    {player.score}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <div className="text-center">
