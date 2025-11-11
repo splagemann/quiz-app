@@ -5,10 +5,16 @@ import { isAuthenticated } from "@/lib/auth";
 
 // Map file signatures (magic numbers) to extensions
 const FILE_SIGNATURES: Record<string, string> = {
+  // Images
   'ffd8ff': 'jpg',      // JPEG
   '89504e47': 'png',    // PNG
   '47494638': 'gif',    // GIF
   '52494646': 'webp',   // WEBP (RIFF header)
+  // Videos
+  '66747970': 'mp4',    // MP4 (ftyp)
+  '00000018': 'mp4',    // MP4 variant
+  '00000020': 'mp4',    // MP4 variant
+  '1a45dfa3': 'webm',   // WebM
 };
 
 /**
@@ -50,11 +56,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate file size first (max 5MB)
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    // Validate file size (max 50MB for videos, 5MB for images)
+    // Determine if it's a video based on MIME type hint (we'll validate signature later)
+    const isVideoHint = file.type.startsWith('video/');
+    const maxSize = isVideoHint ? 50 * 1024 * 1024 : 5 * 1024 * 1024; // 50MB for videos, 5MB for images
+    const maxSizeLabel = isVideoHint ? '50MB' : '5MB';
+
     if (file.size > maxSize) {
       return NextResponse.json(
-        { error: "File too large. Maximum size is 5MB." },
+        { error: `File too large. Maximum size is ${maxSizeLabel}.` },
         { status: 400 }
       );
     }
@@ -67,7 +77,18 @@ export async function POST(request: NextRequest) {
     const detectedExtension = validateFileSignature(buffer);
     if (!detectedExtension) {
       return NextResponse.json(
-        { error: "Invalid file type. Only JPEG, PNG, GIF, and WebP images are allowed." },
+        { error: "Invalid file type. Only JPEG, PNG, GIF, WebP images and MP4, WebM videos are allowed." },
+        { status: 400 }
+      );
+    }
+
+    // Validate file size against actual detected type
+    const isVideo = ['mp4', 'webm'].includes(detectedExtension);
+    const correctMaxSize = isVideo ? 50 * 1024 * 1024 : 5 * 1024 * 1024;
+    if (file.size > correctMaxSize) {
+      const correctMaxLabel = isVideo ? '50MB' : '5MB';
+      return NextResponse.json(
+        { error: `File too large. Maximum size for ${detectedExtension.toUpperCase()} is ${correctMaxLabel}.` },
         { status: 400 }
       );
     }
@@ -85,9 +106,9 @@ export async function POST(request: NextRequest) {
     await writeFile(uploadPath, buffer);
 
     // Return the URL
-    const imageUrl = `/uploads/${safeFilename}`;
+    const fileUrl = `/uploads/${safeFilename}`;
 
-    return NextResponse.json({ url: imageUrl });
+    return NextResponse.json({ url: fileUrl });
   } catch (error) {
     console.error("Error uploading file:", error);
     return NextResponse.json(

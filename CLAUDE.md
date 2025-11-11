@@ -306,11 +306,23 @@ The `docker-compose.yml` supports the following environment variables:
 - **Description**: Optional longer description/context for the question
 - **Image**: Optional image for each question
 
-### Image Upload
-- Images are uploaded via `/api/upload`
+### Media Upload (Images & Videos)
+- Images and videos are uploaded via `/api/upload`
 - Stored in `/public/uploads` directory
-- Validation: Images only (JPEG, PNG, GIF, WebP), max 5MB
+- **Image Validation**: JPEG, PNG, GIF, WebP, max 5MB
+- **Video Validation**: MP4, WebM, max 50MB
+- Magic number (file signature) validation for security
 - Unique filename generation with timestamp
+- **Video Upload Features**:
+  - XMLHttpRequest with upload progress tracking
+  - Progress bar showing percentage
+  - Cancel upload functionality
+  - Client-side file size validation
+- **Markdown Integration**:
+  - Images: `![Image description](/uploads/image.jpg)`
+  - Videos: `![Video description](/uploads/video.mp4)`
+  - Videos automatically rendered with HTML5 `<video>` player in MarkdownPreview
+  - Video player attributes: `controls`, `preload="metadata"`, responsive sizing
 - **Important**: URL input fields were removed - upload functionality only
 
 ### Manual Answer Reveal
@@ -369,17 +381,19 @@ Deletes a question
 - **Important**: Deletes all PlayerAnswer entries first, then the question
 - Answers are deleted via cascade
 
-### Image Upload API
+### Media Upload API
 
 #### POST /api/upload
-Uploads an image
+Uploads an image or video
 ```typescript
 Request: FormData with 'file' field
-Response: { url: string }  // e.g., "/uploads/1234567890-abc123.jpg"
+Response: { url: string }  // e.g., "/uploads/1234567890-abc123.jpg" or "/uploads/1234567890-abc123.mp4"
 ```
 Validation:
-- File type: image/jpeg, image/jpg, image/png, image/gif, image/webp
-- Maximum size: 5MB
+- **Images**: JPEG, PNG, GIF, WebP - max 5MB
+- **Videos**: MP4, WebM - max 50MB
+- Magic number (file signature) validation for security
+- File type detection based on actual file content, not just MIME type
 
 ### Multiplayer API
 

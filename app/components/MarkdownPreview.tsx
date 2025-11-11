@@ -51,13 +51,39 @@ export default function MarkdownPreview({
               {...props}
             />
           ),
-          // Customize image styles
-          img: ({ node, ...props }) => (
-            <img
-              className="max-w-full md:max-w-2xl h-auto rounded-lg shadow-md my-2 mx-auto"
-              {...props}
-            />
-          ),
+          // Customize image/video styles
+          img: ({ node, src, alt, ...props }) => {
+            // Ensure src is a string
+            const srcString = typeof src === 'string' ? src : undefined;
+
+            // Check if src points to a video file
+            if (srcString && /\.(mp4|webm|mov)$/i.test(srcString)) {
+              // Determine video type from extension
+              const extension = srcString.split('.').pop()?.toLowerCase();
+              const mimeType = extension === 'webm' ? 'video/webm' : extension === 'mov' ? 'video/quicktime' : 'video/mp4';
+
+              return (
+                <video
+                  controls
+                  preload="metadata"
+                  className="max-w-full md:max-w-2xl h-auto rounded-lg shadow-md my-2 mx-auto block"
+                  aria-label={alt || 'Video'}
+                >
+                  <source src={srcString} type={mimeType} />
+                  {alt || 'Your browser does not support the video tag.'}
+                </video>
+              );
+            }
+            // Regular image rendering
+            return (
+              <img
+                src={srcString}
+                alt={alt}
+                className="max-w-full md:max-w-2xl h-auto rounded-lg shadow-md my-2 mx-auto"
+                {...props}
+              />
+            );
+          },
           // Customize code blocks
           code: ({ node, inline, ...props }: any) => {
             if (inline) {

@@ -264,8 +264,9 @@
     "savePage": "Seite speichern",
     "pageTitle": "Seitentitel *",
     "pageBody": "Seiteninhalt (Markdown) *",
-    "markdownPlaceholder": "# Überschrift\n\nDein Markdown-Inhalt hier...\n\n![Bild](/uploads/bild.jpg)",
+    "markdownPlaceholder": "# Überschrift\n\nDein Markdown-Inhalt hier...\n\n![Bild](/uploads/bild.jpg)\n![Video](/uploads/video.mp4)",
     "uploadImage": "Bild hochladen",
+    "uploadVideo": "Video hochladen",
     "preview": "Vorschau",
     "editMode": "Bearbeiten",
     "titleAndBodyRequired": "Seitentitel und -inhalt sind erforderlich",
@@ -277,6 +278,11 @@
     "errorUpdatingPage": "Fehler beim Aktualisieren der Seite",
     "errorDeletingPage": "Fehler beim Löschen der Seite",
     "imageUploadError": "Fehler beim Hochladen des Bildes",
+    "videoUploadError": "Fehler beim Hochladen des Videos",
+    "videoUploadSuccess": "Video erfolgreich hochgeladen",
+    "videoTooLarge": "Video-Datei zu groß. Maximale Größe ist 50MB",
+    "uploadingVideo": "Video wird hochgeladen: {percentage}%",
+    "uploadCancelled": "Upload abgebrochen",
     "networkErrorUploading": "Netzwerkfehler beim Hochladen"
   },
   "sessions": {

@@ -264,8 +264,9 @@
     "savePage": "Save Page",
     "pageTitle": "Page Title *",
     "pageBody": "Page Body (Markdown) *",
-    "markdownPlaceholder": "# Heading\n\nYour markdown content here...\n\n![Image](/uploads/image.jpg)",
+    "markdownPlaceholder": "# Heading\n\nYour markdown content here...\n\n![Image](/uploads/image.jpg)\n![Video](/uploads/video.mp4)",
     "uploadImage": "Upload Image",
+    "uploadVideo": "Upload Video",
     "preview": "Preview",
     "editMode": "Edit",
     "titleAndBodyRequired": "Page title and body are required",
@@ -277,6 +278,11 @@
     "errorUpdatingPage": "Error updating page",
     "errorDeletingPage": "Error deleting page",
     "imageUploadError": "Error uploading image",
+    "videoUploadError": "Error uploading video",
+    "videoUploadSuccess": "Video uploaded successfully",
+    "videoTooLarge": "Video file too large. Maximum size is 50MB",
+    "uploadingVideo": "Uploading video: {percentage}%",
+    "uploadCancelled": "Upload cancelled",
     "networkErrorUploading": "Network error while uploading"
   },
   "sessions": {
