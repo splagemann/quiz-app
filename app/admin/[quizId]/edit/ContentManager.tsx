@@ -138,6 +138,9 @@ export default function ContentManager({
   const [markdownPreview, setMarkdownPreview] = useState(false);
   const [pageBody, setPageBody] = useState("");
   const [editPageBody, setEditPageBody] = useState("");
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadCancelRef, setUploadCancelRef] = useState<(() => void) | null>(null);
 
   // State for new question answers (2-4 answers)
   const [newAnswers, setNewAnswers] = useState<NewAnswer[]>([
@@ -245,8 +248,97 @@ export default function ContentManager({
     }
   }
 
+  async function handleMarkdownVideoUpload(file: File): Promise<string | null> {
+    if (!file) return null;
+
+    // Validate file size (50MB)
+    const maxSize = 50 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast.error(tPage('videoTooLarge'));
+      return null;
+    }
+
+    return new Promise((resolve) => {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const xhr = new XMLHttpRequest();
+
+      // Track upload progress
+      xhr.upload.addEventListener('progress', (e) => {
+        if (e.lengthComputable) {
+          const percentage = Math.round((e.loaded * 100) / e.total);
+          setUploadProgress(percentage);
+        }
+      });
+
+      // Handle completion
+      xhr.addEventListener('load', () => {
+        setIsUploading(false);
+        setUploadProgress(0);
+        setUploadCancelRef(null);
+
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const data = JSON.parse(xhr.responseText);
+            toast.success(tPage('videoUploadSuccess'));
+            resolve(data.url);
+          } catch (err) {
+            console.error("Error parsing response:", err);
+            toast.error(tPage('videoUploadError'));
+            resolve(null);
+          }
+        } else {
+          try {
+            const error = JSON.parse(xhr.responseText);
+            toast.error(error.error || tPage('videoUploadError'));
+          } catch {
+            toast.error(tPage('videoUploadError'));
+          }
+          resolve(null);
+        }
+      });
+
+      // Handle errors
+      xhr.addEventListener('error', () => {
+        setIsUploading(false);
+        setUploadProgress(0);
+        setUploadCancelRef(null);
+        toast.error(tPage('networkErrorUploading'));
+        resolve(null);
+      });
+
+      // Handle abort
+      xhr.addEventListener('abort', () => {
+        setIsUploading(false);
+        setUploadProgress(0);
+        setUploadCancelRef(null);
+        toast.error(tPage('uploadCancelled'));
+        resolve(null);
+      });
+
+      // Store cancel function
+      setUploadCancelRef(() => () => xhr.abort());
+      setIsUploading(true);
+      setUploadProgress(0);
+
+      // Start upload
+      xhr.open('POST', '/api/upload');
+      xhr.send(formData);
+    });
+  }
+
   function insertMarkdownImage(url: string, isEdit: boolean = false) {
     const markdown = `![Image](${url})`;
+    if (isEdit) {
+      setEditPageBody(prev => prev + '\n' + markdown + '\n');
+    } else {
+      setPageBody(prev => prev + '\n' + markdown + '\n');
+    }
+  }
+
+  function insertMarkdownVideo(url: string, isEdit: boolean = false) {
+    const markdown = `![Video](${url})`;
     if (isEdit) {
       setEditPageBody(prev => prev + '\n' + markdown + '\n');
     } else {
@@ -753,6 +845,26 @@ export default function ContentManager({
                     {tPage('uploadImage')}
                   </span>
                 </label>
+                <label className="cursor-pointer">
+                  <input
+                    type="file"
+                    accept="video/mp4,video/webm"
+                    className="hidden"
+                    disabled={isUploading}
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const url = await handleMarkdownVideoUpload(file);
+                        if (url) insertMarkdownVideo(url, false);
+                      }
+                      // Reset input
+                      e.target.value = '';
+                    }}
+                  />
+                  <span className={`text-sm ${isUploading ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed' : 'text-blue-600 dark:text-blue-400 hover:underline'}`}>
+                    {tPage('uploadVideo')}
+                  </span>
+                </label>
                 <button
                   type="button"
                   onClick={() => setMarkdownPreview(!markdownPreview)}
@@ -762,6 +874,28 @@ export default function ContentManager({
                 </button>
               </div>
             </div>
+            {isUploading && (
+              <div className="mb-2">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    {tPage('uploadingVideo', { percentage: uploadProgress })}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => uploadCancelRef?.()}
+                    className="text-sm text-red-600 dark:text-red-400 hover:underline"
+                  >
+                    {tCommon('cancel')}
+                  </button>
+                </div>
+                <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2.5">
+                  <div
+                    className="bg-blue-600 dark:bg-blue-500 h-2.5 rounded-full transition-all duration-300"
+                    style={{ width: `${uploadProgress}%` }}
+                  ></div>
+                </div>
+              </div>
+            )}
             {!markdownPreview ? (
               <textarea
                 value={pageBody}
@@ -1063,6 +1197,26 @@ export default function ContentManager({
                                       {tPage('uploadImage')}
                                     </span>
                                   </label>
+                                  <label className="cursor-pointer">
+                                    <input
+                                      type="file"
+                                      accept="video/mp4,video/webm"
+                                      className="hidden"
+                                      disabled={isUploading}
+                                      onChange={async (e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                          const url = await handleMarkdownVideoUpload(file);
+                                          if (url) insertMarkdownVideo(url, true);
+                                        }
+                                        // Reset input
+                                        e.target.value = '';
+                                      }}
+                                    />
+                                    <span className={`text-sm ${isUploading ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed' : 'text-blue-600 dark:text-blue-400 hover:underline'}`}>
+                                      {tPage('uploadVideo')}
+                                    </span>
+                                  </label>
                                   <button
                                     type="button"
                                     onClick={() => setMarkdownPreview(!markdownPreview)}
@@ -1072,6 +1226,28 @@ export default function ContentManager({
                                   </button>
                                 </div>
                               </div>
+                              {isUploading && (
+                                <div className="mb-2">
+                                  <div className="flex justify-between items-center mb-1">
+                                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                                      {tPage('uploadingVideo', { percentage: uploadProgress })}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() => uploadCancelRef?.()}
+                                      className="text-sm text-red-600 dark:text-red-400 hover:underline"
+                                    >
+                                      {tCommon('cancel')}
+                                    </button>
+                                  </div>
+                                  <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2.5">
+                                    <div
+                                      className="bg-blue-600 dark:bg-blue-500 h-2.5 rounded-full transition-all duration-300"
+                                      style={{ width: `${uploadProgress}%` }}
+                                    ></div>
+                                  </div>
+                                </div>
+                              )}
                               {!markdownPreview ? (
                                 <textarea
                                   value={editPageBody}
