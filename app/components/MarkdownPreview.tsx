@@ -53,10 +53,13 @@ export default function MarkdownPreview({
           ),
           // Customize image/video styles
           img: ({ node, src, alt, ...props }) => {
+            // Ensure src is a string
+            const srcString = typeof src === 'string' ? src : undefined;
+
             // Check if src points to a video file
-            if (src && /\.(mp4|webm|mov)$/i.test(src)) {
+            if (srcString && /\.(mp4|webm|mov)$/i.test(srcString)) {
               // Determine video type from extension
-              const extension = src.split('.').pop()?.toLowerCase();
+              const extension = srcString.split('.').pop()?.toLowerCase();
               const mimeType = extension === 'webm' ? 'video/webm' : extension === 'mov' ? 'video/quicktime' : 'video/mp4';
 
               return (
@@ -66,7 +69,7 @@ export default function MarkdownPreview({
                   className="max-w-full md:max-w-2xl h-auto rounded-lg shadow-md my-2 mx-auto block"
                   aria-label={alt || 'Video'}
                 >
-                  <source src={src} type={mimeType} />
+                  <source src={srcString} type={mimeType} />
                   {alt || 'Your browser does not support the video tag.'}
                 </video>
               );
@@ -74,7 +77,7 @@ export default function MarkdownPreview({
             // Regular image rendering
             return (
               <img
-                src={src}
+                src={srcString}
                 alt={alt}
                 className="max-w-full md:max-w-2xl h-auto rounded-lg shadow-md my-2 mx-auto"
                 {...props}
