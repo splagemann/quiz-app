@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.1] - 2025-11-11
+
+### Added
+- **Video Upload Support**: Questions and pages can now include video content
+  - Support for MP4, WebM, and MOV video formats (max 50MB)
+  - Video upload with real-time progress tracking
+  - Cancel upload functionality
+  - Client-side file size validation before upload
+  - Server-side magic number (file signature) validation for security
+  - Automatic HTML5 video player rendering in MarkdownPreview component
+  - Video player features: controls, preload metadata, responsive sizing
+  - Markdown syntax: `![Video description](/uploads/video.mp4)`
+
+### Fixed
+- **TypeScript Build Error**: Fixed type error in MarkdownPreview component
+  - Resolved `src` prop type issue where ReactMarkdown's img component can accept `string | Blob`
+  - Added type guard to ensure type safety when checking for video file extensions
+  - Fixes PR check failures and build errors
+
 ## [1.5.0] - 2025-11-10
 
 ### Added
@@ -435,7 +454,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Environment-based configuration
 - German date formatting
 
-[Unreleased]: https://github.com/splagemann/quiz-app/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/splagemann/quiz-app/compare/v1.5.1...HEAD
+[1.5.1]: https://github.com/splagemann/quiz-app/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/splagemann/quiz-app/compare/v1.4.1...v1.5.0
 [1.4.1]: https://github.com/splagemann/quiz-app/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/splagemann/quiz-app/compare/v1.3.0...v1.4.0
