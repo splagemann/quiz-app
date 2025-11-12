@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.2] - 2025-11-12
+
 ### Fixed
 - **Question Edit Form**: Fixed question update functionality in ContentManager
   - Added missing `editQuestion` translation key in questionManager namespace (en/de)
@@ -461,7 +463,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Environment-based configuration
 - German date formatting
 
-[Unreleased]: https://github.com/splagemann/quiz-app/compare/v1.5.1...HEAD
+[Unreleased]: https://github.com/splagemann/quiz-app/compare/v1.5.2...HEAD
+[1.5.2]: https://github.com/splagemann/quiz-app/compare/v1.5.1...v1.5.2
 [1.5.1]: https://github.com/splagemann/quiz-app/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/splagemann/quiz-app/compare/v1.4.1...v1.5.0
 [1.4.1]: https://github.com/splagemann/quiz-app/compare/v1.4.0...v1.4.1
