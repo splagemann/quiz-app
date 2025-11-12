@@ -227,6 +227,7 @@
     "questionsCount": "Questions ({count})",
     "contentCount": "Content Items ({count})",
     "newQuestion": "New Question",
+    "editQuestion": "Edit Question",
     "titleOptional": "Title (optional)",
     "titlePlaceholder": "e.g. Question 1",
     "questionTextRequired": "Question Text *",
