@@ -227,6 +227,7 @@
     "questionsCount": "Fragen ({count})",
     "contentCount": "Inhaltselemente ({count})",
     "newQuestion": "Neue Frage",
+    "editQuestion": "Frage bearbeiten",
     "titleOptional": "Titel (optional)",
     "titlePlaceholder": "z.B. Frage 1",
     "questionTextRequired": "Fragetext *",

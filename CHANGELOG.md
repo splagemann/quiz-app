@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Question Edit Form**: Fixed question update functionality in ContentManager
+  - Added missing `editQuestion` translation key in questionManager namespace (en/de)
+  - Fixed form submission handling by replacing `action` prop with `onSubmit` event handlers
+  - Fixed new answer creation during edit by using negative IDs (API expects ID < 0 for new answers)
+  - Resolved 500 error when updating questions with new answers
+
 ## [1.5.1] - 2025-11-11
 
 ### Added

@@ -647,7 +647,11 @@ export default function ContentManager({
       {/* Add Content Form */}
       {isAddingContent && contentType === 'question' && (
         <form
-          action={handleAddQuestion}
+          onSubmit={(e) => {
+            e.preventDefault();
+            const formData = new FormData(e.currentTarget);
+            handleAddQuestion(formData);
+          }}
           className="mb-6 p-4 border-2 border-green-200 dark:border-green-700 rounded-lg bg-green-50 dark:bg-green-900/20"
         >
           <h3 className="font-semibold mb-4 text-gray-900 dark:text-gray-100">{t('newQuestion')}</h3>
@@ -810,7 +814,11 @@ export default function ContentManager({
 
       {isAddingContent && contentType === 'page' && (
         <form
-          action={handleAddPage}
+          onSubmit={(e) => {
+            e.preventDefault();
+            const formData = new FormData(e.currentTarget);
+            handleAddPage(formData);
+          }}
           className="mb-6 p-4 border-2 border-green-200 dark:border-green-700 rounded-lg bg-green-50 dark:bg-green-900/20"
         >
           <h3 className="font-semibold mb-4 text-gray-900 dark:text-gray-100">{tPage('newPage')}</h3>
@@ -954,7 +962,11 @@ export default function ContentManager({
                       <div>
                         {editingQuestionId === item.data.id ? (
                           <form
-                            action={(formData) => handleUpdateQuestion(item.data.id, formData)}
+                            onSubmit={(e) => {
+                              e.preventDefault();
+                              const formData = new FormData(e.currentTarget);
+                              handleUpdateQuestion(item.data.id, formData);
+                            }}
                             className="p-4 border-2 border-blue-200 dark:border-blue-700 rounded-lg bg-blue-50 dark:bg-blue-900/20"
                           >
                             <h3 className="font-semibold mb-4 text-gray-900 dark:text-gray-100">{t('editQuestion')}</h3>
@@ -1015,7 +1027,7 @@ export default function ContentManager({
                                 {editAnswers.length < 4 && (
                                   <Button
                                     type="button"
-                                    onClick={() => setEditAnswers([...editAnswers, { id: Date.now(), answerText: "", imageUrl: "", isCorrect: false, orderIndex: editAnswers.length }])}
+                                    onClick={() => setEditAnswers([...editAnswers, { id: -Date.now(), answerText: "", imageUrl: "", isCorrect: false, orderIndex: editAnswers.length }])}
                                     variant="success"
                                     size="sm"
                                   >
@@ -1161,7 +1173,11 @@ export default function ContentManager({
                       <div>
                         {editingPageId === item.data.id ? (
                           <form
-                            action={(formData) => handleUpdatePage(item.data.id, formData)}
+                            onSubmit={(e) => {
+                              e.preventDefault();
+                              const formData = new FormData(e.currentTarget);
+                              handleUpdatePage(item.data.id, formData);
+                            }}
                             className="p-4 border-2 border-purple-200 dark:border-purple-700 rounded-lg bg-purple-50 dark:bg-purple-900/20"
                           >
                             <h3 className="font-semibold mb-4 text-gray-900 dark:text-gray-100">{tPage('editPage')}</h3>
