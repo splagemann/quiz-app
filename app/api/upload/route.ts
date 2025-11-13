@@ -101,23 +101,17 @@ export async function POST(request: NextRequest) {
     if (isOptimizableImage(detectedExtension)) {
       try {
         const originalSize = buffer.length;
-        const optimizedBuffer = await optimizeImage(buffer, detectedExtension);
-        finalBuffer = Buffer.from(optimizedBuffer);
+        const optimized = await optimizeImage(buffer, detectedExtension);
+        finalBuffer = Buffer.from(optimized.buffer);
+        finalExtension = optimized.extension;
         const optimizedSize = finalBuffer.length;
         const savedPercentage = Math.round((1 - optimizedSize / originalSize) * 100);
 
-        console.log(`Image optimized: ${detectedExtension.toUpperCase()}`);
+        const formatChanged = detectedExtension !== finalExtension;
+        console.log(`Image optimized: ${detectedExtension.toUpperCase()}${formatChanged ? ` → ${finalExtension.toUpperCase()}` : ''}`);
         console.log(`Original: ${(originalSize / 1024).toFixed(2)} KB`);
         console.log(`Optimized: ${(optimizedSize / 1024).toFixed(2)} KB`);
         console.log(`Saved: ${savedPercentage}%`);
-
-        // If GIF was converted to PNG, update extension
-        if (detectedExtension === 'gif') {
-          const metadata = await import('sharp').then(s => s.default(buffer).metadata());
-          if (!metadata.pages || metadata.pages === 1) {
-            finalExtension = 'png';
-          }
-        }
       } catch (error) {
         console.error("Error optimizing image, using original:", error);
         // Continue with original buffer if optimization fails
