@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Mobile Layout Optimization**: Improved game UI for mobile devices
+  - Answer buttons now stay fixed at bottom on mobile when no images present
+  - Question content scrolls independently above fixed answers
+  - Sticky answer positioning on mobile for better accessibility
+
+### Changed
+- **Button Text Simplification**: Shortened "Next Question" button text
+  - English: "Next Question" → "Next"
+  - German: "Nächste Frage" → "Weiter"
+  - More concise and mobile-friendly
+- **Responsive 4-Answer Layout**:
+  - Mobile: 4 answers stacked vertically (1 column) for better readability
+  - Desktop: 4 answers in 2x2 quadrant layout
+  - Host view: Responsive grid on mobile, quadrant on desktop
+  - Breakpoint at 768px (md)
+- **Answer Image Sizing**: Optimized image container heights for mobile
+  - 4 answers with images: 8vh on mobile, 18vh on desktop
+  - 2 answers with images: 10vh on mobile, 30vh on desktop
+  - Images stretch to fill containers using object-cover
+  - All containers fit on mobile screen without overflow
+
+### Fixed
+- **Test Output Cleanup**: Suppressed image optimization error logs during tests
+  - Only affects test environment (NODE_ENV === 'test')
+  - Production error logging unchanged
+- **Answer Image Display**: Fixed images not showing in answer buttons
+  - Added overflow-hidden to answer containers
+  - Fixed flexbox height calculations
+  - Images now properly visible and contained
+- **Question Title Visibility**: Ensured question titles display correctly
+  - Fixed scrollable container height issues
+  - Title, description, and images properly visible
+
 ## [1.5.2] - 2025-11-12
 
 ### Fixed
