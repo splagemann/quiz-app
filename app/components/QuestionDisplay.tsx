@@ -102,11 +102,11 @@ export default function QuestionDisplay({
       ? isHost
         ? answerCount === 4 ? "h-[28vh]" : "h-[40vh]" // Host: smaller for 4 answers
         : answerCount === 4
-          ? "h-[11vh] md:h-[18vh]" // Player 4 answers: 11vh mobile, 18vh desktop
-          : "h-[20vh] md:h-[30vh]" // Player 2 answers: 20vh mobile, 30vh desktop
+          ? "h-[8vh] md:h-[18vh]" // Player 4 answers: 8vh mobile, 18vh desktop
+          : "h-[10vh] md:h-[30vh]" // Player 2 answers: 10vh mobile, 30vh desktop
       : "";
 
-    let baseClass = `w-full text-left ${padding} rounded-lg transition font-bold relative flex flex-col shadow-md ${buttonHeight} ${answerTextClass}`;
+    let baseClass = `w-full text-left ${padding} rounded-lg transition font-bold relative flex flex-col shadow-md overflow-hidden ${buttonHeight} ${answerTextClass}`;
 
     // State-based styling
     if (isRevealed || (hasAnswered && isSolo)) {
@@ -214,7 +214,7 @@ export default function QuestionDisplay({
                 <span className={isHost ? "mb-2" : "mb-1"}>{answer.answerText}</span>
               )}
               {answer.imageUrl && (
-                <div className="flex-1 overflow-hidden rounded">
+                <div className="flex-1 min-h-0 max-h-full overflow-hidden rounded">
                   <img
                     src={answer.imageUrl}
                     alt={tCurrent("answerImage")}
