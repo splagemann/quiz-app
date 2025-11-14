@@ -97,10 +97,13 @@ export default function QuestionDisplay({
     const gap = isHost ? "gap-4" : "";
 
     // When images present, give buttons reasonable fixed height based on count and mode
+    // Use responsive heights: smaller on mobile, larger on desktop
     const buttonHeight = hasImages
       ? isHost
         ? answerCount === 4 ? "h-[28vh]" : "h-[40vh]" // Host: smaller for 4 answers
-        : answerCount === 4 ? "h-[18vh]" : "h-[30vh]" // Player: fit 4 on mobile
+        : answerCount === 4
+          ? "h-[11vh] md:h-[18vh]" // Player 4 answers: 11vh mobile, 18vh desktop
+          : "h-[20vh] md:h-[30vh]" // Player 2 answers: 20vh mobile, 30vh desktop
       : "";
 
     let baseClass = `w-full text-left ${padding} rounded-lg transition font-bold relative flex flex-col shadow-md ${buttonHeight} ${answerTextClass}`;
