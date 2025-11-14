@@ -213,7 +213,7 @@ export default function QuestionDisplay({
                 <span className={isHost ? "mb-2" : "mb-1"}>{answer.answerText}</span>
               )}
               {answer.imageUrl && (
-                <div className={`flex-1 relative ${hasImages ? 'min-h-0' : 'min-h-[150px]'}`}>
+                <div className="flex-1 relative min-h-[200px]">
                   <img
                     src={answer.imageUrl}
                     alt={tCurrent("answerImage")}
