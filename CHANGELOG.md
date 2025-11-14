@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **iOS Answer Images**: Fixed answer images not displaying on iPhone 12 and other iOS devices
+  - Changed answer image container from conditional `min-h-0` to fixed `min-h-[200px]`
+  - Prevents iOS Safari flex layout from collapsing image containers to zero height
+  - Added proper viewport configuration with `viewport-fit=cover` for iOS safe areas
+  - Ensures images render correctly in all game modes on iOS devices
+
 ## [1.6.0] - 2025-11-14
 
 ### Added
