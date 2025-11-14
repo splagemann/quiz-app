@@ -174,7 +174,7 @@ export default function QuestionDisplay({
   return (
     <div className="flex flex-col h-full">
       {/* Question Section - Scrollable on mobile */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden">
         <div className="pb-2">
           {question.title && <div className={titleClass}>{question.title}</div>}
           <h2 className={questionClass}>{question.questionText}</h2>
