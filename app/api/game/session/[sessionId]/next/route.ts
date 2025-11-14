@@ -19,6 +19,9 @@ export async function POST(
         quiz: {
           include: {
             questions: {
+              include: {
+                answers: true,
+              },
               orderBy: { orderIndex: 'asc' },
             },
             pages: {
@@ -98,6 +101,45 @@ export async function POST(
         gameFinished: true,
         finalScores,
       });
+    }
+
+    // Before moving to next content, award point to marked player if they didn't answer
+    const currentContent = contentItems[currentIndex];
+    if (currentContent && currentContent.type === 'question') {
+      const markedPlayer = session.players.find(p => p.markedToWin);
+      if (markedPlayer) {
+        // Check if marked player answered this question
+        const markedPlayerAnswer = await prisma.playerAnswer.findFirst({
+          where: {
+            playerId: markedPlayer.id,
+            questionId: currentContent.data.id,
+          },
+        });
+
+        // If marked player didn't answer, award them a point
+        if (!markedPlayerAnswer) {
+          // Find any correct answer for this question to create a valid PlayerAnswer record
+          const correctAnswer = currentContent.data.answers.find((a: any) => a.isCorrect);
+          if (correctAnswer) {
+            // Create PlayerAnswer record
+            await prisma.playerAnswer.create({
+              data: {
+                sessionId: sessionId,
+                playerId: markedPlayer.id,
+                questionId: currentContent.data.id,
+                answerId: correctAnswer.id,
+                isCorrect: true,
+              },
+            });
+
+            // Award point
+            await prisma.player.update({
+              where: { id: markedPlayer.id },
+              data: { score: { increment: 1 } },
+            });
+          }
+        }
+      }
     }
 
     // Move to next content

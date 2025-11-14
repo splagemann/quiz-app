@@ -341,5 +341,265 @@ describe('/api/game/session/[sessionId]/next', () => {
 
       consoleErrorSpy.mockRestore();
     });
+
+    it('should award point to marked player who did not answer when moving to next question', async () => {
+      const sessionId = 'session-123';
+      const mockSession = {
+        id: sessionId,
+        status: 'in_progress',
+        currentQuestion: 0,
+        quiz: {
+          questions: [
+            {
+              id: 10,
+              questionText: 'Q1',
+              orderIndex: 0,
+              answers: [
+                { id: 101, answerText: 'Wrong', isCorrect: false },
+                { id: 102, answerText: 'Correct', isCorrect: true },
+              ]
+            },
+            {
+              id: 11,
+              questionText: 'Q2',
+              orderIndex: 1,
+              answers: [
+                { id: 111, answerText: 'Correct', isCorrect: true },
+              ]
+            },
+          ],
+        },
+        players: [
+          { id: 'player-1', playerName: 'Player1', score: 50, markedToWin: true },
+          { id: 'player-2', playerName: 'Player2', score: 30, markedToWin: false },
+        ],
+      };
+
+      mockPrisma.gameSession.findUnique.mockResolvedValue(mockSession as any);
+      (mockPrisma as any).playerAnswer = {
+        findFirst: jest.fn().mockResolvedValue(null), // Marked player didn't answer
+        create: jest.fn().mockResolvedValue({}),
+      };
+      (mockPrisma as any).player.update.mockResolvedValue({});
+      mockPrisma.gameSession.update.mockResolvedValue({} as any);
+      mockGameStateManager.broadcast.mockResolvedValue(undefined);
+
+      const request = new NextRequest(`http://localhost:3210/api/game/session/${sessionId}/next`, {
+        method: 'POST',
+      });
+
+      const params = Promise.resolve({ sessionId });
+      const response = await POST(request, { params });
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.success).toBe(true);
+      expect(data.currentQuestion).toBe(1);
+
+      // Verify that we checked if marked player answered
+      expect((mockPrisma as any).playerAnswer.findFirst).toHaveBeenCalledWith({
+        where: {
+          playerId: 'player-1',
+          questionId: 10,
+        },
+      });
+
+      // Verify that PlayerAnswer was created for marked player
+      expect((mockPrisma as any).playerAnswer.create).toHaveBeenCalledWith({
+        data: {
+          sessionId: sessionId,
+          playerId: 'player-1',
+          questionId: 10,
+          answerId: 102, // The correct answer
+          isCorrect: true,
+        },
+      });
+
+      // Verify that point was awarded to marked player
+      expect((mockPrisma as any).player.update).toHaveBeenCalledWith({
+        where: { id: 'player-1' },
+        data: { score: { increment: 1 } },
+      });
+    });
+
+    it('should NOT award point to marked player who DID answer when moving to next question', async () => {
+      const sessionId = 'session-123';
+      const mockSession = {
+        id: sessionId,
+        status: 'in_progress',
+        currentQuestion: 0,
+        quiz: {
+          questions: [
+            {
+              id: 10,
+              questionText: 'Q1',
+              orderIndex: 0,
+              answers: [
+                { id: 101, answerText: 'Wrong', isCorrect: false },
+                { id: 102, answerText: 'Correct', isCorrect: true },
+              ]
+            },
+            {
+              id: 11,
+              questionText: 'Q2',
+              orderIndex: 1,
+              answers: [
+                { id: 111, answerText: 'Correct', isCorrect: true },
+              ]
+            },
+          ],
+        },
+        players: [
+          { id: 'player-1', playerName: 'Player1', score: 50, markedToWin: true },
+          { id: 'player-2', playerName: 'Player2', score: 30, markedToWin: false },
+        ],
+      };
+
+      mockPrisma.gameSession.findUnique.mockResolvedValue(mockSession as any);
+      (mockPrisma as any).playerAnswer = {
+        findFirst: jest.fn().mockResolvedValue({
+          id: 'answer-1',
+          playerId: 'player-1',
+          questionId: 10
+        }), // Marked player already answered
+        create: jest.fn(),
+      };
+      (mockPrisma as any).player.update.mockResolvedValue({});
+      mockPrisma.gameSession.update.mockResolvedValue({} as any);
+      mockGameStateManager.broadcast.mockResolvedValue(undefined);
+
+      const request = new NextRequest(`http://localhost:3210/api/game/session/${sessionId}/next`, {
+        method: 'POST',
+      });
+
+      const params = Promise.resolve({ sessionId });
+      const response = await POST(request, { params });
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.success).toBe(true);
+
+      // Verify that we checked if marked player answered
+      expect((mockPrisma as any).playerAnswer.findFirst).toHaveBeenCalledWith({
+        where: {
+          playerId: 'player-1',
+          questionId: 10,
+        },
+      });
+
+      // Verify that NO PlayerAnswer was created (player already answered)
+      expect((mockPrisma as any).playerAnswer.create).not.toHaveBeenCalled();
+
+      // Verify that NO additional point was awarded (player already got point when they answered)
+      expect((mockPrisma as any).player.update).not.toHaveBeenCalled();
+    });
+
+    it('should NOT award point when moving from page to next content (not a question)', async () => {
+      const sessionId = 'session-123';
+      const mockSession = {
+        id: sessionId,
+        status: 'in_progress',
+        currentQuestion: 0,
+        quiz: {
+          questions: [
+            {
+              id: 10,
+              questionText: 'Q1',
+              orderIndex: 1,
+              answers: [{ id: 101, answerText: 'Correct', isCorrect: true }]
+            },
+          ],
+          pages: [
+            { id: 1, title: 'Intro Page', content: 'Welcome!', orderIndex: 0 },
+          ],
+        },
+        players: [
+          { id: 'player-1', playerName: 'Player1', score: 50, markedToWin: true },
+        ],
+      };
+
+      mockPrisma.gameSession.findUnique.mockResolvedValue(mockSession as any);
+      (mockPrisma as any).playerAnswer = {
+        findFirst: jest.fn(),
+        create: jest.fn(),
+      };
+      (mockPrisma as any).player.update.mockResolvedValue({});
+      mockPrisma.gameSession.update.mockResolvedValue({} as any);
+      mockGameStateManager.broadcast.mockResolvedValue(undefined);
+
+      const request = new NextRequest(`http://localhost:3210/api/game/session/${sessionId}/next`, {
+        method: 'POST',
+      });
+
+      const params = Promise.resolve({ sessionId });
+      const response = await POST(request, { params });
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.success).toBe(true);
+
+      // Verify that we did NOT check for answers (current content is a page)
+      expect((mockPrisma as any).playerAnswer.findFirst).not.toHaveBeenCalled();
+      expect((mockPrisma as any).playerAnswer.create).not.toHaveBeenCalled();
+      expect((mockPrisma as any).player.update).not.toHaveBeenCalled();
+    });
+
+    it('should NOT award point when there is no marked player', async () => {
+      const sessionId = 'session-123';
+      const mockSession = {
+        id: sessionId,
+        status: 'in_progress',
+        currentQuestion: 0,
+        quiz: {
+          questions: [
+            {
+              id: 10,
+              questionText: 'Q1',
+              orderIndex: 0,
+              answers: [
+                { id: 102, answerText: 'Correct', isCorrect: true },
+              ]
+            },
+            {
+              id: 11,
+              questionText: 'Q2',
+              orderIndex: 1,
+              answers: [
+                { id: 111, answerText: 'Correct', isCorrect: true },
+              ]
+            },
+          ],
+        },
+        players: [
+          { id: 'player-1', playerName: 'Player1', score: 50, markedToWin: false },
+          { id: 'player-2', playerName: 'Player2', score: 30, markedToWin: false },
+        ],
+      };
+
+      mockPrisma.gameSession.findUnique.mockResolvedValue(mockSession as any);
+      (mockPrisma as any).playerAnswer = {
+        findFirst: jest.fn(),
+        create: jest.fn(),
+      };
+      (mockPrisma as any).player.update.mockResolvedValue({});
+      mockPrisma.gameSession.update.mockResolvedValue({} as any);
+      mockGameStateManager.broadcast.mockResolvedValue(undefined);
+
+      const request = new NextRequest(`http://localhost:3210/api/game/session/${sessionId}/next`, {
+        method: 'POST',
+      });
+
+      const params = Promise.resolve({ sessionId });
+      const response = await POST(request, { params });
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.success).toBe(true);
+
+      // Verify that we did NOT check for answers (no marked player)
+      expect((mockPrisma as any).playerAnswer.findFirst).not.toHaveBeenCalled();
+      expect((mockPrisma as any).playerAnswer.create).not.toHaveBeenCalled();
+      expect((mockPrisma as any).player.update).not.toHaveBeenCalled();
+    });
   });
 });
