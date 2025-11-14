@@ -169,6 +169,7 @@ export default function GameComponent({ quiz, locale, messages }) {
   gameState.ts                    # In-memory game state manager
   i18n.ts                         # next-intl configuration (server)
   i18nClient.ts                   # Client-side i18n utilities
+  imageOptimization.ts            # Image optimization with Sharp
 /locales
   en.json                         # English translations
   de.json                         # German translations
@@ -313,6 +314,15 @@ The `docker-compose.yml` supports the following environment variables:
 - **Video Validation**: MP4, WebM, max 50MB
 - Magic number (file signature) validation for security
 - Unique filename generation with timestamp
+- **Image Optimization** (powered by Sharp):
+  - Automatic resizing to max 1920x1080 (maintains aspect ratio)
+  - Quality compression: JPEG/WebP 80%, PNG level 8
+  - Progressive encoding for JPEGs (faster perceived loading)
+  - Metadata stripping (EXIF removal)
+  - Animated GIFs preserved, static GIFs converted to PNG
+  - Typical file size reduction: 50-70%
+  - Optimization details logged to console
+  - Videos are not optimized (remain unchanged)
 - **Video Upload Features**:
   - XMLHttpRequest with upload progress tracking
   - Progress bar showing percentage
@@ -384,7 +394,7 @@ Deletes a question
 ### Media Upload API
 
 #### POST /api/upload
-Uploads an image or video
+Uploads an image or video with automatic image optimization
 ```typescript
 Request: FormData with 'file' field
 Response: { url: string }  // e.g., "/uploads/1234567890-abc123.jpg" or "/uploads/1234567890-abc123.mp4"
@@ -394,6 +404,15 @@ Validation:
 - **Videos**: MP4, WebM - max 50MB
 - Magic number (file signature) validation for security
 - File type detection based on actual file content, not just MIME type
+
+Processing:
+- **Images**: Automatically optimized using Sharp library
+  - Resized to max 1920x1080 (maintains aspect ratio)
+  - Compressed with quality settings (JPEG/WebP: 80%, PNG: level 8)
+  - EXIF metadata stripped
+  - Static GIFs converted to PNG, animated GIFs preserved
+  - Optimization stats logged to console
+- **Videos**: Saved without modification
 
 ### Multiplayer API
 
@@ -448,6 +467,7 @@ Response: { isCorrect: boolean, score: number }
 13. **TypeScript Types**: Quiz types in Client Components must include all optional fields (title, description, imageUrl, language)
 14. **Page Metadata**: Server Components can use `generateMetadata` for dynamic titles
 15. **Answer Limits**: Questions must have 2-4 answers (minimum 2, maximum 4). The QuestionManager enforces this with `newAnswers.length < 4` check
+16. **Image Optimization**: All uploaded images are automatically optimized using Sharp. Configuration is in `lib/imageOptimization.ts`. Videos are not optimized and remain unchanged.
 
 ## Cascading Deletes
 

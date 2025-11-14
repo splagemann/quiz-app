@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { writeFile } from "fs/promises";
 import path from "path";
 import { isAuthenticated } from "@/lib/auth";
+import { optimizeImage, isOptimizableImage } from "@/lib/imageOptimization";
 
 // Map file signatures (magic numbers) to extensions
 const FILE_SIGNATURES: Record<string, string> = {
@@ -93,17 +94,41 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Optimize image if applicable (videos are not optimized)
+    let finalBuffer: Buffer = buffer;
+    let finalExtension = detectedExtension;
+
+    if (isOptimizableImage(detectedExtension)) {
+      try {
+        const originalSize = buffer.length;
+        const optimized = await optimizeImage(buffer, detectedExtension);
+        finalBuffer = Buffer.from(optimized.buffer);
+        finalExtension = optimized.extension;
+        const optimizedSize = finalBuffer.length;
+        const savedPercentage = Math.round((1 - optimizedSize / originalSize) * 100);
+
+        const formatChanged = detectedExtension !== finalExtension;
+        console.log(`Image optimized: ${detectedExtension.toUpperCase()}${formatChanged ? ` → ${finalExtension.toUpperCase()}` : ''}`);
+        console.log(`Original: ${(originalSize / 1024).toFixed(2)} KB`);
+        console.log(`Optimized: ${(optimizedSize / 1024).toFixed(2)} KB`);
+        console.log(`Saved: ${savedPercentage}%`);
+      } catch (error) {
+        console.error("Error optimizing image, using original:", error);
+        // Continue with original buffer if optimization fails
+      }
+    }
+
     // Generate secure filename with validated extension
     const timestamp = Date.now();
     const randomString = Math.random().toString(36).substring(7);
-    const filename = `${timestamp}-${randomString}.${detectedExtension}`;
+    const filename = `${timestamp}-${randomString}.${finalExtension}`;
 
     // Ensure filename contains no path separators (defense in depth)
     const safeFilename = path.basename(filename);
 
     // Save file to public/uploads directory
     const uploadPath = path.join(process.cwd(), "public", "uploads", safeFilename);
-    await writeFile(uploadPath, buffer);
+    await writeFile(uploadPath, finalBuffer);
 
     // Return the URL
     const fileUrl = `/uploads/${safeFilename}`;
