@@ -10,6 +10,7 @@ import  type { GameEvent } from "@/lib/gameEvents";
 import QuestionDisplay from "@/app/components/QuestionDisplay";
 import GameHeader from "@/app/components/GameHeader";
 import MarkdownPreview from "@/app/components/MarkdownPreview";
+import AnimatedLeaderboard from "@/app/components/AnimatedLeaderboard";
 
 // Import translation files
 import enMessages from "@/locales/en.json";
@@ -446,58 +447,29 @@ function HostGameContent({ onQuizLoaded }: { onQuizLoaded?: (language: string) =
   }
 
   if (gameStatus === "finished") {
+    // Enrich finalScores with avatarSeed
+    const enrichedFinalScores = finalScores.map(score => {
+      const playerData = players.find(p => p.id === score.playerId);
+      return {
+        ...score,
+        avatarSeed: playerData?.avatarSeed || score.playerId,
+      };
+    });
+
     return (
       <div className="h-screen bg-gradient-to-br from-purple-500 to-blue-600 p-3 flex flex-col">
         <div className="w-full h-full overflow-y-auto">
           <div className="bg-white rounded-lg shadow-2xl p-4 sm:p-8 h-full flex flex-col">
-            <h1 className="text-2xl sm:text-4xl font-bold text-gray-900 text-center mb-4 sm:mb-8">
-              🏆 {tMultiplayer('gameFinished')}
-            </h1>
+            <AnimatedLeaderboard
+              finalScores={enrichedFinalScores}
+              mode="host"
+              locale={(quiz?.language as 'en' | 'de') || 'en'}
+              onComplete={() => {
+                // Animation completed
+              }}
+            />
 
-            <div className="flex-1 overflow-y-auto mb-4 sm:mb-8 min-h-0">
-              <div className="space-y-3 sm:space-y-4">
-                {finalScores.map((player, index) => {
-                  // Find the player object to get their avatarSeed
-                  const playerData = players.find(p => p.id === player.playerId);
-                  const avatarSeedToUse = playerData?.avatarSeed || player.playerId;
-                  const playerAvatarSvg = multiavatar(avatarSeedToUse);
-                  return (
-                    <div
-                      key={player.playerId}
-                      className={`p-3 sm:p-6 rounded-lg flex items-center justify-between gap-2 ${
-                        index === 0
-                          ? "bg-yellow-100 border-4 border-yellow-400"
-                          : index === 1
-                          ? "bg-gray-100 border-4 border-gray-400"
-                          : index === 2
-                          ? "bg-orange-100 border-4 border-orange-400"
-                          : "bg-gray-50 border-2 border-gray-300"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 sm:gap-0 flex-1 min-w-0">
-                        <div className="text-2xl sm:text-4xl font-bold sm:mr-4 w-8 sm:w-12 flex-shrink-0">
-                          {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `${index + 1}.`}
-                        </div>
-                        <div
-                          className="w-12 h-12 sm:w-16 sm:h-16 rounded-full sm:mr-4 flex-shrink-0 overflow-hidden bg-white"
-                          dangerouslySetInnerHTML={{ __html: playerAvatarSvg }}
-                        />
-                        <div className="min-w-0 flex-1">
-                          <div className="text-base sm:text-2xl font-bold text-gray-900 truncate">
-                            {player.playerName}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-lg sm:text-3xl font-bold text-gray-900 flex-shrink-0">
-                        {player.score} {player.score === 1 ? tMultiplayer('point') : tMultiplayer('points')}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center flex-shrink-0">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center flex-shrink-0 mt-6">
               <button
                 onClick={() => router.push("/games")}
                 className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition font-bold w-full sm:w-auto"
