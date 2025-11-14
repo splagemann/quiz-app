@@ -84,8 +84,12 @@ export default function QuestionDisplay({
     gridClass = isHost ? "grid grid-cols-2 gap-4" : "flex flex-col gap-2";
   }
 
-  // On mobile, limit answer section height when images are present
-  const answerContainerClass = hasImages && !isHost ? "max-h-[50vh]" : "";
+  // When answers have images, give the grid a defined height so h-full on buttons works
+  const answerContainerClass = hasImages && !isHost
+    ? "min-h-[40vh] max-h-[50vh]"
+    : hasImages && isHost
+    ? "min-h-[60vh]"
+    : "";
 
   const getAnswerClass = (answer: Answer) => {
     const isSelected = selectedAnswerId === answer.id;
@@ -203,7 +207,7 @@ export default function QuestionDisplay({
                 <span className={isHost ? "mb-2" : "mb-1"}>{answer.answerText}</span>
               )}
               {answer.imageUrl && (
-                <div className={`flex-1 relative ${hasImages ? 'min-h-0' : 'min-h-[150px]'}`}>
+                <div className="flex-1 relative min-h-[120px]">
                   <img
                     src={answer.imageUrl}
                     alt={tCurrent("answerImage")}
