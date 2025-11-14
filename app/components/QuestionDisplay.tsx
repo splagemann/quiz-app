@@ -81,9 +81,8 @@ export default function QuestionDisplay({
     gridClass = isHost ? "grid grid-cols-2 gap-4" : "flex flex-col gap-2";
   }
 
-  if (hasImages) {
-    gridClass = "flex-1 " + gridClass;
-  }
+  // On mobile, limit answer section height when images are present
+  const answerContainerClass = hasImages && !isHost ? "max-h-[50vh]" : "";
 
   const getAnswerClass = (answer: Answer) => {
     const isSelected = selectedAnswerId === answer.id;
@@ -159,30 +158,29 @@ export default function QuestionDisplay({
   const tCurrent = isSolo ? tSolo : tMultiplayer;
 
   return (
-    <div className="flex flex-col h-full overflow-y-auto">
-      {/* Question Section - Scrollable content */}
-      <div className="flex-shrink-0">
-        {question.title && <div className={titleClass}>{question.title}</div>}
-        <h2 className={questionClass}>{question.questionText}</h2>
-        {question.description && <p className={descriptionClass}>{question.description}</p>}
-        {question.imageUrl && (
-          <div className="flex justify-center mb-3">
-            <div className="rounded-lg shadow-md inline-block">
-              <img
-                src={question.imageUrl}
-                alt={tCurrent("questionImage")}
-                className={`${imageMaxHeight} w-auto object-contain rounded-lg block`}
-              />
+    <div className="flex flex-col h-full">
+      {/* Question Section - Scrollable on mobile */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0">
+        <div className="pb-2">
+          {question.title && <div className={titleClass}>{question.title}</div>}
+          <h2 className={questionClass}>{question.questionText}</h2>
+          {question.description && <p className={descriptionClass}>{question.description}</p>}
+          {question.imageUrl && (
+            <div className="flex justify-center mb-3">
+              <div className="rounded-lg shadow-md inline-block">
+                <img
+                  src={question.imageUrl}
+                  alt={tCurrent("questionImage")}
+                  className={`${imageMaxHeight} w-auto object-contain rounded-lg block`}
+                />
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
-      {/* Spacer to push answers to bottom (only when no answer images) */}
-      {!hasImages && <div className="flex-1 min-h-4"></div>}
-
-      {/* Answers Section - Fixed at bottom */}
-      <div className={`flex-shrink-0 mb-2 ${gridClass}`}>
+      {/* Answers Section - Fixed at bottom on mobile */}
+      <div className={`flex-shrink-0 mt-2 ${answerContainerClass} ${gridClass}`}>
         {question.answers.map((answer) => {
           const AnswerElement = isInteractive ? "button" : "div";
           const answerProps = isInteractive
