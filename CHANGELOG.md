@@ -8,12 +8,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Animated Leaderboard Reveal**: Dramatic scoreboard reveal with suspense and celebration
+  - Top 3 positions reveal sequentially: 3rd at 5s, 2nd at 10s, 1st at 15s
+  - Dynamic timing based on player count: 1 player (3s), 2 players (6s), 3+ players (15s)
+  - Pulsing placeholder cards for unrevealed top 3 positions
+  - Confetti celebration effect when 1st place is revealed
+  - Smooth spring-based animations with bounce effects
+  - Spacebar shortcut to skip animation
+  - Mobile-optimized compact layout
+  - Full internationalization support (English/German)
+- **Animation Dependencies**: Added libraries for rich animations
+  - `framer-motion` (11.0.0) - Declarative animations
+  - `canvas-confetti` (1.9.0) - Celebration effects
+  - `@types/canvas-confetti` (1.6.0) - TypeScript definitions
 - **Mobile Layout Optimization**: Improved game UI for mobile devices
   - Answer buttons now stay fixed at bottom on mobile when no images present
   - Question content scrolls independently above fixed answers
   - Sticky answer positioning on mobile for better accessibility
 
 ### Changed
+- **Leaderboard Layout**: Simplified scoreboard design for host view
+  - Removed 3-column podium grid layout
+  - Unified list layout on mobile and desktop
+  - Consistent vertical stacking of all players
+  - Color-coded backgrounds: gold (1st), silver (2nd), bronze (3rd)
 - **Button Text Simplification**: Shortened "Next Question" button text
   - English: "Next Question" → "Next"
   - German: "Nächste Frage" → "Weiter"
@@ -30,6 +48,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - All containers fit on mobile screen without overflow
 
 ### Fixed
+- **Leaderboard Readability**: Improved visibility of player positions
+  - Position numbers (4+) now use darker text color (text-gray-900)
+  - Better contrast on light backgrounds
+- **Mobile Scoreboard Layout**: Optimized for small screens
+  - Reduced card heights on mobile (128px for 1st, 112px for 2nd/3rd)
+  - Both players now fit on screen without scrolling
+  - Compact spacing and padding
 - **Test Output Cleanup**: Suppressed image optimization error logs during tests
   - Only affects test environment (NODE_ENV === 'test')
   - Production error logging unchanged
