@@ -76,7 +76,10 @@ export default function QuestionDisplay({
       ? "grid grid-cols-1 sm:grid-cols-2 gap-4"
       : "grid grid-cols-1 sm:grid-cols-2 gap-2";
   } else if (answerCount === 4) {
-    gridClass = isHost ? "grid grid-cols-2 gap-4" : "grid grid-cols-2 gap-2";
+    // Stack on mobile, quadrant on desktop
+    gridClass = isHost
+      ? "grid grid-cols-2 gap-4"
+      : "grid grid-cols-1 md:grid-cols-2 gap-2";
   } else {
     gridClass = isHost ? "grid grid-cols-2 gap-4" : "flex flex-col gap-2";
   }
