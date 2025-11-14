@@ -85,10 +85,11 @@ export default function QuestionDisplay({
   }
 
   // When answers have images, give the grid a defined height so h-full on buttons works
+  // Use fixed height instead of min-h so that h-full can properly calculate
   const answerContainerClass = hasImages && !isHost
-    ? "min-h-[40vh] max-h-[50vh]"
+    ? "h-[45vh]"
     : hasImages && isHost
-    ? "min-h-[60vh]"
+    ? "h-[60vh]"
     : "";
 
   const getAnswerClass = (answer: Answer) => {
@@ -207,11 +208,11 @@ export default function QuestionDisplay({
                 <span className={isHost ? "mb-2" : "mb-1"}>{answer.answerText}</span>
               )}
               {answer.imageUrl && (
-                <div className="flex-1 relative min-h-[120px]">
+                <div className="flex-1 flex items-center justify-center min-h-[120px] overflow-hidden">
                   <img
                     src={answer.imageUrl}
                     alt={tCurrent("answerImage")}
-                    className="absolute inset-0 w-full h-full object-contain rounded shadow-sm"
+                    className="max-w-full max-h-full object-contain rounded shadow-sm"
                   />
                 </div>
               )}
