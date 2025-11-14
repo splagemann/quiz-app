@@ -84,12 +84,10 @@ export default function QuestionDisplay({
     gridClass = isHost ? "grid grid-cols-2 gap-4" : "flex flex-col gap-2";
   }
 
-  // When answers have images, give the grid a defined height so h-full on buttons works
-  // Use fixed height instead of min-h so that h-full can properly calculate
-  const answerContainerClass = hasImages && !isHost
-    ? "h-[45vh]"
-    : hasImages && isHost
-    ? "h-[60vh]"
+  // When answers have images, use auto-sizing with reasonable constraints
+  // This ensures all answers fit on screen, especially on mobile
+  const answerContainerClass = hasImages
+    ? "" // Let grid auto-size based on content
     : "";
 
   const getAnswerClass = (answer: Answer) => {
@@ -98,9 +96,14 @@ export default function QuestionDisplay({
     const padding = isHost ? "p-4" : "p-3";
     const gap = isHost ? "gap-4" : "";
 
-    let baseClass = `w-full text-left ${padding} rounded-lg transition font-bold relative flex flex-col shadow-md ${
-      hasImages ? "h-full" : ""
-    } ${answerTextClass}`;
+    // When images present, give buttons reasonable fixed height based on count and mode
+    const buttonHeight = hasImages
+      ? isHost
+        ? answerCount === 4 ? "h-[28vh]" : "h-[40vh]" // Host: smaller for 4 answers
+        : answerCount === 4 ? "h-[18vh]" : "h-[30vh]" // Player: fit 4 on mobile
+      : "";
+
+    let baseClass = `w-full text-left ${padding} rounded-lg transition font-bold relative flex flex-col shadow-md ${buttonHeight} ${answerTextClass}`;
 
     // State-based styling
     if (isRevealed || (hasAnswered && isSolo)) {
@@ -208,11 +211,11 @@ export default function QuestionDisplay({
                 <span className={isHost ? "mb-2" : "mb-1"}>{answer.answerText}</span>
               )}
               {answer.imageUrl && (
-                <div className="flex-1 flex items-center justify-center min-h-[120px] overflow-hidden">
+                <div className="flex-1 overflow-hidden rounded">
                   <img
                     src={answer.imageUrl}
                     alt={tCurrent("answerImage")}
-                    className="max-w-full max-h-full object-contain rounded shadow-sm"
+                    className="w-full h-full object-cover"
                   />
                 </div>
               )}
