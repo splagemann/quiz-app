@@ -76,19 +76,16 @@ export default function QuestionDisplay({
       ? "grid grid-cols-1 sm:grid-cols-2 gap-4"
       : "grid grid-cols-1 sm:grid-cols-2 gap-2";
   } else if (answerCount === 4) {
-    // Stack on mobile, quadrant on desktop
     gridClass = isHost
-      ? "grid grid-cols-2 gap-4"
-      : "grid grid-cols-1 md:grid-cols-2 gap-2";
+      ? "grid grid-cols-1 sm:grid-cols-2 gap-4"
+      : "grid grid-cols-1 sm:grid-cols-2 gap-2";
   } else {
     gridClass = isHost ? "grid grid-cols-2 gap-4" : "flex flex-col gap-2";
   }
 
-  // When answers have images, use auto-sizing with reasonable constraints
-  // This ensures all answers fit on screen, especially on mobile
-  const answerContainerClass = hasImages
-    ? "" // Let grid auto-size based on content
-    : "";
+  if (hasImages) {
+    gridClass = "flex-1 " + gridClass;
+  }
 
   const getAnswerClass = (answer: Answer) => {
     const isSelected = selectedAnswerId === answer.id;
@@ -96,17 +93,9 @@ export default function QuestionDisplay({
     const padding = isHost ? "p-4" : "p-3";
     const gap = isHost ? "gap-4" : "";
 
-    // When images present, give buttons reasonable fixed height based on count and mode
-    // Use responsive heights: smaller on mobile, larger on desktop
-    const buttonHeight = hasImages
-      ? isHost
-        ? answerCount === 4 ? "h-[28vh]" : "h-[40vh]" // Host: smaller for 4 answers
-        : answerCount === 4
-          ? "h-[8vh] md:h-[18vh]" // Player 4 answers: 8vh mobile, 18vh desktop
-          : "h-[10vh] md:h-[30vh]" // Player 2 answers: 10vh mobile, 30vh desktop
-      : "";
-
-    let baseClass = `w-full text-left ${padding} rounded-lg transition font-bold relative flex flex-col shadow-md overflow-hidden ${buttonHeight} ${answerTextClass}`;
+    let baseClass = `w-full text-left ${padding} rounded-lg transition font-bold relative flex flex-col shadow-md ${
+      hasImages ? "h-full" : ""
+    } ${answerTextClass}`;
 
     // State-based styling
     if (isRevealed || (hasAnswered && isSolo)) {
@@ -168,33 +157,43 @@ export default function QuestionDisplay({
     );
   };
 
-  const translationKey = isSolo ? "solo" : "multiplayer";
   const tCurrent = isSolo ? tSolo : tMultiplayer;
+  const shouldPinAnswers = !hasImages;
+  const questionContainerClass = shouldPinAnswers
+    ? "flex-1 overflow-y-auto"
+    : "flex-shrink-0";
+  const answerWrapperBase = "flex-shrink-0";
+  const answerWrapperClass = shouldPinAnswers
+    ? `${answerWrapperBase} sticky bottom-0 bg-white pb-3 pt-2 sm:static sm:bg-transparent sm:pb-0`
+    : `${answerWrapperBase} pt-2`;
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Question Section - Scrollable on mobile */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden">
-        <div className="pb-2">
-          {question.title && <div className={titleClass}>{question.title}</div>}
-          <h2 className={questionClass}>{question.questionText}</h2>
-          {question.description && <p className={descriptionClass}>{question.description}</p>}
-          {question.imageUrl && (
-            <div className="flex justify-center mb-3">
-              <div className="rounded-lg shadow-md inline-block">
-                <img
-                  src={question.imageUrl}
-                  alt={tCurrent("questionImage")}
-                  className={`${imageMaxHeight} w-auto object-contain rounded-lg block`}
-                />
-              </div>
+    <div className="flex h-full min-h-0 flex-col">
+      {/* Question Section - Scrollable content */}
+      <div className={questionContainerClass}>
+        {question.title && <div className={titleClass}>{question.title}</div>}
+        <h2 className={questionClass}>{question.questionText}</h2>
+        {question.description && <p className={descriptionClass}>{question.description}</p>}
+        {question.imageUrl && (
+          <div className="flex justify-center mb-3">
+            <div className="rounded-lg shadow-md inline-block">
+              <img
+                src={question.imageUrl}
+                alt={tCurrent("questionImage")}
+                className={`${imageMaxHeight} w-auto object-contain rounded-lg block`}
+              />
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
-      {/* Answers Section - Fixed at bottom on mobile */}
-      <div className={`flex-shrink-0 mt-2 ${answerContainerClass} ${gridClass}`}>
+      {/* Spacer to keep breathing room when pinned answers */}
+      {shouldPinAnswers && question.imageUrl && (
+        <div className="sm:hidden h-2"></div>
+      )}
+
+      {/* Answers Section - Fixed at bottom only when question has media */}
+      <div className={`${answerWrapperClass} ${gridClass}`}>
         {question.answers.map((answer) => {
           const AnswerElement = isInteractive ? "button" : "div";
           const answerProps = isInteractive
@@ -214,11 +213,11 @@ export default function QuestionDisplay({
                 <span className={isHost ? "mb-2" : "mb-1"}>{answer.answerText}</span>
               )}
               {answer.imageUrl && (
-                <div className="flex-1 min-h-0 max-h-full overflow-hidden rounded">
+                <div className={`flex-1 relative ${hasImages ? 'min-h-0' : 'min-h-[150px]'}`}>
                   <img
                     src={answer.imageUrl}
                     alt={tCurrent("answerImage")}
-                    className="w-full h-full object-cover"
+                    className="absolute inset-0 w-full h-full object-contain rounded shadow-sm"
                   />
                 </div>
               )}
