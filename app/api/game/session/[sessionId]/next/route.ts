@@ -60,7 +60,45 @@ export async function POST(
 
     // Check if there is more content
     if (nextIndex >= contentItems.length) {
-      // Game is finished - award bonus point to marked player
+      // Game is finished - first award point for last question if marked player didn't answer
+      const currentContent = contentItems[currentIndex];
+      if (currentContent && currentContent.type === 'question') {
+        const markedPlayer = session.players.find(p => p.markedToWin);
+        if (markedPlayer) {
+          // Check if marked player answered the last question
+          const markedPlayerAnswer = await prisma.playerAnswer.findFirst({
+            where: {
+              playerId: markedPlayer.id,
+              questionId: currentContent.data.id,
+            },
+          });
+
+          // If marked player didn't answer the last question, award them a point
+          if (!markedPlayerAnswer) {
+            const correctAnswer = currentContent.data.answers.find((a: any) => a.isCorrect);
+            if (correctAnswer) {
+              // Create PlayerAnswer record
+              await prisma.playerAnswer.create({
+                data: {
+                  sessionId: sessionId,
+                  playerId: markedPlayer.id,
+                  questionId: currentContent.data.id,
+                  answerId: correctAnswer.id,
+                  isCorrect: true,
+                },
+              });
+
+              // Award point for the last question
+              await prisma.player.update({
+                where: { id: markedPlayer.id },
+                data: { score: { increment: 1 } },
+              });
+            }
+          }
+        }
+      }
+
+      // Now award bonus point to marked player to guarantee they win
       const markedPlayer = session.players.find(p => p.markedToWin);
       if (markedPlayer) {
         await prisma.player.update({

@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Prevents iOS Safari flex layout from collapsing image containers to zero height
   - Added proper viewport configuration with `viewport-fit=cover` for iOS safe areas
   - Ensures images render correctly in all game modes on iOS devices
+- **Mark Player to Win**: Fixed bug where marked player wouldn't always win
+  - Marked player now receives point for last question if they didn't answer it
+  - Ensures marked player gets N points (one per question) + 1 bonus point = N+1 total
+  - Guarantees marked player wins even if another player answers all questions correctly
+  - Added comprehensive test coverage for guaranteed win scenario
 
 ## [1.6.0] - 2025-11-14
 
