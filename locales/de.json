@@ -176,7 +176,8 @@
     "points": "Punkte",
     "you": "Du",
     "pressSpaceToReveal": "Drücke Leertaste, um die Antwort aufzudecken",
-    "viewAllSessions": "Sitzungen"
+    "viewAllSessions": "Sitzungen",
+    "skipAnimation": "Überspringen"
   },
   "join": {
     "title": "Spiel beitreten",

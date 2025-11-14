@@ -176,7 +176,8 @@
     "points": "Points",
     "you": "You",
     "pressSpaceToReveal": "Press Space to reveal the answer",
-    "viewAllSessions": "Sessions"
+    "viewAllSessions": "Sessions",
+    "skipAnimation": "Skip"
   },
   "join": {
     "title": "Join Game",

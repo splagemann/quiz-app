@@ -9,6 +9,7 @@ import type { GameEvent } from "@/lib/gameEvents";
 import QuestionDisplay from "@/app/components/QuestionDisplay";
 import GameHeader from "@/app/components/GameHeader";
 import MarkdownPreview from "@/app/components/MarkdownPreview";
+import AnimatedLeaderboard from "@/app/components/AnimatedLeaderboard";
 
 // Import translation files
 import enMessages from "@/locales/en.json";
@@ -85,6 +86,7 @@ function PlayerGameContent() {
   const [myRank, setMyRank] = useState(0);
   const [error, setError] = useState("");
   const [avatarSeed, setAvatarSeed] = useState<string>(playerId || "");
+  const [quizLanguage, setQuizLanguage] = useState<'en' | 'de'>('en');
 
   // Function to switch avatar
   const switchAvatar = async () => {
@@ -137,6 +139,7 @@ function PlayerGameContent() {
         setMyName(player.playerName);
         setMyScore(player.score);
         setQuizTitle(session.quiz.title);
+        setQuizLanguage((session.quiz.language as 'en' | 'de') || 'en');
 
         // Initialize avatar seed from player data if available
         if (player.avatarSeed) {
@@ -333,70 +336,21 @@ function PlayerGameContent() {
   }
 
   if (gameStatus === "finished") {
-    const avatarSvg = multiavatar(avatarSeed);
-
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-500 to-blue-600 py-8 px-4">
         <div className="max-w-2xl mx-auto">
           <div className="bg-white rounded-lg shadow-2xl p-8">
-            <h1 className="text-3xl font-bold text-gray-900 text-center mb-2">
-              {tMultiplayer('gameFinished')}
-            </h1>
-            <div className="text-center mb-8">
-              <div
-                className="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden bg-white"
-                dangerouslySetInnerHTML={{ __html: avatarSvg }}
-              />
-              <div className="text-6xl mb-4">
-                {myRank === 1 ? "🏆" : myRank === 2 ? "🥈" : myRank === 3 ? "🥉" : "👏"}
-              </div>
-              <div className="text-2xl font-bold text-gray-900 mb-2">
-                {tMultiplayer('place')} {myRank}
-              </div>
-              <div className="text-xl text-gray-700">
-                {myScore} {myScore === 1 ? tMultiplayer('point') : tMultiplayer('points')}
-              </div>
-            </div>
+            <AnimatedLeaderboard
+              finalScores={finalScores}
+              currentPlayerId={playerId || undefined}
+              mode="player"
+              locale={quizLanguage}
+              onComplete={() => {
+                // Animation completed
+              }}
+            />
 
-            <div className="space-y-3 mb-8">
-              <h2 className="text-xl font-bold text-gray-900 text-center mb-4">
-                {tMultiplayer('leaderboard')}
-              </h2>
-              {finalScores.map((player, index) => {
-                // Use the player's avatarSeed if available, otherwise fall back to playerId
-                const avatarSeedToUse = player.playerId === playerId ? avatarSeed : (player.avatarSeed || player.playerId);
-                const playerAvatarSvg = multiavatar(avatarSeedToUse);
-                return (
-                  <div
-                    key={player.playerId}
-                    className={`p-4 rounded-lg flex items-center justify-between ${
-                      player.playerId === playerId
-                        ? "bg-blue-100 border-2 border-blue-500"
-                        : "bg-gray-50 border border-gray-300"
-                    }`}
-                  >
-                    <div className="flex items-center">
-                      <div className="text-2xl font-bold mr-3 w-8 text-gray-900">
-                        {index + 1}.
-                      </div>
-                      <div
-                        className="w-12 h-12 rounded-full mr-3 overflow-hidden bg-white"
-                        dangerouslySetInnerHTML={{ __html: playerAvatarSvg }}
-                      />
-                      <div className="font-bold text-gray-900">
-                        {player.playerName}
-                        {player.playerId === playerId && ` (${tMultiplayer('you')})`}
-                      </div>
-                    </div>
-                    <div className="text-xl font-bold text-gray-900">
-                      {player.score}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="text-center">
+            <div className="text-center mt-8">
               <button
                 onClick={() => router.push("/")}
                 className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition font-bold"
