@@ -113,7 +113,10 @@ export async function POST(request: NextRequest) {
         console.log(`Optimized: ${(optimizedSize / 1024).toFixed(2)} KB`);
         console.log(`Saved: ${savedPercentage}%`);
       } catch (error) {
-        console.error("Error optimizing image, using original:", error);
+        // Only log optimization errors in non-test environments
+        if (process.env.NODE_ENV !== 'test') {
+          console.error("Error optimizing image, using original:", error);
+        }
         // Continue with original buffer if optimization fails
       }
     }

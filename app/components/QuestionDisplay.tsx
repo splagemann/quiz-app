@@ -76,7 +76,9 @@ export default function QuestionDisplay({
       ? "grid grid-cols-1 sm:grid-cols-2 gap-4"
       : "grid grid-cols-1 sm:grid-cols-2 gap-2";
   } else if (answerCount === 4) {
-    gridClass = isHost ? "grid grid-cols-2 gap-4" : "grid grid-cols-2 gap-2";
+    gridClass = isHost
+      ? "grid grid-cols-1 sm:grid-cols-2 gap-4"
+      : "grid grid-cols-1 sm:grid-cols-2 gap-2";
   } else {
     gridClass = isHost ? "grid grid-cols-2 gap-4" : "flex flex-col gap-2";
   }
@@ -155,13 +157,20 @@ export default function QuestionDisplay({
     );
   };
 
-  const translationKey = isSolo ? "solo" : "multiplayer";
   const tCurrent = isSolo ? tSolo : tMultiplayer;
+  const shouldPinAnswers = !hasImages;
+  const questionContainerClass = shouldPinAnswers
+    ? "flex-1 overflow-y-auto"
+    : "flex-shrink-0";
+  const answerWrapperBase = "flex-shrink-0";
+  const answerWrapperClass = shouldPinAnswers
+    ? `${answerWrapperBase} sticky bottom-0 bg-white pb-3 pt-2 sm:static sm:bg-transparent sm:pb-0`
+    : `${answerWrapperBase} pt-2`;
 
   return (
-    <div className="flex flex-col h-full overflow-y-auto">
+    <div className="flex h-full min-h-0 flex-col">
       {/* Question Section - Scrollable content */}
-      <div className="flex-shrink-0">
+      <div className={questionContainerClass}>
         {question.title && <div className={titleClass}>{question.title}</div>}
         <h2 className={questionClass}>{question.questionText}</h2>
         {question.description && <p className={descriptionClass}>{question.description}</p>}
@@ -178,11 +187,13 @@ export default function QuestionDisplay({
         )}
       </div>
 
-      {/* Spacer to push answers to bottom (only when no answer images) */}
-      {!hasImages && <div className="flex-1 min-h-4"></div>}
+      {/* Spacer to keep breathing room when pinned answers */}
+      {shouldPinAnswers && question.imageUrl && (
+        <div className="sm:hidden h-2"></div>
+      )}
 
-      {/* Answers Section - Fixed at bottom */}
-      <div className={`flex-shrink-0 mb-2 ${gridClass}`}>
+      {/* Answers Section - Fixed at bottom only when question has media */}
+      <div className={`${answerWrapperClass} ${gridClass}`}>
         {question.answers.map((answer) => {
           const AnswerElement = isInteractive ? "button" : "div";
           const answerProps = isInteractive
