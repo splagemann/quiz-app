@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.0] - 2025-11-14
+
 ### Added
 - **Animated Leaderboard Reveal**: Dramatic scoreboard reveal with suspense and celebration
   - Top 3 positions reveal sequentially: 3rd at 5s, 2nd at 10s, 1st at 15s
@@ -522,7 +524,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Environment-based configuration
 - German date formatting
 
-[Unreleased]: https://github.com/splagemann/quiz-app/compare/v1.5.2...HEAD
+[Unreleased]: https://github.com/splagemann/quiz-app/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/splagemann/quiz-app/compare/v1.5.2...v1.6.0
 [1.5.2]: https://github.com/splagemann/quiz-app/compare/v1.5.1...v1.5.2
 [1.5.1]: https://github.com/splagemann/quiz-app/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/splagemann/quiz-app/compare/v1.4.1...v1.5.0
